@@ -97,12 +97,3 @@ webapp/src/
 | `FRONTEND_URL` | React app URL for CORS (e.g., http://localhost:3000) |
 | `CLOUDINARY_*` | Cloud Name, API Key, and API Secret |
 | `GMAIL_PASS` | Gmail App-specific password |
-
-## 🤝 Contributing
-
-Contributions are welcome! Please follow these patterns when adding features:
-
-1.  **Handlers**: Keep handlers pure by accepting business data parameters instead of `req/res` objects.
-2.  **Transactions**: Use MongoDB sessions for any operations affecting multiple collections (e.g., accepting a request) to ensure atomicity.
-3.  **UUIDs**: Always use UUIDs for primary keys in new models.
-4.  **Error Handling**: Wrap logic in try-catch blocks and return standardized response objects: `{ status, message, data }`.
