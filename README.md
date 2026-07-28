@@ -91,7 +91,7 @@ webapp/src/
 | Variable | Description |
 | :--- | :--- |
 | `PORT` | Server listening port (default: 5000) |
-| `MONGODB_URI` | MongoDB connection string |
+| `MONGO_URI` | MongoDB connection string |
 | `JWT_SECRET` | Strong secret for signing session tokens |
 | `COOKIE_NAME` | Name for the HTTP-only JWT cookie |
 | `FRONTEND_URL` | React app URL for CORS (e.g., http://localhost:3000) |
