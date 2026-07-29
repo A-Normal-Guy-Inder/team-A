@@ -5,6 +5,9 @@ import './index.css';
 import App from './App';
 import store from './app/store';
 import reportWebVitals from './reportWebVitals';
+import { warmBackend } from './services/api';
+
+warmBackend();
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(

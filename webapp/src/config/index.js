@@ -37,10 +37,17 @@ if (process.env.NODE_ENV === "development" && typeof window !== "undefined") {
 
 const pageSize = Number.parseInt(process.env.REACT_APP_PAGE_SIZE, 10) || 12;
 
+// Free-tier hosts (Render, Fly) suspend an idle service and cold-start it on the
+// next request, which regularly takes 50s+ — longer than a typical 30s timeout.
+// The first request after an idle period would otherwise always abort before the
+// server finished waking. Lower this once the backend is on an always-on plan.
+const apiTimeout = Number.parseInt(process.env.REACT_APP_API_TIMEOUT, 10) || 90000;
+
 const config = {
     apiUrl,
     socketUrl,
     pageSize,
+    apiTimeout,
     isProduction: process.env.NODE_ENV === "production",
 };
 

@@ -1,0 +1,12 @@
+# The backend is a long-lived Express + Socket.IO + node-cron process and is not
+# deployed to Vercel. Excluding it keeps the upload small and prevents backend/.env
+# from ever reaching the build environment.
+backend/
+
+# Local build/analysis artifacts
+node_modules/
+webapp/build/
+graphify-out/
+memory/
+.specify/
+.claude/

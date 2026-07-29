@@ -4,8 +4,16 @@ import config from "../config";
 const api = axios.create({
     baseURL: config.apiUrl,
     withCredentials: true,
-    timeout: 30000,
+    timeout: config.apiTimeout,
 });
+
+// Fired once at startup so an idle free-tier backend begins waking while the user
+// is still reading the page, instead of on their first login attempt. Failure is
+// expected and ignored — this is a warm-up, not a health gate.
+export function warmBackend() {
+    const healthUrl = config.apiUrl.replace(/\/api$/, "") + "/health";
+    return fetch(healthUrl, { credentials: "include", cache: "no-store" }).catch(() => { });
+}
 
 const SILENT_401_PATHS = ["/auth/me", "/auth/login", "/auth/logout"];
 
