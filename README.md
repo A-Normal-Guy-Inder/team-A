@@ -129,6 +129,7 @@ full list.
 | `FRONTEND_URL` | Comma-separated allowed origins for CORS **and** websockets |
 | `CLOUDINARY_*` | Cloud Name, API Key, and API Secret |
 | `GMAIL_USER` / `GMAIL_PASS` | Sending address and Gmail App-specific password |
+| `SMTP_HOST` / `SMTP_PORT` / `SMTP_SECURE` | Mail transport (defaults: `smtp.gmail.com`, `465`, `true`) |
 | `RATE_LIMIT_*`, `OTP_*`, `PAGINATION_*` | Tunables for limits, OTP policy and page sizes |
 | `CRON_ENABLED`, `CRON_LOCK_TTL_MS` | Background job toggle and lease duration |
 | `ENSURE_INDEXES` | Build schema indexes on boot (default `true`) |
@@ -140,6 +141,7 @@ full list.
 | `REACT_APP_API_URL` | Base URL of the REST API, including `/api`. Unset in development — defaults to the host the page was served from |
 | `REACT_APP_SOCKET_URL` | Socket.IO origin (defaults to the API URL without `/api`) |
 | `REACT_APP_API_PORT` | Port used when deriving the default API origin (default `5000`) |
+| `REACT_APP_API_TIMEOUT` | Request timeout in ms (default `90000`). Sized for a cold-starting free-tier backend; drop to ~`30000` on an always-on plan so real failures surface quickly |
 | `REACT_APP_PAGE_SIZE` | Items per page for the paginated lists |
 
 > Create React App inlines `REACT_APP_*` variables at build time — restart the dev
@@ -161,6 +163,81 @@ in the `joblocks` collection before each run, so only one instance performs the
 auto-close for a given tick; the others log a skip and move on. Keep
 `CRON_LOCK_TTL_MS` **below** the schedule interval so the lease expires between
 ticks.
+
+## ☁️ Deployment
+
+The frontend and backend deploy independently: the webapp is a static Create React
+App bundle, the backend is a long-lived process that owns websockets and the
+scheduler and therefore cannot run on serverless functions.
+
+| Piece | Target | Root directory |
+| :--- | :--- | :--- |
+| `webapp/` | Vercel (static build) | `webapp` — it reads `webapp/vercel.json`, not the repo root |
+| `backend/` | Render / Railway / Fly (persistent instance) | `backend` |
+
+### Cross-site cookies
+
+Once the two halves live on different domains the session cookie becomes
+*cross-site*, and browsers only accept a cross-site cookie when it carries
+`SameSite=None` **and** `Secure`. Setting `SameSite=None` on its own is worse than
+leaving it `Lax` — the browser rejects the cookie outright and no request is ever
+authenticated.
+
+`backend/config/env.js` already derives both from `NODE_ENV`, so the correct
+production behaviour needs no cookie configuration at all:
+
+```js
+cookieSecure:   toBool(process.env.COOKIE_SECURE, isProduction),        // → true
+cookieSameSite: required("COOKIE_SAMESITE", isProduction ? "none" : "lax"),  // → "none"
+```
+
+> **Do not copy `backend/.env` into your host's dashboard wholesale.** The local
+> file carries `COOKIE_SECURE=false` and `COOKIE_SAMESITE=lax` — correct for
+> development, since `Secure` cookies are not sent over `http://localhost`, but an
+> explicit `false` **overrides** the `NODE_ENV` default above and silently breaks
+> authentication in production. Set `NODE_ENV=production` and leave both cookie
+> variables **unset**.
+
+### Host configuration
+
+Set on the **backend** host:
+
+| Variable | Value |
+| :--- | :--- |
+| `NODE_ENV` | `production` |
+| `FRONTEND_URL` | The deployed frontend origin, e.g. `https://your-app.vercel.app` |
+| `MONGO_URI`, `JWT_SECRET`, `CLOUDINARY_*`, `GMAIL_*` | Real credentials |
+| `COOKIE_SECURE`, `COOKIE_SAMESITE` | Leave unset |
+
+`FRONTEND_URL` feeds the CORS allowlist for both Express (`app.js`) and Socket.IO
+(`realtime/socket.js`); if it still points at `localhost`, the browser blocks every
+request before cookies are even considered.
+
+Set on the **frontend** host (Vercel dashboard, not a committed `.env` — CRA inlines
+`REACT_APP_*` at build time, so changes need a redeploy rather than a restart):
+
+| Variable | Value |
+| :--- | :--- |
+| `REACT_APP_API_URL` | `https://your-backend.onrender.com/api` |
+| `REACT_APP_SOCKET_URL` | `https://your-backend.onrender.com` |
+
+> Leave these unset and the frontend falls back to `<page-host>:5000`, so every
+> request fails with `401 Not authorized, no token`.
+
+### Free-tier caveats
+
+Free tiers on Render and similar hosts **block outbound SMTP on ports 25, 465 and
+587**, so OTP delivery through Gmail fails there — the OTP endpoints are the only
+ones affected, because `utils/otp.js` awaits the send before responding. Either use
+a paid instance or swap `utils/mailer.js` for an HTTP email API (Resend, Brevo,
+SendGrid) that talks over port 443.
+
+`config/email.js` sets explicit connection, greeting and socket timeouts so a
+blocked or stalled SMTP connection fails fast with a logged error instead of
+hanging the request until the client aborts.
+
+Free instances also sleep when idle and cold-start on the next request, which is
+why `REACT_APP_API_TIMEOUT` defaults to 90s. Lower it on an always-on plan.
 
 ## 🔌 API Conventions
 
