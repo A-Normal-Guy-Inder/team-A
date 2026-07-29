@@ -1,224 +1,167 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import api from "../services/api";
+import api, { getErrorMessage } from "../services/api";
 import "../styles/auth.css";
 import Loader from "./Loader";
-import { Eye, EyeOff } from 'lucide-react';
-
+import { Eye, EyeOff } from "lucide-react";
+import { checkPasswordStrength, isValidEmail, isValidPhone } from "../utils/validation";
 
 const Signup = () => {
-  const navigate = useNavigate();
+    const navigate = useNavigate();
 
-  const [form, setForm] = useState({
-    first_name: "",
-    last_name: "",
-    phone_number: "",
-    email_id: "",
-    password: "",
-  });
+    const [form, setForm] = useState({
+        first_name: "",
+        last_name: "",
+        phone_number: "",
+        email_id: "",
+        password: "",
+    });
+    const [loading, setLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
 
-  const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
+    const handleChange = useCallback((e) => {
+        const { name, value } = e.target;
+        setForm((prev) => ({ ...prev, [name]: value }));
+    }, []);
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+    const handleSignup = useCallback(async () => {
+        if (loading) return;
 
-  const isStrongPassword = (password) => {
-  if (password.length < 8) {
-    return {
-      isStrong: false,
-      message: "Password must be at least 8 characters"
-    };
-  }
+        const payload = {
+            first_name: form.first_name.trim(),
+            last_name: form.last_name.trim(),
+            phone_number: form.phone_number.trim(),
+            email_id: form.email_id.trim().toLowerCase(),
+            password: form.password.trim(),
+        };
 
-  if (!/[A-Z]/.test(password)) {
-    return {
-      isStrong: false,
-      message: "Password must contain at least one uppercase letter (A-Z)"
-    };
-  }
+        if (Object.values(payload).some((value) => !value)) {
+            toast.error("All fields are required");
+            return;
+        }
+        if (!isValidEmail(payload.email_id)) {
+            toast.error("Enter a valid email address");
+            return;
+        }
+        if (!isValidPhone(payload.phone_number)) {
+            toast.error("Enter a valid 10-digit phone number");
+            return;
+        }
 
-  if (!/[a-z]/.test(password)) {
-    return {
-      isStrong: false,
-      message: "Password must contain at least one lowercase letter (a-z)"
-    };
-  }
+        // Same rule set the API enforces, so a password accepted here is never
+        // rejected on submit.
+        const strength = checkPasswordStrength(payload.password);
+        if (!strength.isStrong) {
+            toast.error(strength.message);
+            return;
+        }
 
-  if (!/[0-9]/.test(password)) {
-    return {
-      isStrong: false,
-      message: "Password must contain at least one number (0-9)"
-    };
-  }
+        try {
+            setLoading(true);
+            const res = await api.post("/auth/register", payload);
+            toast.success(res.data?.message || "Registration successful");
+            navigate("/verify", { state: { email: payload.email_id, first_time: true } });
+        } catch (err) {
+            toast.error(getErrorMessage(err, "Registration failed"));
+        } finally {
+            setLoading(false);
+        }
+    }, [form, loading, navigate]);
 
-  if (!/[!@#$%^&*()_+\-=[\]{};:'",.<>/?\\|]/.test(password)) {
-    return {
-      isStrong: false,
-      message: "Password must contain at least one special character (!@#$%^&*)"
-    };
-  }
+    return (
+        <>
+            {loading && <Loader />}
+            <div className="auth-container">
+                <div className="auth-card">
+                    <h2>Create Account</h2>
+                    <p>Join the Hire-a-Helper community</p>
 
-  return {
-    isStrong: true,
-    message: "Password is strong"
-  };
-};
+                    <div className="two-col">
+                        <div className="input-group">
+                            <label>First Name <span className="required">*</span></label>
+                            <input
+                                name="first_name"
+                                type="text"
+                                maxLength={50}
+                                autoComplete="given-name"
+                                placeholder="First Name"
+                                value={form.first_name}
+                                onChange={handleChange}
+                            />
+                        </div>
+                        <div className="input-group">
+                            <label>Last Name <span className="required">*</span></label>
+                            <input
+                                name="last_name"
+                                type="text"
+                                maxLength={50}
+                                autoComplete="family-name"
+                                placeholder="Last Name"
+                                value={form.last_name}
+                                onChange={handleChange}
+                            />
+                        </div>
+                    </div>
 
-  const isValidEmail = (email) =>
-    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+                    <div className="input-group">
+                        <label>Phone Number <span className="required">*</span></label>
+                        <input
+                            name="phone_number"
+                            maxLength={10}
+                            autoComplete="tel"
+                            placeholder="Phone Number"
+                            value={form.phone_number}
+                            onChange={handleChange}
+                        />
+                    </div>
 
-  const isValidPhone = (phone) =>
-    /^[6-9]\d{9}$/.test(phone);
+                    <div className="input-group">
+                        <label>Email Address <span className="required">*</span></label>
+                        <input
+                            name="email_id"
+                            type="email"
+                            maxLength={100}
+                            autoComplete="email"
+                            placeholder="Enter your email"
+                            value={form.email_id}
+                            onChange={handleChange}
+                        />
+                    </div>
 
-  const handleSignup = async () => {
-    if (loading) return;
-    setLoading(true);
+                    <div className="input-group">
+                        <label>Password <span className="required">*</span></label>
+                        <div className="password-field">
+                            <input
+                                name="password"
+                                type={showPassword ? "text" : "password"}
+                                maxLength={100}
+                                autoComplete="new-password"
+                                placeholder="Create your password"
+                                value={form.password}
+                                onChange={handleChange}
+                            />
+                            <span
+                                className="toggle-password"
+                                onClick={() => setShowPassword(!showPassword)}
+                                style={{ cursor: "pointer" }}
+                            >
+                                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                            </span>
+                        </div>
+                    </div>
 
-    const payload = {
-      first_name: form.first_name.trim(),
-      last_name: form.last_name.trim(),
-      phone_number: form.phone_number.trim(),
-      email_id: form.email_id.trim().toLowerCase(),
-      password: form.password.trim(),
-    };
+                    <button className="primary-btn" onClick={handleSignup} disabled={loading}>
+                        {loading ? "Creating account..." : "Create Account"}
+                    </button>
 
-    if (Object.values(payload).some((v) => !v)) {
-      toast.error("All fields are required");
-      setLoading(false);
-      return;
-    }
-
-    if (!isValidEmail(payload.email_id)) {
-      toast.error("Enter a valid email address");
-      setLoading(false);
-      return;
-    }
-
-    if (!isValidPhone(payload.phone_number)) {
-      toast.error("Enter a valid 10-digit phone number");
-      setLoading(false);
-      return;
-    }
-
-    const passwordValidation = isStrongPassword(payload.password);
-     if (!passwordValidation.isStrong) {
-     toast.error(passwordValidation.message);
-     setLoading(false);
-    return;
-    }
-
-    try {
-      const res = await api.post("/auth/register", payload);
-      setLoading(false);
-      toast.success(res.data?.message || "Registration successful");
-
-      setTimeout(() => {
-        navigate("/verify", {
-          state: { email: payload.email_id, first_time: true },
-        });
-      }, 400);
-
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Registration failed");
-      setLoading(false);
-    }
-  };
-
-  return (
-    <>
-      {loading && <Loader />}
-      <div className="auth-container">
-        <div className="auth-card">
-          <h2>Create Account</h2>
-          <p>Join the Hire-a-Helper community</p>
-
-          <div className="two-col">
-            <div className="input-group">
-              <label>First Name <span className="required">*</span></label>
-              <input
-                name="first_name"
-                type="text"
-                maxLength={50}
-                autoComplete="given-name"
-                placeholder="First Name"
-                onChange={handleChange}
-              />
+                    <div className="auth-footer">
+                        Already have an account? <Link to="/login">Sign In</Link>
+                    </div>
+                </div>
             </div>
-            <div className="input-group">
-              <label>Last Name <span className="required">*</span></label>
-              <input
-                name="last_name"
-                type="text"
-                maxLength={50}
-                autoComplete="family-name"
-                placeholder="Last Name"
-                onChange={handleChange}
-              />
-            </div>
-          </div>
-
-          <div className="input-group">
-            <label>Phone Number <span className="required">*</span></label>
-            <input
-              name="phone_number"
-              maxLength={10}
-              autoComplete="tel"
-              placeholder="Phone Number"
-              onChange={handleChange}
-            />
-          </div>
-
-          <div className="input-group">
-            <label>Email Address <span className="required">*</span></label>
-            <input
-              name="email_id"
-              type="email"
-              maxLength={100}
-              autoComplete="email"
-              placeholder="Enter your email"
-              onChange={handleChange}
-            />
-          </div>
-
-          <div className="input-group">
-  <label>Password <span className="required">*</span></label>
-  <div className="password-field">
-    <input
-      name="password"
-      type={showPassword ? "text" : "password"}
-      maxLength={100}
-      autoComplete="new-password"
-      placeholder="Create your password"
-      onChange={handleChange}
-    />
-    <span
-      className="toggle-password"
-      onClick={() => setShowPassword(!showPassword)}
-      style={{ cursor: 'pointer' }}
-    >
-      {showPassword ? (
-        <EyeOff size={20} />
-      ) : (
-        <Eye size={20} />
-      )}
-    </span>
-  </div>
-</div>
-
-          <button className="primary-btn" onClick={handleSignup} disabled={loading}>
-            {loading ? "Creating account..." : "Create Account"}
-          </button>
-
-          <div className="auth-footer">
-            Already have an account? <Link to="/login">Sign In</Link>
-          </div>
-        </div>
-      </div>
-    </>
-  );
+        </>
+    );
 };
 
 export default Signup;

@@ -1,0 +1,284 @@
+const Task = require("../models/task.model");
+const Requests = require("../models/request.model");
+const User = require("../models/user.model");
+const ApiError = require("../utils/ApiError");
+const env = require("../config/env");
+const { TASK_STATUS, REQUEST_STATUS } = require("../config/constants");
+const { uploadToCloudinary, deleteFromCloudinary } = require("../utils/cloudinary");
+const { parsePagination, parseSort, buildMeta, buildSearchFilter } = require("../utils/pagination");
+
+const SORTABLE_FIELDS = ["createdAt", "start_time", "end_time", "title", "status"];
+const SEARCHABLE_FIELDS = ["title", "description", "location", "category"];
+
+/** Projection shared by every task list — never ship fields the UI cannot use. */
+const TASK_PROJECTION = {
+    title: 1,
+    description: 1,
+    location: 1,
+    picture: 1,
+    status: 1,
+    start_time: 1,
+    end_time: 1,
+    category: 1,
+    user_id: 1,
+    createdAt: 1,
+};
+
+/**
+ * Translates the shared query-string filters into a mongo filter fragment.
+ * Only whitelisted values reach the database.
+ */
+function buildTaskFilters(query = {}) {
+    const filter = {};
+
+    if (query.status && query.status !== "all") {
+        const statuses = String(query.status)
+            .split(",")
+            .map((value) => value.trim().toLowerCase())
+            .filter((value) => Object.values(TASK_STATUS).includes(value));
+        if (statuses.length === 1) filter.status = statuses[0];
+        else if (statuses.length > 1) filter.status = { $in: statuses };
+    }
+
+    if (query.category && query.category !== "all") {
+        const categories = String(query.category)
+            .split(",")
+            .map((value) => value.trim())
+            .filter(Boolean);
+        if (categories.length === 1) filter.category = categories[0];
+        else if (categories.length > 1) filter.category = { $in: categories };
+    }
+
+    if (query.location) {
+        const search = buildSearchFilter(query.location, ["location"]);
+        if (search) Object.assign(filter, search);
+    }
+
+    const startFrom = query.startFrom ? new Date(query.startFrom) : null;
+    const startTo = query.startTo ? new Date(query.startTo) : null;
+    if ((startFrom && !Number.isNaN(startFrom.getTime())) || (startTo && !Number.isNaN(startTo.getTime()))) {
+        filter.start_time = {};
+        if (startFrom && !Number.isNaN(startFrom.getTime())) filter.start_time.$gte = startFrom;
+        if (startTo && !Number.isNaN(startTo.getTime())) filter.start_time.$lte = startTo;
+    }
+
+    const search = buildSearchFilter(query.search, SEARCHABLE_FIELDS);
+    if (search) Object.assign(filter, search);
+
+    return filter;
+}
+
+async function createTask(payload, file, userId) {
+    let image = null;
+    if (file) {
+        // An upload failure must not silently produce a task without its
+        // picture — the user chose to attach one.
+        image = await uploadToCloudinary(file.path, "tasks").catch((err) => {
+            throw ApiError.badRequest(err.message || "Failed to upload the task image");
+        });
+    }
+
+    try {
+        const task = await Task.create({
+            user_id: userId,
+            title: payload.title,
+            description: payload.description || "",
+            location: payload.location,
+            start_time: payload.start_time,
+            end_time: payload.end_time,
+            category: payload.category,
+            picture: image?.secure_url || null,
+            picture_public_id: image?.public_id || null,
+        });
+
+        return { task: task.toObject(), message: "Task created successfully." };
+    } catch (err) {
+        // Do not leave an orphaned asset on Cloudinary if the write fails.
+        await deleteFromCloudinary(image?.public_id);
+        throw err;
+    }
+}
+
+async function updateTask(taskId, payload, file, userId) {
+    const task = await Task.findById(taskId);
+    if (!task) throw ApiError.notFound("Task not found");
+
+    if (String(task.user_id) !== String(userId)) {
+        throw ApiError.forbidden("You are not allowed to edit this task");
+    }
+
+    let image = null;
+    if (file) {
+        image = await uploadToCloudinary(file.path, "tasks").catch((err) => {
+            throw ApiError.badRequest(err.message || "Failed to upload the task image");
+        });
+    }
+
+    const previousPublicId = task.picture_public_id;
+
+    if (payload.title !== undefined) task.title = payload.title;
+    if (payload.description !== undefined) task.description = payload.description;
+    if (payload.location !== undefined) task.location = payload.location;
+    if (payload.start_time !== undefined) task.start_time = payload.start_time;
+    if (payload.end_time !== undefined) task.end_time = payload.end_time;
+    if (payload.category !== undefined) task.category = payload.category;
+
+    if (image) {
+        task.picture = image.secure_url;
+        task.picture_public_id = image.public_id;
+    }
+
+    // Re-opening an auto-closed task restores whatever it was before the cron
+    // closed it. Previously this ran on *every* edit with a null `prev_status`,
+    // which quietly unassigned tasks that already had a helper.
+    if (task.status === TASK_STATUS.CLOSED && new Date(task.end_time).getTime() > Date.now()) {
+        task.status = task.prev_status || TASK_STATUS.OPEN;
+        task.prev_status = null;
+        task.closed_at = null;
+    }
+
+    await task.save();
+
+    if (image && previousPublicId && previousPublicId !== image.public_id) {
+        await deleteFromCloudinary(previousPublicId);
+    }
+
+    return { task: task.toObject(), message: "Task updated successfully" };
+}
+
+/** Paginated list of the caller's own tasks. */
+async function listMyTasks(userId, query = {}) {
+    const { page, limit, skip } = parsePagination(query);
+    const sort = parseSort(query, SORTABLE_FIELDS, "createdAt");
+    const filter = { user_id: userId, ...buildTaskFilters(query) };
+
+    const [items, total] = await Promise.all([
+        Task.find(filter).select(TASK_PROJECTION).sort(sort).skip(skip).limit(limit).lean(),
+        Task.countDocuments(filter),
+    ]);
+
+    return { items, meta: buildMeta({ page, limit, total }) };
+}
+
+/**
+ * Paginated public feed.
+ *
+ * The author and the caller's own request state are resolved with `$lookup`
+ * *after* `$skip`/`$limit`, so the joins touch one page of tasks rather than
+ * the whole collection — the previous implementation loaded every open task and
+ * every request the user had ever made on each page view.
+ */
+async function listFeed(userId, query = {}) {
+    const { page, limit, skip } = parsePagination(query);
+    const sort = parseSort(query, SORTABLE_FIELDS, "createdAt");
+
+    const filter = {
+        user_id: { $ne: userId },
+        status: TASK_STATUS.OPEN,
+        ...buildTaskFilters({ ...query, status: undefined }),
+    };
+
+    const cooldownCutoff = new Date(Date.now() - env.security.requestCooldownMs);
+
+    const [items, total] = await Promise.all([
+        Task.aggregate([
+            { $match: filter },
+            { $sort: sort },
+            { $skip: skip },
+            { $limit: limit },
+            {
+                $lookup: {
+                    from: User.collection.name,
+                    localField: "user_id",
+                    foreignField: "_id",
+                    as: "author",
+                    pipeline: [{ $project: { first_name: 1, last_name: 1, profile_picture: 1 } }],
+                },
+            },
+            {
+                $lookup: {
+                    from: Requests.collection.name,
+                    let: { taskId: "$_id" },
+                    as: "my_request",
+                    pipeline: [
+                        {
+                            $match: {
+                                $expr: {
+                                    $and: [
+                                        { $eq: ["$task_id", "$$taskId"] },
+                                        { $eq: ["$requester_id", userId] },
+                                    ],
+                                },
+                            },
+                        },
+                        { $project: { status: 1, rejectedAt: 1 } },
+                        { $limit: 1 },
+                    ],
+                },
+            },
+            {
+                $addFields: {
+                    user_id: { $ifNull: [{ $arrayElemAt: ["$author", 0] }, null] },
+                    requestStatus: { $ifNull: [{ $arrayElemAt: ["$my_request.status", 0] }, null] },
+                    // A rejected requester may re-apply once the cooldown has
+                    // elapsed; anything pending or accepted stays blocked.
+                    hasRequested: {
+                        $let: {
+                            vars: { request: { $arrayElemAt: ["$my_request", 0] } },
+                            in: {
+                                $switch: {
+                                    branches: [
+                                        { case: { $eq: [{ $size: "$my_request" }, 0] }, then: false },
+                                        {
+                                            case: {
+                                                $in: [
+                                                    "$$request.status",
+                                                    [REQUEST_STATUS.PENDING, REQUEST_STATUS.ACCEPTED],
+                                                ],
+                                            },
+                                            then: true,
+                                        },
+                                        {
+                                            case: { $eq: [{ $ifNull: ["$$request.rejectedAt", null] }, null] },
+                                            then: true,
+                                        },
+                                    ],
+                                    default: { $gt: ["$$request.rejectedAt", cooldownCutoff] },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+            { $project: { ...TASK_PROJECTION, hasRequested: 1, requestStatus: 1 } },
+        ]),
+        Task.countDocuments(filter),
+    ]);
+
+    // `$first` on a missing lookup yields `undefined`; normalise so the client
+    // always sees the same shape.
+    for (const item of items) {
+        if (item.user_id === undefined) item.user_id = null;
+        item.hasRequested = Boolean(item.hasRequested);
+    }
+
+    return { items, meta: buildMeta({ page, limit, total }) };
+}
+
+async function getTaskById(taskId, userId) {
+    const task = await Task.findById(taskId).select(TASK_PROJECTION).lean();
+    if (!task) throw ApiError.notFound("Task not found");
+
+    const author = await User.findById(task.user_id).select(User.AUTHOR_FIELDS).lean();
+    return { ...task, user_id: author || task.user_id, isOwner: String(task.user_id) === String(userId) };
+}
+
+module.exports = {
+    createTask,
+    updateTask,
+    listMyTasks,
+    listFeed,
+    getTaskById,
+    buildTaskFilters,
+    TASK_PROJECTION,
+};

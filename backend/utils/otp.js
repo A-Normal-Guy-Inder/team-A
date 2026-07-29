@@ -1,64 +1,69 @@
-const dotenv = require("dotenv");
+const crypto = require("crypto");
 const bcrypt = require("bcryptjs");
-const transporter = require("../config/email.js");
-const { Welcome_Email_Template, Verification_Email_Template } = require("./emailTemplates.js")
+const env = require("../config/env");
+const { sendOtpEmail } = require("./mailer");
 
-dotenv.config();
+/**
+ * Cryptographically secure numeric OTP of fixed length.
+ *
+ * `Math.random()` is not suitable here: it is seeded predictably and an
+ * attacker who observes a few codes can narrow the search space for the next
+ * one. `crypto.randomInt` draws from the OS CSPRNG and is unbiased.
+ */
+function generateOtp(length = env.otp.length) {
+    const min = 10 ** (length - 1);
+    const max = 10 ** length;
+    return String(crypto.randomInt(min, max));
+}
 
-async function generateAndSendOTP(user, path, email = null) {
-    const otp = Math.floor(100000 + Math.random() * 900000);
+async function hashOtp(otp) {
     const salt = await bcrypt.genSalt(10);
-    const hashotp = await bcrypt.hash(otp.toString(), salt);
+    return bcrypt.hash(String(otp), salt);
+}
 
-    user.otp_hash = hashotp;
-    user.otp_expires_at = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes validity
+function verifyOtp(otp, hash) {
+    if (!hash) return Promise.resolve(false);
+    return bcrypt.compare(String(otp), hash);
+}
+
+/**
+ * Issues a fresh OTP for `user`, persists its hash and emails the plaintext.
+ *
+ * @param {object}  user            Mongoose user document.
+ * @param {object}  options
+ * @param {string}  options.purpose Flow this code belongs to; verification
+ *   refuses codes minted for a different purpose.
+ * @param {boolean} options.invalidatePassword  Set for password-reset flows so
+ *   the account cannot be used until the reset completes.
+ * @param {string}  options.email   Destination override (email-change flow).
+ */
+async function issueOtp(user, { purpose, invalidatePassword = false, email = null } = {}) {
+    const otp = generateOtp();
+    const otpHash = await hashOtp(otp);
+
+    user.otp_hash = otpHash;
+    user.otp_expires_at = new Date(Date.now() + env.otp.ttlMs);
     user.otp_attempts = 0;
     user.otp_blocked_time = null;
+    if (purpose) user.otp_purpose = purpose;
 
-    if (path) {
+    if (invalidatePassword) {
         user.password_is_verified = false;
     }
 
     await user.save();
-    await sendOTPEmail(otp, email || user.email_id);
+
+    // Sent after the hash is committed: an email that arrives without a
+    // matching stored hash is unusable, whereas the reverse is merely a resend.
+    await sendOtpEmail(otp, email || user.email_id);
 }
 
-/**
- * Sends an OTP email to the specified address.
- */
-async function sendOTPEmail(otp, email) {
-    try {
-        const response = await transporter.sendMail({
-            from: '"Account Security" <isb.inder59433@gmail.com>',
-            to: email,
-            subject: "Your OTP Code for Account Verification",
-            text: `Your One-Time Password is ${otp}. It is valid for 10 minutes. Do not share it with anyone.`,
-            html: Verification_Email_Template.replace("{otp}", otp)
-        });
-        console.log('OTP Email sent Successfully', response.messageId);
-    } catch (err) {
-        console.error("OTP email failed:", err.message);
-        throw new Error("Failed to send OTP email");
-    }
+/** Remaining cooldown (ms) before another OTP may be requested. */
+function remainingCooldownMs(user) {
+    if (!user.otp_expires_at) return 0;
+    const issuedAt = new Date(user.otp_expires_at).getTime() - env.otp.ttlMs;
+    const readyAt = issuedAt + env.otp.resendCooldownMs;
+    return Math.max(0, readyAt - Date.now());
 }
 
-/**
- * Sends a welcome message after successful verification.
- */
-async function welcomeMsg(email, name) {
-    try {
-        const response = await transporter.sendMail({
-            from: '"Support Team" <isb.inder59433@gmail.com>',
-            to: email,
-            subject: "Welcome — Your Account is Successfully Verified 🎉",
-            text: `Welcome ${name}! Your account has been successfully created and verified.`,
-            html: Welcome_Email_Template.replace("{name}", name)
-        });
-        console.log('Welcome Email sent Successfully:', response.messageId);
-    } catch (err) {
-        console.error("Welcome email failed:", err.message);
-        throw new Error("Failed to send Welcome email");
-    }
-}
-
-module.exports = { welcomeMsg, generateAndSendOTP };
+module.exports = { generateOtp, hashOtp, verifyOtp, issueOtp, remainingCooldownMs };

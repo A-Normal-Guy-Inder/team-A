@@ -1,73 +1,63 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import "../styles/auth.css";
-import api from "../services/api";
+import api, { getErrorMessage } from "../services/api";
 import Loader from "./Loader";
+import { isValidEmail } from "../utils/validation";
 
 const ForgotPassword = () => {
-  const navigate = useNavigate();
+    const navigate = useNavigate();
 
-  const [email_id, setEmail] = useState("");
-  const [loading, setLoading] = useState(false);
+    const [email_id, setEmail] = useState("");
+    const [loading, setLoading] = useState(false);
 
-  const handleSendOtp = async () => {
-    if (loading) return;
-    setLoading(true);
+    const handleSendOtp = useCallback(async () => {
+        if (loading) return;
 
-    const cleanEmail = email_id.trim();
+        const cleanEmail = email_id.trim();
+        if (!isValidEmail(cleanEmail)) {
+            toast.error("Enter a valid email address");
+            return;
+        }
 
-    if (!/^\S+@\S+\.\S+$/.test(cleanEmail)) {
-      toast.error("Enter a valid email address");
-      setLoading(false);
-      return;
-    }
+        try {
+            setLoading(true);
+            const res = await api.post("/auth/forgot-password", { email_id: cleanEmail });
+            toast.success(res.data?.message || "If email exists, OTP has been sent.");
+            navigate("/verify", { state: { email: cleanEmail, first_time: false } });
+        } catch (err) {
+            toast.error(getErrorMessage(err, "Could not send the OTP. Please try again."));
+        } finally {
+            setLoading(false);
+        }
+    }, [email_id, loading, navigate]);
 
-    try {
-      const res = await api.post("/auth/forgot-password", {
-        email_id: cleanEmail,
-      });
+    return (
+        <>
+            {loading && <Loader />}
+            <div className="auth-container">
+                <div className="auth-card">
+                    <h2>Forgot Password</h2>
+                    <p>Enter your registered email to receive OTP</p>
 
-      setLoading(false);
-      toast.success(res.data?.message || "If email exists, OTP has been sent.");
+                    <label>Email Address <span className="required">*</span></label>
+                    <input
+                        type="email"
+                        placeholder="Enter email"
+                        value={email_id}
+                        maxLength={100}
+                        onChange={(e) => setEmail(e.target.value)}
+                        onKeyDown={(e) => e.key === "Enter" && handleSendOtp()}
+                    />
 
-      setTimeout(() => {
-        navigate("/verify", {
-          state: { email: cleanEmail, first_time: false },
-        });
-      }, 400);
-
-    } catch (err) {
-      toast.success("If email exists, OTP has been sent.");
-      setLoading(false);
-    }
-  };
-
-  return (
-    <>
-      {loading && <Loader />}
-      <div className="auth-container">
-        <div className="auth-card">
-          <h2>Forgot Password</h2>
-          <p>Enter your registered email to receive OTP</p>
-
-          <label>
-            Email Address <span className="required">*</span>
-          </label>
-          <input
-            type="email"
-            placeholder="Enter email"
-            value={email_id}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-
-          <button onClick={handleSendOtp} disabled={loading}>
-            {loading ? "Sending..." : "Send OTP"}
-          </button>
-        </div>
-      </div>
-    </>
-  );
+                    <button onClick={handleSendOtp} disabled={loading}>
+                        {loading ? "Sending..." : "Send OTP"}
+                    </button>
+                </div>
+            </div>
+        </>
+    );
 };
 
 export default ForgotPassword;

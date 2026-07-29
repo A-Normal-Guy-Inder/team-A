@@ -1,15 +1,19 @@
-const nodemailer = require("nodemailer")
-const dotenv = require("dotenv");
-dotenv.config();
+const nodemailer = require("nodemailer");
+const env = require("./env");
 
 const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 465,
-  secure: true, 
-  auth: {
-    user: "isb.inder59433@gmail.com",
-    pass: process.env.GMAIL_PASS,
-  },
+    host: env.mail.host,
+    port: env.mail.port,
+    secure: env.mail.secure,
+    auth: {
+        user: env.mail.user,
+        pass: env.mail.pass,
+    },
+    // Reuse a single connection for bursts of mail instead of a TLS handshake
+    // per message.
+    pool: true,
+    maxConnections: 3,
+    maxMessages: 50,
 });
 
 module.exports = transporter;

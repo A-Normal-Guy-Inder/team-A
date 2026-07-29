@@ -1,3 +1,20 @@
+/* ================= RESET =================
+ * This lives here, in the entry stylesheet, rather than in a feature stylesheet.
+ * `index.js` imports it so it is part of the main bundle and present on every
+ * first paint. It previously sat at the top of `dashboard.css`, which only ships
+ * with the lazily-loaded Dashboard chunk: until that chunk had been fetched, no
+ * `box-sizing: border-box` existed, so the auth inputs (`width: 100%` plus
+ * horizontal padding and a border) rendered wider than their card. The login
+ * page looked broken on a cold reload and correct only after the Dashboard had
+ * been visited at some point in the session.
+ */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Segoe UI", sans-serif;
+}
+
 body {
   margin: 0;
   font-family: 'Inter', sans-serif;

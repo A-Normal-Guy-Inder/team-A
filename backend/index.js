@@ -1,35 +1,86 @@
-const express = require("express");
-const cors = require("cors");
-const app = express();
-const cookieParser = require("cookie-parser");
-const dotenv = require("dotenv");
+/**
+ * Application entry point.
+ *
+ * `config/env` is required first and on its own line: it is what loads the
+ * `.env` file, and several modules (Cloudinary, SMTP) read their credentials at
+ * import time. Previously `dotenv.config()` ran *after* the route imports, so
+ * those modules were configured with `undefined` values.
+ */
+const env = require("./config/env");
+
+const http = require("http");
+const createApp = require("./app");
 const connectDB = require("./config/db");
-const authRoutes = require("./routes/auth")
-const taskRoutes = require("./routes/task")
-const requestsRoutes = require("./routes/requests")
-const notificationsRoutes = require("./routes/notification")
-const userRoutes = require("./routes/user")
-const authmiddleware = require("./middleware/auth-middleware");
-dotenv.config();
+const { disconnectDB } = require("./config/db");
+const ensureIndexes = require("./config/ensureIndexes");
+const { initSocket, closeSocket } = require("./realtime/socket");
+const { startScheduler, stopScheduler } = require("./jobs/scheduler");
 
-app.use(express.json());
-app.use(cors({
-    origin: process.env.FRONTEND_URL,
-    credentials: true,              
-}));
-app.use(cookieParser());
+let server;
 
+async function bootstrap() {
+    env.assertConfig();
 
-app.use("/api/auth", authRoutes);
-app.use("/api/task", authmiddleware, taskRoutes);
-app.use("/api/requests", authmiddleware, requestsRoutes);
-app.use("/api/notifications", authmiddleware, notificationsRoutes);
-app.use("/api/user", authmiddleware, userRoutes);
+    // The database must be reachable before the port is opened — accepting
+    // traffic first only produces a burst of 500s during startup.
+    await connectDB();
+    await ensureIndexes();
 
-connectDB();
+    const app = createApp();
+    server = http.createServer(app);
 
-const PORT = process.env.PORT || 5000;
+    initSocket(server);
+    startScheduler();
 
-app.listen(PORT, () => {
-    console.log(`Server started on port ${PORT}`);
+    await new Promise((resolve, reject) => {
+        server.once("error", reject);
+        server.listen(env.port, () => {
+            server.off("error", reject);
+            resolve();
+        });
+    });
+
+    console.log(`[server] Listening on port ${env.port} (${env.nodeEnv})`);
+}
+
+async function shutdown(signal) {
+    console.log(`[server] ${signal} received, shutting down...`);
+
+    const forceExit = setTimeout(() => {
+        console.error("[server] Forced shutdown after timeout");
+        process.exit(1);
+    }, 10000);
+    forceExit.unref();
+
+    try {
+        await stopScheduler();
+        await closeSocket();
+        if (server) {
+            await new Promise((resolve) => server.close(resolve));
+        }
+        await disconnectDB();
+        console.log("[server] Shutdown complete");
+        process.exit(0);
+    } catch (err) {
+        console.error("[server] Shutdown failed:", err);
+        process.exit(1);
+    }
+}
+
+["SIGINT", "SIGTERM"].forEach((signal) => process.on(signal, () => shutdown(signal)));
+
+process.on("unhandledRejection", (reason) => {
+    console.error("[server] Unhandled rejection:", reason);
 });
+
+process.on("uncaughtException", (err) => {
+    console.error("[server] Uncaught exception:", err);
+    shutdown("uncaughtException");
+});
+
+bootstrap().catch((err) => {
+    console.error("[server] Failed to start:", err.message);
+    process.exit(1);
+});
+
+module.exports = { bootstrap, shutdown };

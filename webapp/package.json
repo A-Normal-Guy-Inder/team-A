@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@reduxjs/toolkit": "^2.12.0",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.1",
@@ -11,9 +12,11 @@
     "lucide-react": "^0.562.0",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
+    "react-redux": "^9.3.0",
     "react-router-dom": "^7.11.0",
     "react-scripts": "5.0.1",
     "react-toastify": "^11.0.5",
+    "socket.io-client": "^4.8.3",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
@@ -27,6 +30,14 @@
       "react-app",
       "react-app/jest"
     ]
+  },
+  "jest": {
+    "moduleNameMapper": {
+      "^axios$": "<rootDir>/node_modules/axios/dist/node/axios.cjs",
+      "^react-router-dom$": "<rootDir>/node_modules/react-router-dom/dist/index.js",
+      "^react-router/dom$": "<rootDir>/node_modules/react-router/dist/development/dom-export.js",
+      "^react-router$": "<rootDir>/node_modules/react-router/dist/development/index.js"
+    }
   },
   "browserslist": {
     "production": [

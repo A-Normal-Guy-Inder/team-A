@@ -1,32 +1,40 @@
-import React, { useEffect, useState } from "react";
-import { Navigate } from "react-router-dom";
-import api from "../services/api";
+import React, { useEffect } from "react";
+import { Navigate, useLocation } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 import Loader from "../components/Loader";
+import {
+    fetchCurrentUser,
+    selectAuthChecked,
+    selectAuthStatus,
+    selectCurrentUser,
+} from "../features/auth/authSlice";
 
+/**
+ * Guards authenticated routes.
+ *
+ * The session probe result lives in the store, so navigating between protected
+ * routes no longer re-hits `/auth/me` on every mount the way the old
+ * component-local state did.
+ */
 const ProtectedRoute = ({ children }) => {
-  const [loading, setLoading] = useState(true);
-  const [isAuth, setIsAuth] = useState(false);
+    const dispatch = useDispatch();
+    const location = useLocation();
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        await api.get("/auth/me"); 
-        setIsAuth(true);
-      } catch (err) {
-        setIsAuth(false);
-      } finally {
-        setLoading(false);
-      }
-    };
+    const user = useSelector(selectCurrentUser);
+    const checked = useSelector(selectAuthChecked);
+    const status = useSelector(selectAuthStatus);
 
-    checkAuth();
-  }, []);
+    useEffect(() => {
+        if (!checked && status !== "loading") {
+            dispatch(fetchCurrentUser());
+        }
+    }, [checked, status, dispatch]);
 
-  if (loading) return <Loader />;
+    if (!checked) return <Loader />;
 
-  if (!isAuth) return <Navigate to="/login" replace />;
+    if (!user) return <Navigate to="/login" replace state={{ from: location.pathname }} />;
 
-  return children;
+    return children;
 };
 
 export default ProtectedRoute;

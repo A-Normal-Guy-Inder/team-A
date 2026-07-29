@@ -1,10 +1,6 @@
-/* ================= RESET ================= */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: "Segoe UI", sans-serif;
-}
+/* The global reset lives in `src/index.css`. Keeping it here put it in this
+ * file's lazily-loaded chunk, so every page rendered before the Dashboard was
+ * first visited went unstyled by it. Do not reintroduce it. */
 
 /* ================= DASHBOARD ================= */
 .dashboard-layout {
@@ -3528,5 +3524,76 @@ font-size: 24px;
 
   .badges-container .status-badge {
     margin-left: 0;
+  }
+}
+/* ================= PAGINATION ================= */
+/* Added for server-side paginated lists. Hidden entirely when there is only
+   one page, so short lists look exactly as they always have. */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 20px 24px 32px;
+  flex-wrap: wrap;
+}
+
+.pagination-btn {
+  background: #ffffff;
+  color: #374151;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+  color: #1f2937;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination-info {
+  font-size: 14px;
+  color: #6b7280;
+  white-space: nowrap;
+}
+
+.pagination-total {
+  color: #9ca3af;
+}
+
+.notification-load-more {
+  justify-content: center;
+  text-align: center;
+  cursor: pointer;
+}
+
+.notification-load-more .notification-message {
+  color: #3b82f6;
+  font-weight: 500;
+}
+
+@media (max-width: 480px) {
+  .pagination {
+    gap: 10px;
+    padding: 16px 12px 24px;
+  }
+
+  .pagination-btn {
+    padding: 7px 12px;
+    font-size: 13px;
+  }
+
+  .pagination-info {
+    font-size: 13px;
   }
 }
