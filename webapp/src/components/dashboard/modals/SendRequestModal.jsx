@@ -21,13 +21,10 @@ const SendRequestModal = ({ task, onClose }) => {
 
         if (sendRequest.rejected.match(result)) {
             toast.error(result.payload);
-            // "Already requested" means the card state is stale — close so the
-            // refreshed feed can show the correct button.
             if (String(result.payload).toLowerCase().includes("already")) onClose();
             return;
         }
 
-        // The card flips to "Requested" without another feed round-trip.
         dispatch(markTaskRequested(task._id));
         dispatch(fetchSentRequests({ page: 1 }));
         toast.success("Task request sent successfully 📩");

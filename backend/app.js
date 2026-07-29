@@ -13,17 +13,12 @@ const { sendSuccess } = require("./utils/apiResponse");
 function createApp() {
     const app = express();
 
-    // Required for correct client IPs (and therefore correct rate limiting)
-    // when running behind a single reverse proxy such as Nginx or a PaaS router.
     app.set("trust proxy", 1);
     app.disable("x-powered-by");
 
     app.use(
         helmet({
-            // The API is consumed from a different origin than it is served
-            // from, so the default `same-origin` policy would block responses.
             crossOriginResourcePolicy: { policy: "cross-origin" },
-            // No HTML is served from here; a CSP would only add noise.
             contentSecurityPolicy: false,
         })
     );

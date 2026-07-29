@@ -1,16 +1,7 @@
 const validator = require("validator");
 
-/**
- * Small, dependency-light rule set. Each rule returns `undefined` when the
- * value is acceptable, or a human-readable error message when it is not.
- *
- * Rules are pure so the same definitions can be reused by any layer.
- */
-
 const PASSWORD_MIN_LENGTH = 8;
 const PASSWORD_MAX_LENGTH = 100;
-// Kept deliberately broad and identical to the client-side check so a password
-// accepted by the signup form is never rejected by the API (and vice versa).
 const PASSWORD_SPECIAL = /[!@#$%^&*()_+\-=[\]{};:'",.<>/?\\|`~]/;
 const PHONE_PATTERN = /^[6-9]\d{9}$/;
 

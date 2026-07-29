@@ -13,13 +13,6 @@ const { emitToUser, emitToUsers } = require("../realtime/socket");
 
 const SORTABLE_FIELDS = ["createdAt", "status", "updatedAt"];
 
-/**
- * Sends a request for someone else's task.
- *
- * A previously rejected requester may re-apply once the cooldown has elapsed —
- * the existing document is reused so the `(task_id, requester_id)` unique index
- * keeps holding, which is what makes the check race-free under concurrency.
- */
 async function createRequest({ description }, taskId, requester) {
     const task = await Task.findById(taskId).select("user_id title status").lean();
     if (!task) throw ApiError.notFound("Task not found");
@@ -114,14 +107,6 @@ function mapReceivedRequest(request, requesterMap, taskMap) {
     };
 }
 
-/**
- * Requests received on the caller's tasks.
- *
- * Owned task ids are resolved first (covered by the `{ user_id, createdAt }`
- * index) and any title search is applied at that stage, so the request query is
- * always bounded and the requester/task documents are only loaded for the page
- * actually being returned.
- */
 async function listReceivedRequests(userId, query = {}) {
     const { page, limit, skip } = parsePagination(query);
     const sort = parseSort(query, SORTABLE_FIELDS, "createdAt");
@@ -133,8 +118,6 @@ async function listReceivedRequests(userId, query = {}) {
         return { items: [], meta: { ...buildMeta({ page, limit, total: 0 }), pendingCount: 0 } };
     }
 
-    // The badge counts every pending request the user owns, so it is measured
-    // against the unfiltered set — searching the list must not change it.
     const pendingCountPromise = Requests.countDocuments({
         task_id: { $in: allOwnedIds },
         status: REQUEST_STATUS.PENDING,
@@ -193,7 +176,6 @@ async function listReceivedRequests(userId, query = {}) {
     };
 }
 
-/** Requests the caller has sent, with the task and its owner attached. */
 async function listSentRequests(userId, query = {}) {
     const { page, limit, skip } = parsePagination(query);
     const sort = parseSort(query, SORTABLE_FIELDS, "createdAt");
@@ -220,8 +202,6 @@ async function listSentRequests(userId, query = {}) {
     };
     const unwindTask = { $unwind: { path: "$task", preserveNullAndEmptyArrays: true } };
 
-    // When there is no search term the page can be narrowed before joining;
-    // with one, the join has to happen first so titles can be matched.
     const pipeline = search
         ? [
             { $match: match },
@@ -301,15 +281,6 @@ async function listSentRequests(userId, query = {}) {
     return { items: mapped, meta: buildMeta({ page, limit, total }) };
 }
 
-/**
- * Accept or reject a request.
- *
- * Accepting is the one place where several documents must move together
- * (request accepted, siblings rejected, task assigned, assignment recorded), so
- * it runs in a transaction when the deployment supports one. Notifications are
- * emitted only *after* the transaction commits — a socket message about a
- * rollback cannot be recalled.
- */
 async function updateRequestStatus(requestId, action, ownerId) {
     const useTransaction = supportsTransactions();
     const session = useTransaction ? await mongoose.startSession() : null;
@@ -328,7 +299,7 @@ async function updateRequestStatus(requestId, action, ownerId) {
         if (session) await session.endSession();
     }
 
-    // Post-commit side effects. `notify` persists and pushes in one step.
+    // Emit only after commit
     await notificationService.notify(outcome.notifications);
     emitToUsers(outcome.affectedUserIds, SOCKET_EVENTS.REQUEST_UPDATED, { scope: "sent" });
     emitToUser(ownerId, SOCKET_EVENTS.REQUEST_UPDATED, { scope: "received" });
@@ -385,8 +356,6 @@ async function applyStatusChange(requestId, action, ownerId, session) {
     request.rejectedAt = null;
     await request.save({ session });
 
-    // Upsert keeps the one-assignment-per-task invariant idempotent even if the
-    // same accept is retried.
     await AcceptedTasks.findOneAndUpdate(
         { task_id: task._id },
         {

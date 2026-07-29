@@ -65,8 +65,6 @@ const ChangePasswordPage = () => {
             });
 
             toast.success("Password changed successfully");
-            // The old redirect went to `/dashboard?tab=settings`, which matched
-            // no route and dropped the user on the login page.
             navigate("/Dashboard", { state: { openPage: "Settings" } });
         } catch (err) {
             toast.error(getErrorMessage(err, "Password change failed"));

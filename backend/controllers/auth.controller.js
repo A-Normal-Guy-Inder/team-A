@@ -19,8 +19,6 @@ const resendOtp = asyncHandler(async (req, res) => {
 });
 
 const login = asyncHandler(async (req, res) => {
-    // The client historically sent `remember`; `rememberMe` is the documented
-    // name. Both are honoured so the checkbox actually works.
     const rememberMe = Boolean(req.body.rememberMe ?? req.body.remember);
     const result = await authService.login({ ...req.body, rememberMe });
 
@@ -50,8 +48,6 @@ const me = asyncHandler(async (req, res) => {
         message: "Authenticated",
         data: {
             authenticated: true,
-            // `_id` is part of the payload: the dashboard needs it to tell the
-            // user's own tasks apart from everyone else's.
             user: {
                 _id: req.user._id,
                 first_name: req.user.first_name,

@@ -24,10 +24,6 @@ async function sendOtpEmail(otp, email) {
     }
 }
 
-/**
- * Welcome mail is a courtesy — a failure must never roll back a successful
- * verification, so this never throws.
- */
 async function sendWelcomeEmail(email, name) {
     try {
         const response = await transporter.sendMail({

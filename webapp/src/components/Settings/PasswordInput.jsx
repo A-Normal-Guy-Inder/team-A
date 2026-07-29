@@ -1,12 +1,6 @@
 import React, { memo, useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 
-/**
- * Password field with a visibility toggle.
- *
- * The settings pages each carried their own copy of the eye/eye-off SVGs and
- * their own `showX` state; this is that markup in one place.
- */
 const PasswordInput = ({ name, placeholder, value, onChange, onEnter, autoComplete = "off" }) => {
     const [visible, setVisible] = useState(false);
 

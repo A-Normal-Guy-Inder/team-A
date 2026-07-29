@@ -49,8 +49,6 @@ const Signup = () => {
             return;
         }
 
-        // Same rule set the API enforces, so a password accepted here is never
-        // rejected on submit.
         const strength = checkPasswordStrength(payload.password);
         if (!strength.isStrong) {
             toast.error(strength.message);

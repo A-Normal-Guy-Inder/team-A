@@ -2,7 +2,6 @@ import React, { memo } from "react";
 import { Bell } from "lucide-react";
 import NotificationDropdown from "./NotificationDropdown";
 
-/** Tabs where the search box is meaningless. */
 const NO_SEARCH_PAGES = ["Settings", "Add Task"];
 
 const Topbar = ({

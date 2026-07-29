@@ -79,8 +79,6 @@ const UpdateProfile = () => {
 
             const { data } = await api.put("/user/profile", formData);
 
-            // The response carries the saved user, so the cached profile is
-            // patched directly instead of triggering another /auth/me request.
             if (data?.data?.user) dispatch(patchUser(data.data.user));
 
             toast.success("Profile updated successfully ⚙️");

@@ -5,10 +5,6 @@ const { SOCKET_EVENTS } = require("../config/constants");
 
 let io = null;
 
-/**
- * Minimal cookie header parser. Written inline rather than pulling in a
- * transitive dependency of Express, which is not a contract we control.
- */
 function parseCookies(header = "") {
     const jar = {};
     for (const part of header.split(";")) {
@@ -25,17 +21,8 @@ function parseCookies(header = "") {
     return jar;
 }
 
-/** Every socket for a user shares one room, so a user with several tabs stays in sync. */
 const userRoom = (userId) => `user:${userId}`;
 
-/**
- * Attaches a Socket.IO server to the given HTTP server.
- *
- * Authentication reuses the same HTTP-only JWT cookie as the REST API: the
- * token is never exposed to JavaScript on the client, so it cannot be passed in
- * a handshake `auth` payload — reading it from the handshake headers keeps the
- * existing security model intact.
- */
 function initSocket(httpServer) {
     io = new Server(httpServer, {
         path: "/socket.io",
@@ -49,6 +36,7 @@ function initSocket(httpServer) {
         pingTimeout: 20000,
     });
 
+    // Token from handshake cookie
     io.use((socket, next) => {
         try {
             const cookies = parseCookies(socket.handshake.headers?.cookie || "");
@@ -78,11 +66,6 @@ function initSocket(httpServer) {
     return io;
 }
 
-/**
- * Emits to a single user's room. Safe to call before/without a socket server
- * (tests, scripts) — delivery is best-effort by design, since the REST API
- * remains the source of truth.
- */
 function emitToUser(userId, event, payload) {
     if (!io || !userId) return;
     try {

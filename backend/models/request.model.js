@@ -13,15 +13,9 @@ const requestSchema = new mongoose.Schema(
     { timestamps: true }
 );
 
-// --- Indexes -----------------------------------------------------------------
-// One live request per (task, requester). Enforced in the database rather than
-// by a read-then-write check, which races under concurrency.
 requestSchema.index({ task_id: 1, requester_id: 1 }, { unique: true });
-// "My Requests" list.
 requestSchema.index({ requester_id: 1, createdAt: -1 });
-// Sibling auto-rejection when a request is accepted.
 requestSchema.index({ task_id: 1, status: 1 });
-// "Requests received" list is driven by task ownership, then sorted by recency.
 requestSchema.index({ status: 1, createdAt: -1 });
 
 module.exports = mongoose.model("Requests", requestSchema);

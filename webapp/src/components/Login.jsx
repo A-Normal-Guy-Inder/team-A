@@ -36,8 +36,6 @@ const Login = () => {
         setLoading(true);
 
         const result = await dispatch(
-            // `rememberMe` is the name the API reads. The old payload sent
-            // `remember`, so the checkbox never actually extended the session.
             loginUser({ email_id: email, password: pass, rememberMe: remember })
         );
 

@@ -1,11 +1,5 @@
 import { useEffect, useState } from "react";
 
-/**
- * Returns `value` after it has stopped changing for `delay` ms.
- *
- * Search is now executed server-side, so this is what stops every keystroke
- * becoming its own request.
- */
 export default function useDebouncedValue(value, delay = 400) {
     const [debounced, setDebounced] = useState(value);
 

@@ -1,8 +1,3 @@
-/**
- * Operational (expected) error carrying an HTTP status code.
- * Anything thrown that is not an ApiError is treated as a programmer error and
- * reported as a generic 500 by the central error handler.
- */
 class ApiError extends Error {
     constructor(statusCode, message, details = undefined) {
         super(message);

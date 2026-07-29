@@ -22,16 +22,11 @@ const userSchema = new mongoose.Schema(
         otp_expires_at: { type: Date, default: null },
         otp_attempts: { type: Number, default: 0 },
         otp_blocked_time: { type: Date, default: null },
-        // Which flow issued the outstanding OTP. Without this an OTP minted for
-        // account verification could be replayed to authorise a password reset.
         otp_purpose: {
             type: String,
             enum: ["account_verification", "password_reset", "email_change", null],
             default: null,
         },
-        // Short-lived grant written only after a password-reset OTP is verified.
-        // `POST /auth/reset-password` requires it, which closes the hole where
-        // any known email address could have its password overwritten.
         password_reset_expires_at: { type: Date, default: null },
         password_is_verified: { type: Boolean, default: true },
         password_verified_at: { type: Date, default: Date.now },
@@ -40,14 +35,10 @@ const userSchema = new mongoose.Schema(
     { timestamps: true, _id: false }
 );
 
-// Uniqueness is declared once, here — declaring `unique` on the path *and* an
-// explicit index duplicates the index and makes Mongoose warn at boot.
 userSchema.index({ email_id: 1 }, { unique: true });
 userSchema.index({ phone_number: 1 }, { unique: true });
 
-/** Fields safe to serialise to the client. */
 userSchema.statics.PUBLIC_FIELDS = "_id first_name last_name email_id phone_number profile_picture is_verified createdAt";
-/** Minimal projection used when embedding an author inside another document. */
 userSchema.statics.AUTHOR_FIELDS = "_id first_name last_name profile_picture";
 
 userSchema.methods.toPublicJSON = function toPublicJSON() {

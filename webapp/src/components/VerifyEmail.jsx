@@ -18,9 +18,6 @@ const VerifyEmail = () => {
     const email = location.state?.email;
     const first_time = location.state?.first_time;
 
-    // Redirecting has to happen in an effect. Calling `navigate()` straight from
-    // the render body updates the router while React is rendering, which React
-    // warns about and can leave the component in an inconsistent state.
     useEffect(() => {
         if (!email) navigate("/signup", { replace: true });
     }, [email, navigate]);

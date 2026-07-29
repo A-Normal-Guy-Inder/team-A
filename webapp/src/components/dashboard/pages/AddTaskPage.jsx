@@ -37,7 +37,6 @@ const AddTaskPage = () => {
     }, []);
 
     const handleSubmit = useCallback(async () => {
-        // Validated here so an invalid form never costs a request.
         const error = validateTaskForm(form, "create");
         if (error) {
             toast.error(error);

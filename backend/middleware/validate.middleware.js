@@ -1,14 +1,5 @@
 const ApiError = require("../utils/ApiError");
 
-/**
- * Declarative request validation.
- *
- * A schema maps a request source (`body`, `params`, `query`) to
- * `{ field: [rule, rule, ...] }`. Every field is checked so the client gets the
- * full picture in one round-trip instead of one error at a time.
- *
- *   validate({ body: { title: [rules.required("Title"), rules.string("Title", { max: 120 })] } })
- */
 function validate(schema) {
     const sources = Object.keys(schema);
 
@@ -24,7 +15,7 @@ function validate(schema) {
                     const message = rule(payload[field], payload, req);
                     if (message) {
                         errors[field] = message;
-                        break; // first failure per field is enough
+                        break;
                     }
                 }
             }

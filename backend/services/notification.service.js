@@ -7,16 +7,6 @@ const { SOCKET_EVENTS } = require("../config/constants");
 const SORTABLE_FIELDS = ["createdAt", "read"];
 const LIST_FIELDS = "_id message read type reference_id createdAt";
 
-/**
- * Persists notifications and pushes them over the socket.
- *
- * Delivery is intentionally decoupled from persistence: a socket failure must
- * never lose the notification, and a client that was offline still sees it on
- * its next fetch.
- *
- * @param {Array<object>} entries  `{ user_id, message, type?, reference_id? }`
- * @param {object} [options.session]  Optional mongo session (transactional writes).
- */
 async function createNotifications(entries, { session = null } = {}) {
     const payload = (Array.isArray(entries) ? entries : [entries]).filter((entry) => entry?.user_id && entry?.message);
     if (!payload.length) return [];
@@ -25,7 +15,6 @@ async function createNotifications(entries, { session = null } = {}) {
     return created;
 }
 
-/** Fan the freshly created notifications out to their recipients. */
 function dispatchNotifications(notifications) {
     for (const notification of notifications || []) {
         emitToUser(notification.user_id, SOCKET_EVENTS.NOTIFICATION_NEW, {
@@ -39,7 +28,6 @@ function dispatchNotifications(notifications) {
     }
 }
 
-/** Create + dispatch in one step, never failing the caller's main operation. */
 async function notify(entries, options = {}) {
     try {
         const created = await createNotifications(entries, options);
@@ -57,8 +45,6 @@ async function listNotifications(userId, query = {}) {
 
     const filter = { user_id: userId };
 
-    // Default matches the previous behaviour (the bell only ever showed unread
-    // items); `?status=all` opts into the full history.
     const status = String(query.status || "unread").toLowerCase();
     if (status === "unread") filter.read = false;
     else if (status === "read") filter.read = true;

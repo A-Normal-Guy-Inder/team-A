@@ -1,8 +1,3 @@
-/* The global reset lives in `src/index.css`. Keeping it here put it in this
- * file's lazily-loaded chunk, so every page rendered before the Dashboard was
- * first visited went unstyled by it. Do not reintroduce it. */
-
-/* ================= DASHBOARD ================= */
 .dashboard-layout {
   display: flex;
   min-height: 100vh;
@@ -22,9 +17,6 @@
   }
 }
 
-
-
-/* ================= TOPBAR ================= */
 .topbar {
   height: 72px;
   background: #ffffff;
@@ -43,12 +35,10 @@
   color: #0f172a;
 }
 
-/* LEFT */
 .topbar-left {
   flex: 1;
 }
 
-/* CENTER */
 .topbar-center {
   position: absolute;
   left: 50%;
@@ -72,7 +62,6 @@
   gap: 16px;
 }
 
-/* Hamburger Icon */
 .hamburger-icon {
   font-size: 24px;
   cursor: pointer;
@@ -80,24 +69,18 @@
   display: none;
 }
 
-/* Notification Bell */
 .topbar span {
   font-size: 20px;
   cursor: pointer;
   position: relative;
 }
 
-
-
-/* ================= MAIN CONTENT ================= */
 .main {
   padding: 24px;
   width: 100%;
   min-height: calc(100vh - 72px);
 }
 
-
-/* ================= FEED GRID ================= */
 .feed {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -106,11 +89,9 @@
   width: 100%;
   align-content: start;
   align-items: stretch;
-  /* ensure grid items stretch uniformly */
 
 }
 
-/* For empty state for feed and mytasks */
 .empty-state-feed {
   width: 100%;
   grid-column: 1 / -1;
@@ -139,7 +120,6 @@
   overflow-wrap: break-word;
 }
 
-/* my task */
 .empty-state {
   width: 100%;
   grid-column: 1 / -1;
@@ -168,7 +148,6 @@
   overflow-wrap: break-word;
 }
 
-/* Responsive adjustments */
 @media (max-width: 768px) {
 
   .empty-state-feed,
@@ -243,8 +222,6 @@
 
 }
 
-
-/* ===== MY TASKS HEADER ===== */
 .my-tasks-header {
   display: flex;
   align-items: center;
@@ -252,7 +229,6 @@
   margin-bottom: 24px;
 }
 
-/* Left title */
 .my-tasks-header h2 {
   font-size: 24px;
   font-weight: 600;
@@ -260,7 +236,6 @@
   margin: 0;
 }
 
-/* Add New Task button */
 .add-task-btn {
   background: #6366f1;
   color: white;
@@ -304,11 +279,6 @@
   }
 }
 
-
-
-
-/* ================= TASK CARD ================= */
-
 .task-card {
   background: #ffffff;
   border-radius: 12px;
@@ -319,26 +289,21 @@
   overflow: hidden;
   border: 1px solid #e5e7eb;
   display: flex;
-  /* ensure vertical stacking */
   flex-direction: column;
   height: 100%;
   min-height: 360px;
-  /* keep cards visually consistent */
 }
-
 
 .task-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
 }
 
-/* Task Image Container */
 .task-card .task-image-container {
   position: relative;
   width: 100%;
 }
 
-/* Task Image */
 .task-card .task-image {
   width: 100%;
   height: 180px;
@@ -349,8 +314,6 @@
   display: block;
 }
 
-
-/* Badges Container */
 .badges-container {
   display: flex;
   align-items: center;
@@ -359,9 +322,8 @@
   gap: 8px;
 }
 
-/* Category Tag - Pill Style */
 .badges-container .tag {
-  max-width: 100px;  
+  max-width: 100px;
   padding: 4px 10px;
   border-radius: 4px;
   font-size: 10px;
@@ -377,7 +339,6 @@
   white-space: nowrap;
 }
 
-/* Status Badge - Pill Style */
 .badges-container .status-badge {
   padding: 4px 10px;
   border-radius: 4px;
@@ -416,31 +377,26 @@
   color: #92400e;
 }
 
-/* Status: Open */
 .status-badge.status-open {
   background: #01e5a4;
   color: #065f46;
 }
 
-/* Status: Assigned */
 .status-badge.status-assigned {
   background: #c7d2fe;
   color: #3730a3;
 }
 
-/* Status: In Progress */
 .status-badge.status-in-progress {
   background: #fef3c7;
   color: #92400e;
 }
 
-/* Status: Completed */
 .status-badge.status-completed {
   background: #d1fae5;
   color: #065f46;
 }
 
-/* Status: Cancelled */
 .status-badge.status-cancelled {
   background: #fee2e2;
   color: #991b1b;
@@ -451,8 +407,6 @@
   color: #fffefe;
 }
 
-
-/* Card Content */
 .task-card .card-content {
   padding: 12px 16px;
   display: flex;
@@ -479,14 +433,11 @@
   line-height: 1.5;
   display: -webkit-box;
   -webkit-line-clamp: 3;
-  /* limit to 3 lines for consistent height */
   line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
   min-height: 4.6em;
-  /* reserve space approximately for 3 lines */
 }
-
 
 .task-card .task-location,
 .task-card .task-date,
@@ -504,7 +455,6 @@
   font-size: 14px;
 }
 
-/* Task Footer */
 .task-footer {
   padding: 16px;
   display: flex;
@@ -512,9 +462,7 @@
   justify-content: space-between;
   border-top: 1px solid #f3f4f6;
   margin-top: auto;
-  /* push footer to bottom of card */
 }
-
 
 .task-author {
   display: flex;
@@ -549,7 +497,6 @@
   min-width: 0;
   flex: 1;
 
-
 }
 
 .author-name span {
@@ -562,7 +509,6 @@
   text-overflow: ellipsis;
 }
 
-
 .task-footer button {
   flex-shrink: 0;
   margin-left: 12px;
@@ -574,9 +520,6 @@
   object-fit: cover;
   display: block;
 }
-
-
-/* ================= HIDE USER INFO ONLY IN MY TASKS ================= */
 
 .my-tasks-section .task-author,
 .my-tasks-container .task-author,
@@ -597,8 +540,6 @@
 [data-section="my-tasks"] .task-footer {
   justify-content: flex-end !important;
 }
-
-/* Buttons */
 
 .task-card .edit-btn,
 .task-card .request-btn {
@@ -630,9 +571,6 @@
   background: #4f46e5;
 }
 
-
-/* ===== TASK IMAGE ===== */
-
 .task-image-wrapper {
   width: 100%;
   height: 180px;
@@ -640,14 +578,12 @@
   border-bottom: 1px solid #f1f5f9;
 }
 
-
 .task-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
 }
-
 
 .task-image-placeholder {
   width: 100%;
@@ -661,14 +597,12 @@
   font-weight: 500;
 }
 
-
 .task-date {
   font-size: 12px;
   color: #666;
   margin: 5px 0;
 }
 
-/* ================= NEW ADD TASK ================= */
 .add-task-container {
   display: flex;
   justify-content: center;
@@ -726,7 +660,6 @@
 .select-wrapper select {
   height: 48px;
 }
-
 
 .form-row {
   display: grid;
@@ -814,7 +747,6 @@
   }
 }
 
-/* ===== IMAGE PREVIEW ===== */
 .image-preview-container {
   position: relative;
   display: inline-block;
@@ -849,7 +781,6 @@
   background: rgba(0, 0, 0, 0.8);
 }
 
-/*  category select input field */
 .select-wrapper {
   position: relative;
   width: 100%;
@@ -864,14 +795,13 @@
   border-radius: 8px;
   background: #ffffff;
   color: #374151;
-  appearance: none;         
+  appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
   cursor: pointer;
   transition: border 0.2s ease, box-shadow 0.2s ease;
 }
 
-/* Custom arrow */
 .select-wrapper::after {
   content: "▾";
   position: absolute;
@@ -882,7 +812,6 @@
   color: #6b7280;
   pointer-events: none;
 }
-
 
 .select-wrapper select:focus {
   outline: none;
@@ -896,8 +825,6 @@
   }
 }
 
-
-/* ================= SETTINGS ================= */
 .settings-page {
   background: linear-gradient(135deg, #f0fdf4, #dcfce7);
   padding: 20px;
@@ -913,8 +840,6 @@
   border: 1px solid #bbf7d0;
 }
 
-/* ================= NOTIFICATIONS ================= */
-
 .notification-panel {
   position: absolute;
   top: 36px;
@@ -926,8 +851,6 @@
   padding: 12px;
   z-index: 999;
 }
-
-/* ===== NOTIFICATION DROPDOWN ===== */
 
 .notification-bell {
   position: relative;
@@ -948,7 +871,6 @@
   display: flex;
   transform: translateY(-1px);
 }
-
 
 .notification-badge {
   position: absolute;
@@ -982,8 +904,6 @@
   border: 1px solid #e6e6e6;
 }
 
-
-/* HEADER */
 .notification-header {
   padding: 12px 20px 12px 20px;
   font-weight: 600;
@@ -1006,12 +926,10 @@
 
 }
 
-/* LIST */
 .notification-list {
   overflow-y: auto;
 }
 
-/* ITEM */
 .notification-item {
   padding: 14px 20px;
   display: flex;
@@ -1034,7 +952,6 @@
   opacity: 0.6;
 }
 
-/* DOT */
 .notification-dot {
   width: 8px;
   height: 8px;
@@ -1044,12 +961,10 @@
   flex-shrink: 0;
 }
 
-
 .notification-item.read .notification-dot {
   background: transparent;
 }
 
-/* CONTENT */
 .notification-content {
   flex: 1;
   display: flex;
@@ -1057,7 +972,6 @@
   gap: 0px;
 }
 
-/* MESSAGE  */
 .notification-message {
   margin: 0;
   font-size: 14px;
@@ -1066,7 +980,6 @@
   color: #111827;
 }
 
-/* TIME  */
 .notification-time {
   font-size: 12px;
   color: #6b7280;
@@ -1074,8 +987,6 @@
   margin-top: 2px;
 }
 
-
-/* EMPTY */
 .notification-empty {
   padding: 50px 20px;
   text-align: center;
@@ -1083,9 +994,6 @@
   font-size: 14px;
 }
 
-
-
-/* ================= EDIT MODAL ================= */
 .edit-modal {
   max-width: 600px;
   max-height: 90vh;
@@ -1201,7 +1109,6 @@
   background: #d1d5db;
 }
 
-/* Edit Modal Responsive */
 @media (max-width: 768px) {
   .edit-modal {
     padding: 20px;
@@ -1213,7 +1120,6 @@
   }
 }
 
-/* ================= HAMBURGER MENU ================= */
 .hamburger-overlay {
   position: fixed;
   inset: 0;
@@ -1275,7 +1181,6 @@
   margin-bottom: 10px;
 }
 
-/* ================= HAMBURGER MENU FOOTER ================= */
 .hamburger-menu .sidebar-footer {
   border-top: 1px solid #555;
   padding-top: 15px;
@@ -1304,7 +1209,6 @@
   padding: 8px 10px;
 }
 
-/* Logout Button */
 .logout-btn {
   width: 100%;
   padding: 10px;
@@ -1321,7 +1225,6 @@
   opacity: 0.9;
 }
 
-/* ================= LOGOUT MODAL ================= */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -1379,7 +1282,6 @@
   background: #4f46e5;
 }
 
-/* Flex container for buttons */
 .modal button-container {
   display: flex;
   justify-content: center;
@@ -1419,8 +1321,6 @@
   cursor: pointer;
 }
 
-
-/* ================= SIDEBAR ================= */
 .sidebar {
   width: 240px;
   background: #2f2f2f;
@@ -1432,13 +1332,10 @@
   left: 0;
   height: 100vh;
   display: flex;
-  /* arrange contents vertically */
   flex-direction: column;
   justify-content: space-between;
-  /* pin footer to bottom */
   overflow: hidden;
 }
-
 
 .sidebar .logo {
   margin-bottom: 30px;
@@ -1448,7 +1345,6 @@
   list-style: none;
   padding: 0;
   margin-bottom: auto;
-  /* keep menu items at the top */
 
 }
 
@@ -1463,7 +1359,6 @@
   background: #404040;
 }
 
-/* ================= SIDEBAR FOOTER ================= */
 .sidebar-footer {
   margin-top: auto;
   border-top: 1px solid #444;
@@ -1476,9 +1371,9 @@
 
 .sidebar-footer-user {
   flex-shrink: 0;
-  width: 56px;      
-height: 56px;    
-font-size: 24px;  
+  width: 56px;
+height: 56px;
+font-size: 24px;
   border-radius: 12px;
   overflow: hidden;
   background: linear-gradient(135deg, #3b82f6, #8b5cf6);
@@ -1506,18 +1401,18 @@ font-size: 24px;
 
 .sidebar-footer-info {
   display: flex;
-  flex-direction: column;  
+  flex-direction: column;
   gap: 10px;
-  align-items: center;    
-  text-align: center;     
+  align-items: center;
+  text-align: center;
 }
 
 .sidebar-footer-text {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;  
-  width: 100%;          
+  align-items: center;
+  width: 100%;
 }
 
 .sidebar-footer strong {
@@ -1531,7 +1426,7 @@ font-size: 24px;
 
 .sidebar-footer span {
   display: block;
-  font-size: 11px;  
+  font-size: 11px;
   margin-top: 4px;
   color: #b0b0b0;
   margin: 2px 0 0 0;
@@ -1563,9 +1458,6 @@ font-size: 24px;
   transform: translateY(0);
 }
 
-
-
-/* ================= REQUEST MODAL ================= */
 .request-modal {
   max-width: 600px;
   width: 90%;
@@ -1646,8 +1538,6 @@ font-size: 24px;
   background: #d1d5db;
 }
 
-/* ================= REQUEST CARDS ================= */
-
 .request-card {
   background: white;
   border: 1px solid #e5e7eb;
@@ -1658,15 +1548,14 @@ font-size: 24px;
   transition: all 0.3s;
   min-height: 500px;
   display: flex;
-  flex-direction: column;      
-  
+  flex-direction: column;
+
 }
 
 .request-card:hover {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-/* INCOMING REQUEST CARD (Requests Page) */
 .requester-header {
   display: flex;
   gap: 15px;
@@ -1706,7 +1595,7 @@ font-size: 24px;
 }
 
 .requester-info {
-  flex: 1; 
+  flex: 1;
 }
 
 .rating {
@@ -1738,7 +1627,7 @@ font-size: 24px;
   padding: 15px;
   border-radius: 8px;
   margin-bottom: 15px;
-    max-height: 320px !important;  
+    max-height: 320px !important;
   flex: 1;
   overflow-y: auto !important;
   border: 1px solid #e5e7eb !important;
@@ -1763,13 +1652,12 @@ font-size: 24px;
   background: #94a3b8;
 }
 
-
 .request-message p {
   margin: 0;
   font-size: 14px;
-  line-height: 1.6;              
-  word-wrap: break-word;         
-  overflow-wrap: break-word;     
+  line-height: 1.6;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 .request-message strong {
   color: #374151;
@@ -1803,7 +1691,7 @@ font-size: 24px;
   display: flex;
   gap: 10px;
   justify-content: flex-end;
-   margin-top: auto;    
+   margin-top: auto;
 }
 
 .btn-accept,
@@ -1863,7 +1751,6 @@ font-size: 24px;
   color: #7f1d1d;
 }
 
-/* SENT REQUEST CARD (My Requests Page) */
 .my-request-card {
   display: grid;
   grid-template-columns: 150px 1fr 150px;
@@ -1940,9 +1827,6 @@ font-size: 24px;
   font-weight: 500;
 }
 
-
-/* ================= PAGES ================= */
-
 .requests-page,
 .my-requests-page {
   padding: 20px;
@@ -1953,8 +1837,6 @@ font-size: 24px;
   margin: 10px 0 20px 0;
   font-size: 14px;
 }
-
-/* ================= FEED BUTTON STATES ================= */
 
 .request-btn {
   padding: 10px 20px;
@@ -1992,8 +1874,6 @@ font-size: 24px;
   color: white;
   cursor: not-allowed;
 }
-
-/* ================= MODAL OVERLAY ================= */
 
 .modal-overlay {
   position: fixed;
@@ -2053,9 +1933,6 @@ font-size: 24px;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
-
-/* ================= MY REQUESTS PAGE ================= */
-
 .my-requests-page {
   padding: 10px 20px;
 }
@@ -2066,9 +1943,6 @@ font-size: 24px;
   gap: 22px;
 }
 
-
-/* ================= REQUEST CARD ================= */
-
 .my-request-card {
   display: flex;
   flex-direction: column;
@@ -2077,7 +1951,7 @@ font-size: 24px;
   overflow: hidden;
   box-shadow: 0 8px 22px rgba(0, 0, 0, 0.06);
   transition: 0.25s ease;
-  min-height: 500px; 
+  min-height: 500px;
 }
 
 .my-request-card:hover {
@@ -2085,15 +1959,11 @@ font-size: 24px;
   box-shadow: 0 14px 30px rgba(0, 0, 0, 0.1);
 }
 
-/* ================= IMAGE ================= */
-
 .my-request-card .request-task-image {
   width: 100%;
   height: 180px;
   object-fit: cover;
 }
-
-/* ================= INFO ================= */
 
 .my-request-card h3 {
   margin: 0;
@@ -2106,8 +1976,6 @@ font-size: 24px;
   color: #555;
   margin-top: 4px;
 }
-
-/* ================= Card body ================= */
 
 .request-card-body {
   padding: 16px 18px;
@@ -2136,19 +2004,16 @@ font-size: 24px;
 
   line-clamp: 3;
   line-height: 1.5;
-  
-  max-height: 200px !important;  
-  flex: 1; 
-}
 
+  max-height: 200px !important;
+  flex: 1;
+}
 
 .message-text {
   font-style: italic;
   color: #444;
-  margin-top: 4px;   
+  margin-top: 4px;
 }
-
-/* ================= STATUS ================= */
 
 .request-status-section {
   padding: 12px 18px;
@@ -2185,9 +2050,6 @@ font-size: 24px;
   font-size: 13px;
   color: #9ca3af;
 }
-
-
-/* ================= RESPONSIVE DESIGN ================= */
 
 @media (max-width: 768px) {
   .my-request-card {
@@ -2277,8 +2139,6 @@ font-size: 24px;
   }
 }
 
-
-/* ================= SIDEBAR BADGE ================= */
 .pending-badge {
   position: absolute;
   top: 15px;
@@ -2295,15 +2155,12 @@ font-size: 24px;
   justify-content: center;
 }
 
-
 .sidebar-menu li {
   position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
-
-/* ================= ANIMATIONS ================= */
 
 @keyframes slideIn {
   from {
@@ -2321,10 +2178,6 @@ font-size: 24px;
 .modal {
   animation: slideIn 0.3s ease-out;
 }
-
-/* ================= EDIT MODAL ================= */
-
-/* ADDED */
 
 .edit-modal {
   max-width: 700px;
@@ -2385,17 +2238,12 @@ font-size: 24px;
   background: #d1d5db;
 }
 
-/* Required fields symbol */
 .required {
   color: #ef4444;
   margin-left: 2px;
   font-weight: bold;
 }
 
-
-/* ================= RESPONSIVE DESIGN ================= */
-
-/* Tablet (768px - 1024px) */
 @media (max-width: 1024px) {
   .sidebar {
     width: 220px;
@@ -2437,7 +2285,6 @@ font-size: 24px;
   }
 }
 
-/* Mobile (max-width: 768px) */
 @media (max-width: 768px) {
   .sidebar {
     display: none;
@@ -2493,7 +2340,6 @@ font-size: 24px;
   }
 }
 
-/* Extra Small (max-width: 480px) */
 @media (max-width: 480px) {
   .hamburger-menu {
     width: 260px;
@@ -2550,10 +2396,6 @@ font-size: 24px;
   }
 }
 
-/* ================= NEW UPDATED RESPONSIVE DESIGN  ================= */
-
-
-/* =================  Dashboard Right Margin ================= */
 @media (max-width: 768px) {
   .dashboard-right {
     margin-left: 0 !important;
@@ -2566,7 +2408,6 @@ font-size: 24px;
   }
 }
 
-/* =================  Feed Grid Responsive ================= */
 @media (max-width: 1024px) {
   .feed {
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
@@ -2588,7 +2429,6 @@ font-size: 24px;
   }
 }
 
-/* =================  Main Padding ================= */
 @media (max-width: 768px) {
   .main {
     padding: 16px;
@@ -2601,7 +2441,6 @@ font-size: 24px;
   }
 }
 
-/* =================  Topbar Responsive ================= */
 @media (max-width: 768px) {
   .topbar {
     height: 64px;
@@ -2653,7 +2492,6 @@ font-size: 24px;
   }
 }
 
-/* =================  Hamburger Menu Show/Hide ================= */
 @media (max-width: 768px) {
   .hamburger-icon {
     display: block !important;
@@ -2670,7 +2508,6 @@ font-size: 24px;
   }
 }
 
-/* =================  Modal Responsive ================= */
 @media (max-width: 768px) {
   .modal {
     width: 95%;
@@ -2714,7 +2551,6 @@ font-size: 24px;
   }
 }
 
-/* =================  Request Card Mobile ================= */
 @media (max-width: 768px) {
   .my-request-card {
     grid-template-columns: 1fr;
@@ -2785,7 +2621,6 @@ font-size: 24px;
   }
 }
 
-/* =================  My Tasks Header Mobile ================= */
 @media (max-width: 600px) {
   .my-tasks-header {
     flex-direction: column;
@@ -2799,7 +2634,6 @@ font-size: 24px;
   }
 }
 
-/* =================  Form Responsive ================= */
 @media (max-width: 600px) {
   .form-row {
     grid-template-columns: 1fr;
@@ -2810,7 +2644,6 @@ font-size: 24px;
   }
 }
 
-/* =================  Notification Dropdown Mobile ================= */
 @media (max-width: 480px) {
   .notification-dropdown {
     left: 8px !important;
@@ -2821,7 +2654,6 @@ font-size: 24px;
   }
 }
 
-/* =================  Sidebar Responsive ================= */
 @media (max-width: 1024px) {
   .sidebar {
     width: 220px;
@@ -2935,7 +2767,6 @@ font-size: 24px;
   }
 }
 
-/* ================= Request Grid ================= */
 @media (max-width: 1024px) {
   .my-requests-grid {
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
@@ -2959,14 +2790,12 @@ font-size: 24px;
   }
 }
 
-/* =================  Task Card Mobile ================= */
 @media (max-width: 480px) {
   .task-card {
     min-height: auto;
   }
 }
 
-/* =================  Modal Actions Mobile ================= */
 @media (max-width: 480px) {
   .modal-actions {
     flex-direction: column;
@@ -2978,7 +2807,6 @@ font-size: 24px;
   }
 }
 
-/* =================  Edit Modal Responsive ================= */
 @media (max-width: 480px) {
   .edit-modal {
     max-width: 100%;
@@ -2998,9 +2826,6 @@ font-size: 24px;
     width: 100%;
   }
 }
-
-/* ================= NEW MOBILE OPTIMIZATION ================= */
-/* Ultra-small device (under 400px) */
 
 @media (max-width: 400px) {
   .main {
@@ -3055,7 +2880,6 @@ font-size: 24px;
     font-size: 12px;
   }
 
-  /* Request cards mobile optimization */
   .request-card {
     padding: 12px;
   }
@@ -3100,7 +2924,6 @@ font-size: 24px;
     font-size: 12px;
   }
 
-
   .modal {
     width: 100%;
     padding: 12px;
@@ -3135,7 +2958,6 @@ font-size: 24px;
     font-size: 13px;
   }
 
-  /* Edit modal */
   .edit-modal {
     padding: 12px;
     max-width: 100%;
@@ -3168,7 +2990,6 @@ font-size: 24px;
     font-size: 12px;
   }
 
-  /* Request card items */
   .request-card-body {
     padding: 12px 14px;
     gap: 8px;
@@ -3205,7 +3026,6 @@ font-size: 24px;
     font-size: 11px;
   }
 
-
   .topbar {
     height: 52px;
     padding: 0 10px;
@@ -3233,7 +3053,6 @@ font-size: 24px;
     width: 32px;
     height: 32px;
   }
-
 
   .add-task-form {
     padding: 16px;
@@ -3278,7 +3097,6 @@ font-size: 24px;
     font-size: 14px;
   }
 
-  /* My Tasks Header */
   .my-tasks-header {
     margin-bottom: 16px;
   }
@@ -3293,7 +3111,6 @@ font-size: 24px;
     gap: 4px;
   }
 
-  /* Notifications */
   .notification-dropdown {
     width: 95vw;
     max-width: calc(100% - 16px);
@@ -3319,7 +3136,6 @@ font-size: 24px;
     font-size: 11px;
   }
 
-
   .sidebar-footer strong {
     font-size: 11px;
   }
@@ -3334,7 +3150,6 @@ font-size: 24px;
   }
 }
 
-/* Extra small phones  */
 @media (max-width: 375px) {
   .main {
     padding: 6px;
@@ -3427,9 +3242,6 @@ font-size: 24px;
   }
 }
 
-/* ================= TOPBAR SPACING FIX ================= */
-/* Fix gap between search bar and bell icon on mobile */
-
 @media (max-width: 768px) {
   .topbar-right {
     gap: 24px !important;
@@ -3479,10 +3291,8 @@ font-size: 24px;
     margin-left: 0 !important;
   }
 
-
 }
 
-/* Responsive adjustments for status badge */
 @media (max-width: 480px) {
   .badges-container {
     padding: 12px 14px;
@@ -3526,9 +3336,6 @@ font-size: 24px;
     margin-left: 0;
   }
 }
-/* ================= PAGINATION ================= */
-/* Added for server-side paginated lists. Hidden entirely when there is only
-   one page, so short lists look exactly as they always have. */
 .pagination {
   display: flex;
   align-items: center;

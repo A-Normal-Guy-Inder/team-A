@@ -41,8 +41,6 @@ const ResetPassword = () => {
             return;
         }
 
-        // Shares the rule set with signup and the API — the three used to
-        // disagree on which special characters counted.
         const strength = checkPasswordStrength(cleanPassword);
         if (!strength.isStrong) {
             toast.error(strength.message);

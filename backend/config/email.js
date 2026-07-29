@@ -9,8 +9,6 @@ const transporter = nodemailer.createTransport({
         user: env.mail.user,
         pass: env.mail.pass,
     },
-    // Reuse a single connection for bursts of mail instead of a TLS handshake
-    // per message.
     pool: true,
     maxConnections: 3,
     maxMessages: 50,

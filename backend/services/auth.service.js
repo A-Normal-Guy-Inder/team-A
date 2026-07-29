@@ -23,18 +23,10 @@ async function hashPassword(password) {
     return bcrypt.hash(password, salt);
 }
 
-/** Loads a user by email including the normally-hidden credential fields. */
 function findByEmailWithSecrets(email) {
     return User.findOne({ email_id: normaliseEmail(email) }).select("+password +otp_hash");
 }
 
-/**
- * Registers a new account, or refreshes an existing *unverified* one.
- *
- * Re-registering an unverified address is a legitimate flow (the user never
- * received the first code, or mistyped a field), so the record is updated in
- * place and a single fresh OTP is issued.
- */
 async function register(payload) {
     const email = normaliseEmail(payload.email_id);
     const existing = await User.findOne({ email_id: email });
@@ -71,10 +63,6 @@ async function register(payload) {
     return { message: "User registered. OTP sent to email." };
 }
 
-/**
- * Shared OTP checking: block window, expiry, purpose and attempt accounting.
- * Returns the user document with the OTP consumed but not yet saved.
- */
 async function consumeOtp(user, otp, expectedPurpose) {
     if (user.otp_blocked_time && Date.now() < new Date(user.otp_blocked_time).getTime()) {
         throw ApiError.tooManyRequests("Too many failed attempts. Try again later.");
@@ -114,10 +102,6 @@ async function consumeOtp(user, otp, expectedPurpose) {
     return user;
 }
 
-/**
- * Verifies an OTP for either account activation or a password reset. The two
- * flows share an endpoint, so the stored purpose decides what the code grants.
- */
 async function verifyEmailOtp({ email_id, otp }) {
     const user = await findByEmailWithSecrets(email_id);
     if (!user) throw ApiError.notFound("User not found.");
@@ -128,8 +112,6 @@ async function verifyEmailOtp({ email_id, otp }) {
     const wasUnverified = !user.is_verified;
 
     if (purpose === OTP_PURPOSE.PASSWORD_RESET) {
-        // A verified reset code grants a short window in which the password may
-        // actually be replaced — nothing more.
         user.password_reset_expires_at = new Date(Date.now() + env.security.passwordReverifyWindowMs);
         user.password_is_verified = true;
         user.password_verified_at = new Date();
@@ -141,8 +123,6 @@ async function verifyEmailOtp({ email_id, otp }) {
 
     await user.save();
 
-    // Welcome mail is driven by the actual state transition rather than a
-    // client-supplied flag, so it can neither be spoofed nor sent twice.
     if (wasUnverified && purpose !== OTP_PURPOSE.PASSWORD_RESET) {
         await sendWelcomeEmail(user.email_id, `${user.first_name} ${user.last_name}`);
     }
@@ -220,8 +200,6 @@ async function resetPassword({ email_id, password }) {
         throw ApiError.badRequest("User is not verified. Password cannot be changed.");
     }
 
-    // The reset grant is what proves the caller owns the mailbox. Without this
-    // check, knowing an email address would be enough to take over an account.
     const grantExpiry = user.password_reset_expires_at ? new Date(user.password_reset_expires_at).getTime() : 0;
     if (!grantExpiry || Date.now() > grantExpiry) {
         throw ApiError.forbidden("Password reset session expired. Please verify your OTP again.");

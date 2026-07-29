@@ -1,9 +1,5 @@
 import React, { memo } from "react";
 
-/**
- * Pager for the server-side paginated lists. Renders nothing while there is
- * only a single page, so short lists look exactly as they did before.
- */
 const Pagination = ({ meta, onChange, disabled = false }) => {
     if (!meta || meta.totalPages <= 1) return null;
 

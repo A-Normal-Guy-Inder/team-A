@@ -3,13 +3,6 @@ const bcrypt = require("bcryptjs");
 const env = require("../config/env");
 const { sendOtpEmail } = require("./mailer");
 
-/**
- * Cryptographically secure numeric OTP of fixed length.
- *
- * `Math.random()` is not suitable here: it is seeded predictably and an
- * attacker who observes a few codes can narrow the search space for the next
- * one. `crypto.randomInt` draws from the OS CSPRNG and is unbiased.
- */
 function generateOtp(length = env.otp.length) {
     const min = 10 ** (length - 1);
     const max = 10 ** length;
@@ -26,17 +19,6 @@ function verifyOtp(otp, hash) {
     return bcrypt.compare(String(otp), hash);
 }
 
-/**
- * Issues a fresh OTP for `user`, persists its hash and emails the plaintext.
- *
- * @param {object}  user            Mongoose user document.
- * @param {object}  options
- * @param {string}  options.purpose Flow this code belongs to; verification
- *   refuses codes minted for a different purpose.
- * @param {boolean} options.invalidatePassword  Set for password-reset flows so
- *   the account cannot be used until the reset completes.
- * @param {string}  options.email   Destination override (email-change flow).
- */
 async function issueOtp(user, { purpose, invalidatePassword = false, email = null } = {}) {
     const otp = generateOtp();
     const otpHash = await hashOtp(otp);
@@ -53,12 +35,9 @@ async function issueOtp(user, { purpose, invalidatePassword = false, email = nul
 
     await user.save();
 
-    // Sent after the hash is committed: an email that arrives without a
-    // matching stored hash is unusable, whereas the reverse is merely a resend.
     await sendOtpEmail(otp, email || user.email_id);
 }
 
-/** Remaining cooldown (ms) before another OTP may be requested. */
 function remainingCooldownMs(user) {
     if (!user.otp_expires_at) return 0;
     const issuedAt = new Date(user.otp_expires_at).getTime() - env.otp.ttlMs;

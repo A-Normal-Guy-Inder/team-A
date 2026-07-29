@@ -9,13 +9,6 @@ import {
     selectCurrentUser,
 } from "../features/auth/authSlice";
 
-/**
- * Guards authenticated routes.
- *
- * The session probe result lives in the store, so navigating between protected
- * routes no longer re-hits `/auth/me` on every mount the way the old
- * component-local state did.
- */
 const ProtectedRoute = ({ children }) => {
     const dispatch = useDispatch();
     const location = useLocation();

@@ -13,9 +13,6 @@ import Loader from "./components/Loader";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import PublicOnlyRoute from "./routes/PublicOnlyRoute";
 
-// The dashboard pulls in the largest slice of the bundle (and 3.5k lines of
-// CSS). Splitting it keeps the login screen — the first thing every visitor
-// sees — small and fast.
 const Dashboard = lazy(() => import("./components/dashboard/Dashboard"));
 const ChangeEmail = lazy(() => import("./components/Settings/ChangeEmail"));
 const ChangePassword = lazy(() => import("./components/Settings/ChangePassword"));
@@ -37,7 +34,7 @@ function App() {
                     <Route path="/ResetPassword" element={<ResetPassword />} />
 
                     <Route path="/Dashboard" element={guarded(<Dashboard />)} />
-                    {/* Settings sub-pages change credentials — they must be guarded too. */}
+                    {}
                     <Route path="/change-email" element={guarded(<ChangeEmail />)} />
                     <Route path="/change-password" element={guarded(<ChangePassword />)} />
 

@@ -1,11 +1,3 @@
-/**
- * Client-side validation rules.
- *
- * These deliberately mirror `backend/validators/rules.js` one-for-one. When the
- * two drift the user gets a form that accepts input the API then rejects, which
- * is exactly the failure this module exists to prevent.
- */
-
 export const PASSWORD_MIN_LENGTH = 8;
 const PASSWORD_SPECIAL = /[!@#$%^&*()_+\-=[\]{};:'",.<>/?\\|`~]/;
 
@@ -13,7 +5,6 @@ export const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(
 
 export const isValidPhone = (phone) => /^[6-9]\d{9}$/.test(String(phone || "").trim());
 
-/** Returns `{ isStrong, message }` so callers can surface the exact rule that failed. */
 export function checkPasswordStrength(password) {
     const value = String(password || "");
 
@@ -38,11 +29,6 @@ export function checkPasswordStrength(password) {
 
 export const isStrongPassword = (password) => checkPasswordStrength(password).isStrong;
 
-/**
- * Validates the task form. `mode` matches the API: creating forbids a start
- * time in the past, editing only requires the window to still end in the future
- * so an in-progress task stays editable.
- */
 export function validateTaskForm(form, mode = "create") {
     if (!form.title?.trim()) return "Task title is required";
     if (form.title.trim().length < 3) return "Title must be at least 3 characters";

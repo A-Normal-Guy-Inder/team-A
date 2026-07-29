@@ -28,10 +28,6 @@ function buildParams(query) {
     });
 }
 
-/**
- * `getState` supplies the current query so callers only pass what changed —
- * `dispatch(fetchFeed({ page: 2 }))` keeps the active search and filters.
- */
 export const fetchFeed = createAsyncThunk(
     "tasks/fetchFeed",
     async (overrides = {}, { getState, rejectWithValue }) => {
@@ -87,8 +83,6 @@ const tasksSlice = createSlice({
     initialState,
     reducers: {
         setFeedQuery(state, action) {
-            // A changed filter always returns to page 1 — staying on page 7 of a
-            // now two-page result set would show an empty list.
             state.feed.query = { ...state.feed.query, ...action.payload, page: action.payload.page ?? 1 };
         },
         setMyTasksQuery(state, action) {
@@ -98,7 +92,6 @@ const tasksSlice = createSlice({
                 page: action.payload.page ?? 1,
             };
         },
-        /** Optimistically marks a feed task as requested after a successful send. */
         markTaskRequested(state, action) {
             const task = state.feed.items.find((item) => item._id === action.payload);
             if (task) task.hasRequested = true;
@@ -141,7 +134,6 @@ const tasksSlice = createSlice({
             })
             .addCase(updateTask.fulfilled, (state, action) => {
                 state.saving = false;
-                // Patch in place so the list does not have to be refetched.
                 const updated = action.payload;
                 const index = state.myTasks.items.findIndex((task) => task._id === updated._id);
                 if (index !== -1) {

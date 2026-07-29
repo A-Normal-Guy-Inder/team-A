@@ -13,10 +13,7 @@ function notFoundHandler(req, res, next) {
     next(ApiError.notFound(`Route ${req.method} ${req.originalUrl} not found`));
 }
 
-/**
- * Translates every failure mode the app can produce into the standard error
- * envelope. Nothing else in the codebase formats an error response.
- */
+// Arity marks error handler
 // eslint-disable-next-line no-unused-vars
 function errorHandler(err, req, res, next) {
     let status = 500;

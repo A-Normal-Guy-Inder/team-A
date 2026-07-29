@@ -7,7 +7,6 @@ const { uploadToCloudinary, deleteFromCloudinary } = require("../utils/cloudinar
 const { issueOtp, remainingCooldownMs } = require("../utils/otp");
 const { OTP_PURPOSE, normaliseEmail, hashPassword, consumeOtp } = require("./auth.service");
 
-/** Throws unless the caller re-entered their password recently enough. */
 function assertRecentReverification(user) {
     const verifiedAt = user.password_verified_at ? new Date(user.password_verified_at).getTime() : 0;
     if (!verifiedAt || Date.now() - verifiedAt > env.security.passwordReverifyWindowMs) {
@@ -50,7 +49,6 @@ async function updateProfile(userId, payload, file) {
         throw err;
     }
 
-    // Only discard the old asset once the new one is safely persisted.
     if (image && previousPublicId && previousPublicId !== image.public_id) {
         await deleteFromCloudinary(previousPublicId);
     }
@@ -105,8 +103,6 @@ async function verifyChangeEmailOtp(otp, userId) {
     assertRecentReverification(user);
     await consumeOtp(user, otp, OTP_PURPOSE.EMAIL_CHANGE);
 
-    // Re-check at commit time: the address may have been claimed while the OTP
-    // was in flight.
     const taken = await User.exists({ email_id: user.pending_email, _id: { $ne: user._id } });
     if (taken) {
         user.pending_email = null;
@@ -116,7 +112,6 @@ async function verifyChangeEmailOtp(otp, userId) {
 
     user.email_id = user.pending_email;
     user.pending_email = null;
-    // Changing the login identifier ends the elevated window.
     user.password_is_verified = false;
     user.password_verified_at = null;
 
@@ -157,9 +152,6 @@ async function changePassword(userId, { current_password, new_password }) {
     user.password_is_verified = true;
     await user.save();
 
-    // Changing the password invalidates every previously issued token, this
-    // session's included. Handing back a fresh one keeps the user signed in
-    // here while other devices are logged out.
     const token = jwt.sign({ userId: user._id }, env.jwtSecret, { expiresIn: env.jwtShortExpiry });
 
     return { message: "Password changed successfully.", token, maxAge: env.shortSessionMs };

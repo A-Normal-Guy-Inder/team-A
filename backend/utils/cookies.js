@@ -14,7 +14,6 @@ function setAuthCookie(res, token, maxAge) {
 }
 
 function clearAuthCookie(res) {
-    // Clearing only works when the attributes match those used when setting.
     res.clearCookie(env.cookieName, baseOptions());
 }
 

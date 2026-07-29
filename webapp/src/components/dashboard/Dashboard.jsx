@@ -51,7 +51,6 @@ import {
     toggleNotifications,
 } from "../../features/ui/uiSlice";
 
-/** Which list thunk backs each tab, so search/paging stay uniform. */
 const PAGE_FETCHERS = {
     Feed: fetchFeed,
     "My Tasks": fetchMyTasks,
@@ -77,7 +76,6 @@ const Dashboard = () => {
     const requestSending = useSelector(selectRequestSending);
     const actionInFlight = useSelector(selectActionInFlight);
 
-    // Same blocking overlay the dashboard has always shown for write operations.
     const busy =
         tasksSaving || requestSending || logoutPending || Object.keys(actionInFlight).length > 0;
 
@@ -85,22 +83,14 @@ const Dashboard = () => {
     const [requestTarget, setRequestTarget] = useState(null);
 
     const debouncedSearch = useDebouncedValue(searchTerm, 400);
-    // An empty box applies immediately. Without this, clearing the search — or
-    // switching tabs, which also clears it — would fire one request with the
-    // stale term and a second one 400ms later.
     const effectiveSearch = searchTerm === "" ? "" : debouncedSearch;
 
-    // --- Realtime ------------------------------------------------------------
-    // Refreshes are routed through a ref so the socket subscription does not
-    // rebuild whenever the active tab changes.
     const activePageRef = useRef(activePage);
     activePageRef.current = activePage;
 
     const handleRequestUpdated = useCallback(
         (payload) => {
             const scope = payload?.scope;
-            // The badge must stay accurate on every tab, so received requests
-            // are always refreshed; the sent list only when it is on screen.
             if (scope === "received") dispatch(fetchReceivedRequests());
             if (scope === "sent" && activePageRef.current === "My Requests") {
                 dispatch(fetchSentRequests());
@@ -119,15 +109,11 @@ const Dashboard = () => {
         onTaskUpdated: handleTaskUpdated,
     });
 
-    // --- Data loading --------------------------------------------------------
-    // Only the visible tab is fetched. The dashboard previously loaded every
-    // list plus notifications on mount and again after each mutation.
     useEffect(() => {
         const fetcher = PAGE_FETCHERS[activePage];
         if (fetcher) dispatch(fetcher({ search: effectiveSearch, page: 1 }));
     }, [activePage, effectiveSearch, dispatch]);
 
-    // Notifications, and the request badge, are needed regardless of tab.
     const seeded = useRef(false);
     useEffect(() => {
         if (!user?._id || seeded.current) return;
@@ -137,7 +123,6 @@ const Dashboard = () => {
         if (activePageRef.current !== "Requests") dispatch(fetchReceivedRequests({ page: 1 }));
     }, [dispatch, user?._id]);
 
-    // Deep link from the settings sub-pages: /Dashboard with { openPage }.
     useEffect(() => {
         if (location.state?.openPage) {
             dispatch(setActivePage(location.state.openPage));
@@ -145,7 +130,6 @@ const Dashboard = () => {
         }
     }, [location.state, location.pathname, dispatch, navigate]);
 
-    // --- Handlers ------------------------------------------------------------
     const handleNavigate = useCallback((page) => dispatch(setActivePage(page)), [dispatch]);
     const handleSearchChange = useCallback((value) => dispatch(setSearchTerm(value)), [dispatch]);
     const handleOpenMenu = useCallback(() => dispatch(setShowMenu(true)), [dispatch]);

@@ -1,10 +1,3 @@
-/**
- * Centralised, validated environment configuration.
- *
- * This module is the ONLY place that reads `process.env`. It must be required
- * before any module that depends on configuration (cloudinary, email, db...),
- * which is why `index.js` requires it on its very first line.
- */
 const path = require("path");
 const dotenv = require("dotenv");
 
@@ -58,9 +51,7 @@ const env = {
     jwtLongExpiry: required("JWT_LONG_EXPIRY", "30d"),
 
     cookieName: required("COOKIE_NAME", "hire_a_helper_token"),
-    // Cross-site cookies must be `SameSite=None; Secure`. Over plain http
-    // (local development) that combination is rejected by browsers, so the
-    // defaults follow NODE_ENV and stay overridable.
+    // Cross-site needs None+Secure
     cookieSecure: toBool(process.env.COOKIE_SECURE, isProduction),
     cookieSameSite: required("COOKIE_SAMESITE", isProduction ? "none" : "lax"),
     shortSessionMs: toInt(process.env.SHORT_SESSION_MS, 2 * 60 * 60 * 1000),
@@ -96,9 +87,7 @@ const env = {
     },
 
     security: {
-        // Re-authentication window for sensitive operations (email change).
         passwordReverifyWindowMs: toInt(process.env.PASSWORD_REVERIFY_WINDOW_MS, 10 * 60 * 1000),
-        // How long a rejected requester must wait before re-applying.
         requestCooldownMs: toInt(process.env.REQUEST_COOLDOWN_MS, 24 * 60 * 60 * 1000),
     },
 
@@ -119,14 +108,10 @@ const env = {
     },
 
     jobs: {
-        // Build schema indexes on boot. Turn off if indexes are managed
-        // out-of-band on a large production cluster.
         ensureIndexes: toBool(process.env.ENSURE_INDEXES, true),
         enabled: toBool(process.env.CRON_ENABLED, true),
         timezone: required("CRON_TIMEZONE", "Asia/Kolkata"),
         autoCloseSchedule: required("CRON_AUTO_CLOSE_SCHEDULE", "* * * * *"),
-        // Lease duration for the distributed lock that keeps a job single-run
-        // across horizontally scaled instances.
         lockTtlMs: toInt(process.env.CRON_LOCK_TTL_MS, 55 * 1000),
     },
 };

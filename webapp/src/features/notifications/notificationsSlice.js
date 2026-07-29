@@ -54,10 +54,6 @@ const notificationsSlice = createSlice({
     name: "notifications",
     initialState,
     reducers: {
-        /**
-         * Pushed in by the socket listener. Replaces the 10s poll the dashboard
-         * used to run: notifications now arrive the moment they are created.
-         */
         notificationReceived(state, action) {
             const incoming = action.payload;
             if (!incoming?._id) return;
@@ -95,7 +91,6 @@ const notificationsSlice = createSlice({
             .addCase(fetchNotifications.fulfilled, (state, action) => {
                 state.status = "succeeded";
                 const { items, meta, page } = action.payload;
-                // Page 1 replaces; later pages append ("load more" in the dropdown).
                 state.items = page > 1 ? [...state.items, ...items] : items;
                 state.meta = { ...state.meta, ...meta, page };
                 if (typeof meta.unreadCount === "number") state.unreadCount = meta.unreadCount;

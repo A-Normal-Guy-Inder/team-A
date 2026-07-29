@@ -29,8 +29,6 @@ const ReceivedRequestsPage = () => {
 
             toast.success(status === "accepted" ? "Request accepted! ✅" : "Request rejected");
 
-            // Accepting also auto-rejects the siblings and flips the task to
-            // "assigned", so both lists are refreshed — but only these two.
             dispatch(fetchReceivedRequests());
             if (status === "accepted") dispatch(fetchMyTasks());
         },

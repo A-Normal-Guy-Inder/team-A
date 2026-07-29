@@ -1,10 +1,6 @@
 const fs = require("fs");
 const cloudinary = require("../config/cloudinary");
 
-/**
- * Per-folder delivery transformations. Keeping them here (rather than inline at
- * each call site) means the two upload paths can never drift apart.
- */
 const TRANSFORMATIONS = {
     tasks: [
         { width: 400, height: 225, crop: "fill", gravity: "auto" },
@@ -27,10 +23,6 @@ async function safeUnlink(filePath) {
     }
 }
 
-/**
- * Uploads a local file and always removes it afterwards, success or failure.
- * Returns `{ secure_url, public_id }`.
- */
 async function uploadToCloudinary(localFilePath, folder) {
     if (!localFilePath) return null;
 
@@ -50,10 +42,6 @@ async function uploadToCloudinary(localFilePath, folder) {
     }
 }
 
-/**
- * Best-effort delete. A stale remote asset must never fail the user's request,
- * so failures are logged rather than propagated.
- */
 async function deleteFromCloudinary(publicId) {
     if (!publicId) return;
     try {

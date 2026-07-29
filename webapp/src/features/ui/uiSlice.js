@@ -8,7 +8,6 @@ const initialState = {
     showMenu: false,
     showNotifications: false,
     showLogoutConfirm: false,
-    // Global blocking loader, used only for genuinely blocking operations.
     busy: false,
 };
 
@@ -19,9 +18,6 @@ const uiSlice = createSlice({
         setActivePage(state, action) {
             if (!PAGES.includes(action.payload)) return;
             state.activePage = action.payload;
-            // The search box is shared across tabs and its term deliberately
-            // carries over, matching how the dashboard has always behaved —
-            // the difference is only that the filtering now runs server-side.
             state.showMenu = false;
         },
         setSearchTerm(state, action) {

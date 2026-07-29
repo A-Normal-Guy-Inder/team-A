@@ -9,13 +9,12 @@ background: radial-gradient(circle at top left, #fde68a, #fbcfe8, #c7d2fe);
   z-index: 1000;
 }
 
-
 .auth-card {
   width: 380px;
   background: rgba(255,255,255,0.92);
   padding: 34px;
   border-radius: 18px;
-  box-shadow: 
+  box-shadow:
     0 20px 40px rgba(0,0,0,0.08),
     0 4px 12px rgba(0,0,0,0.05);
   backdrop-filter: blur(10px);
@@ -100,7 +99,6 @@ button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
-
 
 .auth-footer {
   margin-top: 18px;
@@ -189,7 +187,7 @@ button:disabled {
   border-radius: 10px;
   font-size: 13px;
   margin-bottom: 18px;
- 
+
 }
 
 .error {
@@ -200,7 +198,7 @@ button:disabled {
   padding: 10px 12px;
   border-radius: 10px;
   font-size: 13px;
-  margin-bottom: 18px;   
+  margin-bottom: 18px;
 }
 
 .success, .error {
@@ -218,7 +216,6 @@ button:disabled {
   display: flex;
   gap: 12px;
 }
-
 
 .required {
   color: #ef4444;
@@ -250,9 +247,6 @@ button:disabled {
   transform: scale(1.1);
 }
 
-
-
-/* For Tablets & small laptops */
 @media (max-width: 768px) {
   .auth-card {
     width: 92%;
@@ -273,7 +267,6 @@ button:disabled {
   }
 }
 
-/* For Mobile devices */
 @media (max-width: 480px) {
   .auth-card {
     width: 94%;
@@ -315,7 +308,6 @@ button:disabled {
   }
 }
 
-/* For Very small phones */
 @media (max-width: 360px) {
   .auth-card {
     padding: 18px;
@@ -325,4 +317,3 @@ button:disabled {
     font-size: 18px;
   }
 }
-

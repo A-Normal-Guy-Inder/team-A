@@ -5,11 +5,6 @@ const { JOB_NAME, autoCloseExpiredTasks } = require("./autoCloseTasks.job");
 
 const scheduledTasks = [];
 
-/**
- * Guards against a slow run overlapping the next tick *within* this process.
- * The database lease handles the cross-instance case; this handles the local
- * one, which a lock alone would not (the same instance can re-acquire).
- */
 let autoCloseRunning = false;
 
 async function runAutoClose() {
@@ -34,13 +29,6 @@ async function runAutoClose() {
     }
 }
 
-/**
- * Starts the background jobs.
- *
- * Kept out of `connectDB` on purpose: connecting to a database and scheduling
- * work are unrelated concerns, and mixing them meant every process that merely
- * imported the db config also started a cron.
- */
 function startScheduler() {
     if (!env.jobs.enabled) {
         console.log("[cron] Scheduler disabled (CRON_ENABLED=false)");
@@ -65,13 +53,9 @@ async function stopScheduler() {
         try {
             await task.stop();
         } catch {
-            /* already stopped */
         }
     }
     scheduledTasks.length = 0;
-    // The lease is deliberately *not* released here: it expires within one
-    // schedule interval, and handing it back early would let a surviving
-    // instance run the same tick a second time.
 }
 
 module.exports = { startScheduler, stopScheduler, runAutoClose };

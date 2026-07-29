@@ -1,11 +1,3 @@
-/**
- * Single response envelope used by every endpoint:
- *
- *   { success, message, data, meta? }
- *
- * Keeping one shape means the client never has to guess between
- * `res.data.tasks`, `res.data.data` and bare arrays.
- */
 function sendSuccess(res, { status = 200, message = "OK", data = null, meta = undefined } = {}) {
     const body = { success: true, message, data };
     if (meta) body.meta = meta;

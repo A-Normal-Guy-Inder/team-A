@@ -16,16 +16,12 @@ export const store = configureStore({
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware({
-            // FormData instances are passed to upload thunks; they are not
-            // serialisable and are never stored in state.
             serializableCheck: {
                 ignoredActionPaths: ["meta.arg", "payload.formData"],
             },
         }),
 });
 
-// A dropped session is reported by the API layer and handled in exactly one
-// place, instead of every component checking for 401 itself.
 setUnauthorizedHandler(() => store.dispatch(sessionExpired()));
 
 export default store;

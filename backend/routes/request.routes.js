@@ -6,7 +6,6 @@ const schemas = require("../validators/request.validator");
 
 const router = express.Router();
 
-//   ?page&limit&search&status&sortBy&sortOrder
 router.get("/received", controller.listReceived);
 router.get("/sent", controller.listSent);
 

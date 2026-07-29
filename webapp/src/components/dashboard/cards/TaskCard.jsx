@@ -3,13 +3,6 @@ import React, { memo } from "react";
 const formatDate = (value) => new Date(value).toLocaleDateString();
 const formatTime = (value) => new Date(value).toLocaleTimeString();
 
-/**
- * Resolves the state of the request button.
- *
- * `hasRequested` now comes from the server, which is the only place that knows
- * whether a previous rejection has passed its cooldown. The old client-side
- * scan of the sent-requests list could not see beyond the current page.
- */
 function resolveRequestButton({ isOwnTask, hasRequested, isUnavailable }) {
     if (isOwnTask) return { text: "Your Task", disabled: true, className: "request-btn disabled" };
     if (hasRequested) return { text: "Requested", disabled: true, className: "request-btn requested" };

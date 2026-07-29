@@ -11,13 +11,6 @@ export const SOCKET_EVENTS = {
 
 let socket = null;
 
-/**
- * Lazily creates the single shared connection.
- *
- * `withCredentials` matters: the server authenticates the handshake from the
- * same HTTP-only session cookie the REST API uses, so the browser has to be
- * told to attach it to the cross-origin upgrade request.
- */
 export function connectSocket() {
     if (socket?.connected || socket?.active) return socket;
 

@@ -5,12 +5,6 @@ import { toast } from "react-toastify";
 const MAX_BYTES = 5 * 1024 * 1024;
 const ACCEPTED = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 
-/**
- * File picker with drag-and-drop and a live preview.
- *
- * Type and size are checked here as well as on the server so an oversized file
- * is rejected instantly instead of after a full upload round-trip.
- */
 const ImageUploadField = ({ inputId = "task-image", preview, onSelect, onRemove }) => {
     const handleFile = useCallback(
         (file) => {

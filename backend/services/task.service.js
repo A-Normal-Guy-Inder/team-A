@@ -10,7 +10,6 @@ const { parsePagination, parseSort, buildMeta, buildSearchFilter } = require("..
 const SORTABLE_FIELDS = ["createdAt", "start_time", "end_time", "title", "status"];
 const SEARCHABLE_FIELDS = ["title", "description", "location", "category"];
 
-/** Projection shared by every task list — never ship fields the UI cannot use. */
 const TASK_PROJECTION = {
     title: 1,
     description: 1,
@@ -24,10 +23,6 @@ const TASK_PROJECTION = {
     createdAt: 1,
 };
 
-/**
- * Translates the shared query-string filters into a mongo filter fragment.
- * Only whitelisted values reach the database.
- */
 function buildTaskFilters(query = {}) {
     const filter = {};
 
@@ -71,8 +66,6 @@ function buildTaskFilters(query = {}) {
 async function createTask(payload, file, userId) {
     let image = null;
     if (file) {
-        // An upload failure must not silently produce a task without its
-        // picture — the user chose to attach one.
         image = await uploadToCloudinary(file.path, "tasks").catch((err) => {
             throw ApiError.badRequest(err.message || "Failed to upload the task image");
         });
@@ -93,7 +86,6 @@ async function createTask(payload, file, userId) {
 
         return { task: task.toObject(), message: "Task created successfully." };
     } catch (err) {
-        // Do not leave an orphaned asset on Cloudinary if the write fails.
         await deleteFromCloudinary(image?.public_id);
         throw err;
     }
@@ -128,9 +120,6 @@ async function updateTask(taskId, payload, file, userId) {
         task.picture_public_id = image.public_id;
     }
 
-    // Re-opening an auto-closed task restores whatever it was before the cron
-    // closed it. Previously this ran on *every* edit with a null `prev_status`,
-    // which quietly unassigned tasks that already had a helper.
     if (task.status === TASK_STATUS.CLOSED && new Date(task.end_time).getTime() > Date.now()) {
         task.status = task.prev_status || TASK_STATUS.OPEN;
         task.prev_status = null;
@@ -146,7 +135,6 @@ async function updateTask(taskId, payload, file, userId) {
     return { task: task.toObject(), message: "Task updated successfully" };
 }
 
-/** Paginated list of the caller's own tasks. */
 async function listMyTasks(userId, query = {}) {
     const { page, limit, skip } = parsePagination(query);
     const sort = parseSort(query, SORTABLE_FIELDS, "createdAt");
@@ -160,14 +148,6 @@ async function listMyTasks(userId, query = {}) {
     return { items, meta: buildMeta({ page, limit, total }) };
 }
 
-/**
- * Paginated public feed.
- *
- * The author and the caller's own request state are resolved with `$lookup`
- * *after* `$skip`/`$limit`, so the joins touch one page of tasks rather than
- * the whole collection — the previous implementation loaded every open task and
- * every request the user had ever made on each page view.
- */
 async function listFeed(userId, query = {}) {
     const { page, limit, skip } = parsePagination(query);
     const sort = parseSort(query, SORTABLE_FIELDS, "createdAt");
@@ -220,8 +200,6 @@ async function listFeed(userId, query = {}) {
                 $addFields: {
                     user_id: { $ifNull: [{ $arrayElemAt: ["$author", 0] }, null] },
                     requestStatus: { $ifNull: [{ $arrayElemAt: ["$my_request.status", 0] }, null] },
-                    // A rejected requester may re-apply once the cooldown has
-                    // elapsed; anything pending or accepted stays blocked.
                     hasRequested: {
                         $let: {
                             vars: { request: { $arrayElemAt: ["$my_request", 0] } },
@@ -255,8 +233,6 @@ async function listFeed(userId, query = {}) {
         Task.countDocuments(filter),
     ]);
 
-    // `$first` on a missing lookup yields `undefined`; normalise so the client
-    // always sees the same shape.
     for (const item of items) {
         if (item.user_id === undefined) item.user_id = null;
         item.hasRequested = Boolean(item.hasRequested);

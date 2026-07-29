@@ -35,8 +35,6 @@ const resendChangeEmailOtp = asyncHandler(async (req, res) => {
 
 const changePassword = asyncHandler(async (req, res) => {
     const result = await userService.changePassword(req.user._id, req.body);
-    // Refresh the session cookie so the active device is not signed out by its
-    // own password change.
     setAuthCookie(res, result.token, result.maxAge);
     return sendSuccess(res, { message: result.message });
 });

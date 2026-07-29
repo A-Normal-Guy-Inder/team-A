@@ -13,7 +13,6 @@ const initialState = {
     received: { ...emptyList(), meta: { ...emptyList().meta, pendingCount: 0 } },
     sent: emptyList(),
     sending: false,
-    // Keyed by request id so only the row being acted on shows a spinner.
     actionInFlight: {},
 };
 
@@ -129,8 +128,6 @@ const requestsSlice = createSlice({
             })
             .addCase(respondToRequest.fulfilled, (state, action) => {
                 delete state.actionInFlight[action.payload.requestId];
-                // Reflect the new status immediately; the list is refetched in
-                // the background to pick up any sibling auto-rejections.
                 const row = state.received.items.find((item) => item.requestId === action.payload.requestId);
                 if (row) row.status = action.payload.status;
                 if (state.received.meta.pendingCount > 0) state.received.meta.pendingCount -= 1;

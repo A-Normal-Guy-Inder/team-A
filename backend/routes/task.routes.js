@@ -9,11 +9,8 @@ const router = express.Router();
 
 router.get("/categories", controller.listCategories);
 
-// Paginated + searchable/filterable/sortable lists.
-//   ?page&limit&search&status&category&location&startFrom&startTo&sortBy&sortOrder
 router.get("/me", controller.listMyTasks);
 router.get("/feed", controller.listFeed);
-// Legacy alias retained so existing clients keep working.
 router.get("/other", controller.listFeed);
 
 router.post("/create", writeLimiter, ...single("picture"), validate(schemas.createTaskSchema), controller.createTask);

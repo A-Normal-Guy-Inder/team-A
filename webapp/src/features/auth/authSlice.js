@@ -3,13 +3,12 @@ import api, { getErrorMessage } from "../../services/api";
 
 const initialState = {
     user: null,
-    status: "idle", // idle | loading | succeeded | failed
-    checked: false, // has a session probe completed at least once?
+    status: "idle",
+    checked: false,
     error: null,
     logoutPending: false,
 };
 
-/** Probes the session cookie. Used by the route guard and on app start. */
 export const fetchCurrentUser = createAsyncThunk(
     "auth/fetchCurrentUser",
     async (_, { rejectWithValue }) => {
@@ -47,7 +46,6 @@ const authSlice = createSlice({
     name: "auth",
     initialState,
     reducers: {
-        /** Called by the axios interceptor when the server rejects the session. */
         sessionExpired(state) {
             state.user = null;
             state.status = "idle";
@@ -56,7 +54,6 @@ const authSlice = createSlice({
         setUser(state, action) {
             state.user = action.payload;
         },
-        /** Patches the cached profile after a settings update. */
         patchUser(state, action) {
             if (state.user) state.user = { ...state.user, ...action.payload };
         },

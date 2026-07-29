@@ -15,7 +15,6 @@ const EditTaskModal = ({ task, onClose }) => {
         category: task.category || "",
         description: task.description || "",
         location: task.location || "",
-        // Stored as UTC ISO, displayed in the user's own timezone.
         startDate: toDateTimeLocal(task.start_time),
         endDate: toDateTimeLocal(task.end_time),
         newImage: null,
@@ -62,7 +61,6 @@ const EditTaskModal = ({ task, onClose }) => {
 
         toast.success("Task updated successfully ✏️");
         onClose();
-        // Refresh only the lists an edit can actually change.
         dispatch(fetchMyTasks());
         dispatch(fetchFeed());
     }, [dispatch, form, onClose, task._id]);

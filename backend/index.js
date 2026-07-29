@@ -1,11 +1,4 @@
-/**
- * Application entry point.
- *
- * `config/env` is required first and on its own line: it is what loads the
- * `.env` file, and several modules (Cloudinary, SMTP) read their credentials at
- * import time. Previously `dotenv.config()` ran *after* the route imports, so
- * those modules were configured with `undefined` values.
- */
+// Must load before models
 const env = require("./config/env");
 
 const http = require("http");
@@ -21,8 +14,6 @@ let server;
 async function bootstrap() {
     env.assertConfig();
 
-    // The database must be reachable before the port is opened — accepting
-    // traffic first only produces a burst of 500s during startup.
     await connectDB();
     await ensureIndexes();
 

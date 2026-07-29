@@ -2,7 +2,6 @@ const mongoose = require("mongoose");
 const env = require("./env");
 
 mongoose.set("strictQuery", true);
-// Fail fast instead of buffering queries forever when the driver is not connected.
 mongoose.set("bufferCommands", false);
 
 async function connectDB() {
@@ -14,9 +13,6 @@ async function connectDB() {
         serverSelectionTimeoutMS: 10000,
         maxPoolSize: 20,
         minPoolSize: 2,
-        // Index creation is driven explicitly by `ensureIndexes()` after the
-        // connection is up. The implicit path cannot work here because the
-        // models are compiled before `connectDB()` is ever called.
         autoIndex: false,
     });
 
@@ -27,10 +23,6 @@ async function disconnectDB() {
     await mongoose.connection.close(false);
 }
 
-/**
- * Multi-document transactions require a replica set. Standalone deployments
- * throw at `startSession`, so callers can degrade gracefully.
- */
 function supportsTransactions() {
     const topology = mongoose.connection?.client?.topology;
     if (!topology) return false;

@@ -15,8 +15,6 @@ const acceptedTaskSchema = new mongoose.Schema(
     { timestamps: true }
 );
 
-// A task is assigned to exactly one helper — the one-to-one guarantee the whole
-// request workflow is built around, enforced at the storage layer.
 acceptedTaskSchema.index({ task_id: 1 }, { unique: true });
 acceptedTaskSchema.index({ user_id: 1, createdAt: -1 });
 

@@ -1,5 +1,3 @@
-/** Shared enums so route validators, services and models cannot drift apart. */
-
 const TASK_STATUS = Object.freeze({
     OPEN: "open",
     ASSIGNED: "assigned",
@@ -22,10 +20,8 @@ const TASK_STATUSES = Object.values(TASK_STATUS);
 const REQUEST_STATUSES = Object.values(REQUEST_STATUS);
 const ACCEPTED_TASK_STATUSES = Object.values(ACCEPTED_TASK_STATUS);
 
-/** Statuses a task can hold *before* being auto-closed. */
 const ASSIGNABLE_TASK_STATUSES = [TASK_STATUS.OPEN, TASK_STATUS.ASSIGNED];
 
-/** Task categories offered by the UI. Mirrors webapp/src/constants/categories. */
 const TASK_CATEGORIES = Object.freeze([
     "Cleaning",
     "Repair",

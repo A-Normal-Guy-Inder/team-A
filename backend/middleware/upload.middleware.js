@@ -9,11 +9,6 @@ const TEMP_DIR = env.upload.tempDir;
 const ALLOWED_MIME_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
 const ALLOWED_EXTENSIONS = new Set([".jpg", ".jpeg", ".png", ".webp", ".gif"]);
 
-/**
- * The upload directory is gitignored/empty on a fresh checkout, so multer would
- * fail on the very first upload. Creating it at module load removes that class
- * of "works on my machine" failure.
- */
 function ensureTempDir() {
     fs.mkdirSync(TEMP_DIR, { recursive: true });
 }
@@ -29,8 +24,6 @@ const storage = multer.diskStorage({
         }
     },
     filename: (req, file, cb) => {
-        // Never trust the client-provided name — only the (validated) extension
-        // is carried over, which keeps path traversal and odd characters out.
         const extension = path.extname(file.originalname).toLowerCase();
         const safeExtension = ALLOWED_EXTENSIONS.has(extension) ? extension : ".img";
         cb(null, `${Date.now()}-${Math.round(Math.random() * 1e9)}${safeExtension}`);
@@ -51,7 +44,6 @@ const upload = multer({
     fileFilter,
 });
 
-/** Removes the temp file left behind by multer; safe to call unconditionally. */
 async function cleanupTempFile(file) {
     if (!file?.path) return;
     try {
@@ -63,10 +55,6 @@ async function cleanupTempFile(file) {
     }
 }
 
-/**
- * Guarantees the temp file is deleted once the response is finished, even when
- * the handler throws before the upload step is reached.
- */
 function cleanupOnResponse(req, res, next) {
     res.on("finish", () => {
         cleanupTempFile(req.file);
