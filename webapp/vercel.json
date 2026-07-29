@@ -1,9 +1,8 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "create-react-app",
-  "installCommand": "npm --prefix webapp ci",
-  "buildCommand": "CI=false npm --prefix webapp run build",
-  "outputDirectory": "webapp/build",
+  "buildCommand": "CI=false npm run build",
+  "outputDirectory": "build",
   "github": {
     "silent": true
   },
