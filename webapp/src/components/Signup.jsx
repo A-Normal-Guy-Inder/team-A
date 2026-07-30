@@ -6,6 +6,7 @@ import "../styles/auth.css";
 import Loader from "./Loader";
 import { Eye, EyeOff } from "lucide-react";
 import { checkPasswordStrength, isValidEmail, isValidPhone } from "../utils/validation";
+import { OTP_FLOW } from "../utils/authFlows";
 
 const Signup = () => {
     const navigate = useNavigate();
@@ -59,7 +60,7 @@ const Signup = () => {
             setLoading(true);
             const res = await api.post("/auth/register", payload);
             toast.success(res.data?.message || "Registration successful");
-            navigate("/verify", { state: { email: payload.email_id, first_time: true } });
+            navigate("/verify", { state: { email: payload.email_id, flow: OTP_FLOW.SIGNUP } });
         } catch (err) {
             toast.error(getErrorMessage(err, "Registration failed"));
         } finally {

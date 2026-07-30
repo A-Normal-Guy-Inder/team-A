@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import api, { getErrorMessage } from "../services/api";
 import Loader from "./Loader";
+import { OTP_FLOW } from "../utils/authFlows";
 
 const RESEND_COOLDOWN_SECONDS = 60;
 
@@ -16,11 +17,11 @@ const VerifyEmail = () => {
     const location = useLocation();
 
     const email = location.state?.email;
-    const first_time = location.state?.first_time;
+    const flow = location.state?.flow;
 
     useEffect(() => {
-        if (!email) navigate("/signup", { replace: true });
-    }, [email, navigate]);
+        if (!email) navigate(flow === OTP_FLOW.SIGNUP ? "/signup" : "/login", { replace: true });
+    }, [email, flow, navigate]);
 
     useEffect(() => {
         if (cooldown <= 0) return undefined;
@@ -43,14 +44,21 @@ const VerifyEmail = () => {
 
             toast.success(res.data?.message || "OTP verified");
 
-            if (first_time) navigate("/login", { replace: true });
-            else navigate("/ResetPassword", { replace: true, state: { email } });
+            // Only the forgot-password journey earns a password-reset grant from the
+            // backend, so it is the only one allowed on to /ResetPassword. Every other
+            // flow (including an unverified login) has just verified its account and
+            // belongs back at the login screen.
+            if (flow === OTP_FLOW.PASSWORD_RESET) {
+                navigate("/ResetPassword", { replace: true, state: { email } });
+            } else {
+                navigate("/login", { replace: true });
+            }
         } catch (err) {
             toast.error(getErrorMessage(err, "Invalid OTP"));
         } finally {
             setLoading(false);
         }
-    }, [email, first_time, loading, navigate, otp]);
+    }, [email, flow, loading, navigate, otp]);
 
     const handleResend = useCallback(async () => {
         if (loading || cooldown > 0) return;

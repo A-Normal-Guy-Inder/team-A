@@ -5,6 +5,7 @@ import "../styles/auth.css";
 import api, { getErrorMessage } from "../services/api";
 import Loader from "./Loader";
 import { isValidEmail } from "../utils/validation";
+import { OTP_FLOW } from "../utils/authFlows";
 
 const ForgotPassword = () => {
     const navigate = useNavigate();
@@ -25,7 +26,7 @@ const ForgotPassword = () => {
             setLoading(true);
             const res = await api.post("/auth/forgot-password", { email_id: cleanEmail });
             toast.success(res.data?.message || "If email exists, OTP has been sent.");
-            navigate("/verify", { state: { email: cleanEmail, first_time: false } });
+            navigate("/verify", { state: { email: cleanEmail, flow: OTP_FLOW.PASSWORD_RESET } });
         } catch (err) {
             toast.error(getErrorMessage(err, "Could not send the OTP. Please try again."));
         } finally {

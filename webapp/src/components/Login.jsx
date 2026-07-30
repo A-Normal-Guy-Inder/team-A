@@ -7,6 +7,7 @@ import Loader from "../components/Loader";
 import { Eye, EyeOff } from "lucide-react";
 import { loginUser } from "../features/auth/authSlice";
 import { isValidEmail } from "../utils/validation";
+import { OTP_FLOW } from "../utils/authFlows";
 
 const Login = () => {
     const navigate = useNavigate();
@@ -45,7 +46,7 @@ const Login = () => {
             const msg = result.payload || "Login failed";
             if (msg.toLowerCase().includes("verif")) {
                 toast.error(msg);
-                navigate("/verify", { state: { email, first_time: false } });
+                navigate("/verify", { state: { email, flow: OTP_FLOW.LOGIN_UNVERIFIED } });
             } else {
                 toast.error(msg);
             }

@@ -4,7 +4,7 @@
 
 ## 🚀 Key Features
 
-*   **Secure Authentication**: Multi-stage verification using **cryptographically random 6-digit OTPs** (sent via Gmail SMTP) with per-purpose scoping, attempt limiting (6 attempts → 10-minute block) and JWT-based sessions stored in **HTTP-only cookies**.
+*   **Secure Authentication**: Multi-stage verification using **cryptographically random 6-digit OTPs** (sent via Gmail SMTP) with per-purpose scoping, attempt limiting (6 attempts → 10-minute block, counter resets after 30 minutes idle) and JWT-based sessions stored in **HTTP-only cookies**.
 *   **Task Management**: Users can create, edit, and browse tasks with details like location, category, and time range.
 *   **Request System**: A transactional workflow for sending, accepting, and rejecting task requests, with a cooldown before a rejected requester may re-apply.
 *   **Server-Side Pagination, Search, Filtering & Sorting**: Every list endpoint accepts `page`, `limit`, `search`, `status`, `category`, `sortBy` and `sortOrder`, and returns a `meta` block. The client never downloads a whole collection to filter it in the browser.

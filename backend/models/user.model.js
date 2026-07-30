@@ -21,6 +21,7 @@ const userSchema = new mongoose.Schema(
         otp_hash: { type: String, default: null, select: false },
         otp_expires_at: { type: Date, default: null },
         otp_attempts: { type: Number, default: 0 },
+        otp_last_attempt_at: { type: Date, default: null },
         otp_blocked_time: { type: Date, default: null },
         otp_purpose: {
             type: String,

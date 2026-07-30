@@ -83,6 +83,7 @@ const env = {
         ttlMs: toInt(process.env.OTP_TTL_MS, 5 * 60 * 1000),
         resendCooldownMs: toInt(process.env.OTP_RESEND_COOLDOWN_MS, 60 * 1000),
         maxAttempts: toInt(process.env.OTP_MAX_ATTEMPTS, 6),
+        attemptWindowMs: toInt(process.env.OTP_ATTEMPT_WINDOW_MS, 30 * 60 * 1000),
         blockMs: toInt(process.env.OTP_BLOCK_MS, 10 * 60 * 1000),
     },
 

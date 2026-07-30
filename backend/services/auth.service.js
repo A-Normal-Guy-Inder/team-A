@@ -3,7 +3,7 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/user.model");
 const ApiError = require("../utils/ApiError");
 const env = require("../config/env");
-const { issueOtp, verifyOtp, remainingCooldownMs } = require("../utils/otp");
+const { issueOtp, verifyOtp, resetStaleAttempts, remainingCooldownMs } = require("../utils/otp");
 const { sendWelcomeEmail } = require("../utils/mailer");
 
 const OTP_PURPOSE = {
@@ -68,6 +68,8 @@ async function consumeOtp(user, otp, expectedPurpose) {
         throw ApiError.tooManyRequests("Too many failed attempts. Try again later.");
     }
 
+    resetStaleAttempts(user);
+
     if (!user.otp_hash || !user.otp_expires_at || Date.now() > new Date(user.otp_expires_at).getTime()) {
         throw ApiError.badRequest("OTP expired. Please resend OTP.");
     }
@@ -79,6 +81,7 @@ async function consumeOtp(user, otp, expectedPurpose) {
     const valid = await verifyOtp(otp, user.otp_hash);
     if (!valid) {
         user.otp_attempts = (user.otp_attempts || 0) + 1;
+        user.otp_last_attempt_at = new Date();
 
         if (user.otp_attempts >= env.otp.maxAttempts) {
             user.otp_blocked_time = new Date(Date.now() + env.otp.blockMs);
@@ -97,6 +100,7 @@ async function consumeOtp(user, otp, expectedPurpose) {
     user.otp_expires_at = null;
     user.otp_purpose = null;
     user.otp_attempts = 0;
+    user.otp_last_attempt_at = null;
     user.otp_blocked_time = null;
 
     return user;
@@ -157,7 +161,10 @@ async function login({ email_id, password, rememberMe }) {
     const user = await findByEmailWithSecrets(email_id);
     if (!user) throw ApiError.notFound("User not found.");
 
-    if (!user.is_verified) throw ApiError.badRequest("User not verified.");
+    if (!user.is_verified) {
+        await resendOtp({ email_id }).catch(() => {});
+        throw ApiError.badRequest("User not verified.");
+    }
 
     const valid = await bcrypt.compare(password, user.password);
     if (!valid) throw ApiError.badRequest("Invalid Password.");
@@ -176,9 +183,7 @@ async function forgotPassword({ email_id }) {
     const user = await findByEmailWithSecrets(email_id);
     if (!user) throw ApiError.notFound("User not found.");
 
-    if (!user.is_verified) {
-        throw ApiError.badRequest("User is not verified. Password cannot be changed.");
-    }
+    if (!user.is_verified) throw ApiError.badRequest("User is not verified. Password cannot be changed.");
 
     const cooldown = remainingCooldownMs(user);
     if (cooldown > 0 && user.otp_purpose === OTP_PURPOSE.PASSWORD_RESET) {
