@@ -1,0 +1,51 @@
+<div class="settings-container">
+  <div class="settings-card">
+    <h3>Change Email</h3>
+
+    @if (step() === 1) {
+      <app-password-input
+        name="password"
+        placeholder="Enter Current Password"
+        autocomplete="current-password"
+        [value]="password()"
+        (valueChange)="password.set($event)"
+        (enter)="handleVerifyPassword()"
+      />
+      <button class="settings-save-btn" (click)="handleVerifyPassword()" [disabled]="loading()">
+        {{ loading() ? 'Verifying...' : 'Verify Password' }}
+      </button>
+    }
+
+    @if (step() === 2) {
+      <input
+        name="new_email"
+        placeholder="Enter New Email"
+        maxlength="100"
+        [ngModel]="newEmail()"
+        (ngModelChange)="newEmail.set($event)"
+        (keydown.enter)="handleSendOtp()"
+      />
+      <button class="settings-save-btn" (click)="handleSendOtp()" [disabled]="loading()">
+        {{ loading() ? 'Sending OTP...' : 'Send OTP' }}
+      </button>
+    }
+
+    @if (step() === 3) {
+      <input
+        name="otp"
+        placeholder="Enter OTP"
+        maxlength="6"
+        inputmode="numeric"
+        [ngModel]="otp()"
+        (ngModelChange)="otp.set($event)"
+        (keydown.enter)="handleVerifyOtp()"
+      />
+      <button class="settings-save-btn" (click)="handleVerifyOtp()" [disabled]="loading()">
+        {{ loading() ? 'Verifying...' : 'Verify OTP' }}
+      </button>
+      <button class="resend-btn" (click)="handleResendOtp()" [disabled]="timer() > 0 || loading()">
+        {{ timer() > 0 ? 'Resend OTP in ' + timer() + 's' : 'Resend OTP' }}
+      </button>
+    }
+  </div>
+</div>

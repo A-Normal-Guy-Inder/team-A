@@ -1,0 +1,41 @@
+@if (email()) {
+  @if (loading()) {
+    <app-loader />
+  }
+
+  <div class="auth-container">
+    <div class="auth-card">
+      <h2>Verify Your OTP</h2>
+      <p>OTP sent to: {{ email() }}</p>
+
+      <label for="verify-otp" class="auth-label">
+        Verification Code <span class="required">*</span>
+      </label>
+      <input
+        id="verify-otp"
+        class="auth-input text-center text-lg font-semibold tracking-[0.5em]
+               placeholder:tracking-normal placeholder:text-base
+               placeholder:font-normal"
+        placeholder="Enter OTP"
+        maxlength="6"
+        inputmode="numeric"
+        autocomplete="one-time-code"
+        [value]="otp()"
+        (input)="onOtpInput($event)"
+        (keydown)="onOtpKeydown($event)"
+      />
+
+      <button class="primary-btn" (click)="handleVerify()" [disabled]="loading()">
+        {{ loading() ? 'Verifying...' : 'Verify Code' }}
+      </button>
+
+      <button
+        class="secondary-btn"
+        (click)="handleResend()"
+        [disabled]="loading() || cooldown() > 0"
+      >
+        {{ cooldown() > 0 ? 'Resend OTP in ' + cooldown() + 's' : 'Resend OTP' }}
+      </button>
+    </div>
+  </div>
+}

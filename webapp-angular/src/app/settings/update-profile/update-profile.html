@@ -1,0 +1,44 @@
+<div class="settings-card">
+  <h3>Profile Picture</h3>
+  <div class="profile-picture-section">
+    <div class="profile-preview">
+      @if (preview()) {
+        <img [src]="preview()" alt="profile" />
+      } @else {
+        <div class="profile-placeholder">{{ firstName().charAt(0) || 'U' }}</div>
+      }
+    </div>
+    <input type="file" accept="image/*" (change)="onImageChange($event)" />
+  </div>
+</div>
+
+<div class="settings-card">
+  <h3>Personal Information</h3>
+  <div class="settings-row">
+    <input
+      name="first_name"
+      placeholder="First Name"
+      maxlength="50"
+      [ngModel]="firstName()"
+      (ngModelChange)="firstName.set($event)"
+    />
+    <input
+      name="last_name"
+      placeholder="Last Name"
+      maxlength="50"
+      [ngModel]="lastName()"
+      (ngModelChange)="lastName.set($event)"
+    />
+  </div>
+  <input name="email" placeholder="Email" [value]="email()" disabled />
+  <input
+    name="phone_number"
+    placeholder="Phone Number"
+    maxlength="10"
+    [ngModel]="phoneNumber()"
+    (ngModelChange)="phoneNumber.set($event)"
+  />
+  <button class="settings-save-btn" (click)="handleSave()" [disabled]="saving()">
+    {{ saving() ? 'Saving...' : 'Save Changes' }}
+  </button>
+</div>

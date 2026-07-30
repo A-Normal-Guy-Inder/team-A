@@ -1,0 +1,70 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Global reset: every route */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Segoe UI", sans-serif;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  background-color: #f1f5f9;
+}
+
+/*
+ * Form-control normalisation.
+ *
+ * Tailwind's Preflight is disabled (see tailwind.config.js) so it cannot reset
+ * the ground out from under the pre-existing stylesheets. The cost is that
+ * <button> keeps the UA default `border: 2px outset ButtonBorder`, which drew a
+ * dark outline around every gradient button. This is the narrow slice of
+ * Preflight the app actually needs — it only clears UA chrome, and each
+ * component rule still paints its own appearance on top.
+ */
+button {
+  border: 0;
+  background-color: transparent;
+  background-image: none;
+  font-family: inherit;
+  font-size: 100%;
+  line-height: inherit;
+  color: inherit;
+  cursor: pointer;
+  -webkit-appearance: button;
+}
+
+/* Keep native focus rings for keyboard users where a rule adds none. */
+button:focus-visible {
+  outline-offset: 2px;
+}
+
+/*
+ * React components render straight into the parent flow; Angular wraps each one
+ * in a host element that defaults to `display: inline`. The layout stylesheets
+ * assume the class-carrying div is the outermost box, so every host that only
+ * exists to hold a laid-out child is taken back out of the flow here.
+ */
+app-root,
+app-loader,
+app-sidebar,
+app-topbar,
+app-mobile-menu,
+app-notification-dropdown,
+app-pagination,
+app-image-upload-field,
+app-task-card,
+app-received-request-card,
+app-sent-request-card,
+app-confirm-modal,
+app-edit-task-modal,
+app-send-request-modal,
+app-update-profile,
+app-password-input,
+app-toast-container {
+  display: contents;
+}

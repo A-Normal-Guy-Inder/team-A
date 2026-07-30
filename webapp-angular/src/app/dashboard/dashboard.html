@@ -1,0 +1,82 @@
+@if (busy()) {
+  <app-loader />
+}
+
+<div class="dashboard-layout">
+  <app-sidebar
+    [activePage]="activePage()"
+    [user]="user()"
+    [pendingCount]="pendingCount()"
+    (navigate)="onNavigate($event)"
+    (logoutClick)="ui.setShowLogoutConfirm(true)"
+  />
+
+  <div class="dashboard-right">
+    <app-topbar
+      [activePage]="activePage()"
+      [searchTerm]="searchTerm()"
+      [showNotifications]="showNotifications()"
+      [notifications]="notificationItems()"
+      [unreadCount]="unreadCount()"
+      [canLoadMoreNotifications]="canLoadMoreNotifications()"
+      (searchChange)="ui.setSearchTerm($event)"
+      (openMenu)="ui.setShowMenu(true)"
+      (toggleNotifications)="ui.toggleNotifications()"
+      (closeNotifications)="ui.toggleNotifications(false)"
+      (markAllRead)="onMarkAllRead()"
+      (markRead)="onMarkRead($event)"
+      (loadMoreNotifications)="onLoadMoreNotifications()"
+    />
+
+    <main class="main">
+      @switch (activePage()) {
+        @case ('Feed') {
+          <app-feed-page (requestTask)="requestTarget.set($event)" />
+        }
+        @case ('My Tasks') {
+          <app-my-tasks-page
+            (addTask)="onNavigate('Add Task')"
+            (editTask)="editingTask.set($event)"
+          />
+        }
+        @case ('Requests') {
+          <app-received-requests-page />
+        }
+        @case ('My Requests') {
+          <app-sent-requests-page />
+        }
+        @case ('Add Task') {
+          <app-add-task-page />
+        }
+        @case ('Settings') {
+          <app-settings />
+        }
+      }
+    </main>
+
+    @if (editingTask(); as task) {
+      <app-edit-task-modal [task]="task" (closed)="editingTask.set(null)" />
+    }
+
+    @if (requestTarget(); as task) {
+      <app-send-request-modal [task]="task" (closed)="requestTarget.set(null)" />
+    }
+
+    @if (showMenu()) {
+      <app-mobile-menu
+        (close)="ui.setShowMenu(false)"
+        (navigate)="onMenuNavigate($event)"
+        (logoutClick)="onMenuLogout()"
+      />
+    }
+
+    @if (showLogoutConfirm()) {
+      <app-confirm-modal
+        message="Do you really want to logout?"
+        [busy]="logoutPending()"
+        (confirmed)="handleLogout()"
+        (cancelled)="ui.setShowLogoutConfirm(false)"
+      />
+    }
+  </div>
+</div>

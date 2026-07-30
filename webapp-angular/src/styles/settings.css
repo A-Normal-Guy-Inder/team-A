@@ -1,0 +1,142 @@
+/*
+ * Settings surfaces. Tailwind @apply; directives live in index.css.
+ *
+ * `.password-field` / `.toggle-password` are scoped under `.settings-card`
+ * here. Both this file and auth.css define those class names, and because the
+ * settings routes are lazy-loaded their stylesheet lands after the auth one —
+ * previously the settings rules won globally and shifted the eye icon on the
+ * login form for the rest of the session. Scoping keeps the two apart.
+ */
+
+.settings-container {
+  @apply mx-auto flex max-w-[700px] flex-col gap-5 p-2.5
+         max-[600px]:gap-4;
+}
+
+.settings-card {
+  @apply rounded-xl border border-slate-200/70 bg-white p-6 shadow-card
+         transition duration-200 hover:-translate-y-0.5 hover:shadow-card-hover
+         max-[600px]:p-[18px];
+  animation: fadeSlide 0.4s ease;
+}
+
+.settings-card h3 {
+  @apply mb-4 border-b border-slate-100 pb-2.5 text-lg font-semibold
+         tracking-tight text-slate-900;
+}
+
+.settings-row {
+  @apply flex gap-2.5 max-[600px]:flex-col max-[600px]:gap-0;
+}
+
+/* Form controls ----------------------------------------------------------- */
+
+.settings-card input {
+  @apply mb-3.5 w-full rounded-lg border border-slate-200 bg-slate-50/80 p-3
+         text-sm text-slate-900 placeholder:text-slate-400
+         transition duration-200
+         hover:border-brand-200
+         focus:border-brand-500 focus:bg-white focus:shadow-ring
+         focus:outline-none
+         disabled:cursor-not-allowed disabled:bg-slate-100
+         disabled:text-slate-500;
+}
+
+/* The file picker is not a text field — drop the text-input chrome. */
+.settings-card input[type="file"] {
+  @apply mb-0 cursor-pointer border-0 bg-transparent p-0 text-sm
+         text-slate-600 shadow-none
+         file:mr-3 file:cursor-pointer file:rounded-lg file:border-0
+         file:bg-brand-50 file:px-4 file:py-2 file:text-sm
+         file:font-medium file:text-brand-700 file:transition
+         hover:file:bg-brand-100;
+}
+
+.settings-save-btn {
+  @apply w-[35%] rounded-lg bg-gradient-to-br from-brand-500 to-brand-600 p-3
+         text-sm font-semibold text-white shadow-sm transition duration-200
+         hover:-translate-y-px hover:shadow-lg hover:shadow-brand-500/30
+         active:translate-y-0
+         focus-visible:outline-none focus-visible:ring-2
+         focus-visible:ring-brand-500 focus-visible:ring-offset-2
+         disabled:cursor-not-allowed disabled:from-slate-300
+         disabled:to-slate-300 disabled:shadow-none
+         disabled:hover:translate-y-0
+         max-[600px]:w-full;
+}
+
+/* Profile picture --------------------------------------------------------- */
+
+.profile-picture-section {
+  @apply flex items-center gap-5
+         max-[600px]:flex-col max-[600px]:items-start;
+}
+
+.profile-preview img {
+  @apply h-[90px] w-[90px] rounded-full border-[3px] border-white
+         object-cover shadow-card;
+}
+
+.profile-placeholder {
+  @apply flex h-[90px] w-[90px] select-none items-center justify-center
+         rounded-full border-[3px] border-white
+         bg-gradient-to-br from-brand-400 to-brand-600
+         text-3xl font-semibold uppercase text-white shadow-card;
+}
+
+/* Password field (scoped — see file header) -------------------------------- */
+
+.settings-card .password-field {
+  @apply relative w-full;
+}
+
+.settings-card .password-field input {
+  @apply w-full pr-12;
+}
+
+/*
+ * Centred on the input itself rather than the wrapper: the wrapper is taller
+ * than the input because of the input's bottom margin, so `top: 50%` sat low.
+ * Input height = 12px padding * 2 + ~20px line-box ≈ 44px, so 22px.
+ */
+.settings-card .toggle-password {
+  @apply absolute right-2 top-[22px] flex h-8 w-8 -translate-y-1/2
+         cursor-pointer items-center justify-center rounded-lg border-0
+         bg-transparent p-0 text-slate-400 transition
+         hover:bg-slate-100 hover:text-slate-700
+         focus-visible:outline-none focus-visible:ring-2
+         focus-visible:ring-brand-500;
+}
+
+/* Misc -------------------------------------------------------------------- */
+
+.resend-btn {
+  @apply mt-2.5 rounded border-0 bg-transparent p-0 text-sm font-medium
+         text-brand-600 transition-colors
+         hover:text-brand-700 hover:underline
+         focus-visible:outline-none focus-visible:ring-2
+         focus-visible:ring-brand-500 focus-visible:ring-offset-2
+         disabled:cursor-not-allowed disabled:text-slate-400
+         disabled:no-underline;
+}
+
+.settings-divider {
+  @apply my-4 h-px bg-slate-100;
+}
+
+@keyframes fadeSlide {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .settings-card {
+    animation: none;
+  }
+}
