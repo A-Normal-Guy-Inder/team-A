@@ -42,9 +42,14 @@ const ForgotPassword = () => {
                     <h2>Forgot Password</h2>
                     <p>Enter your registered email to receive OTP</p>
 
-                    <label>Email Address <span className="required">*</span></label>
+                    <label htmlFor="forgot-email" className="auth-label">
+                        Email Address <span className="required">*</span>
+                    </label>
                     <input
+                        id="forgot-email"
+                        className="auth-input"
                         type="email"
+                        autoComplete="email"
                         placeholder="Enter email"
                         value={email_id}
                         maxLength={100}
@@ -52,7 +57,7 @@ const ForgotPassword = () => {
                         onKeyDown={(e) => e.key === "Enter" && handleSendOtp()}
                     />
 
-                    <button onClick={handleSendOtp} disabled={loading}>
+                    <button className="primary-btn" onClick={handleSendOtp} disabled={loading}>
                         {loading ? "Sending..." : "Send OTP"}
                     </button>
                 </div>

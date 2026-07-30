@@ -72,44 +72,58 @@ const ResetPassword = () => {
                     <h2>Reset Password</h2>
                     <p>Create a new password</p>
 
-                    <label>New Password <span className="required">*</span></label>
+                    <label htmlFor="reset-password" className="auth-label">
+                        New Password <span className="required">*</span>
+                    </label>
                     <div className="password-field">
                         <input
+                            id="reset-password"
+                            className="auth-input"
                             type={showPassword ? "text" : "password"}
+                            autoComplete="new-password"
                             placeholder="New password"
                             value={password}
                             maxLength={100}
                             onChange={(e) => setPassword(e.target.value)}
                         />
-                        <span
+                        <button
+                            type="button"
                             className="toggle-password"
+                            aria-label={showPassword ? "Hide password" : "Show password"}
                             onClick={() => setShowPassword(!showPassword)}
-                            style={{ cursor: "pointer" }}
                         >
-                            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                        </span>
+                            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                        </button>
                     </div>
 
-                    <label>Confirm Password <span className="required">*</span></label>
+                    <label htmlFor="reset-confirm-password" className="auth-label">
+                        Confirm Password <span className="required">*</span>
+                    </label>
                     <div className="password-field">
                         <input
+                            id="reset-confirm-password"
+                            className="auth-input"
                             type={showConfirmPassword ? "text" : "password"}
+                            autoComplete="new-password"
                             placeholder="Confirm password"
                             value={confirmPassword}
                             maxLength={100}
                             onChange={(e) => setConfirmPassword(e.target.value)}
                             onKeyDown={(e) => e.key === "Enter" && handleReset()}
                         />
-                        <span
+                        <button
+                            type="button"
                             className="toggle-password"
+                            aria-label={
+                                showConfirmPassword ? "Hide password" : "Show password"
+                            }
                             onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                            style={{ cursor: "pointer" }}
                         >
-                            {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                        </span>
+                            {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                        </button>
                     </div>
 
-                    <button onClick={handleReset} disabled={loading}>
+                    <button className="primary-btn" onClick={handleReset} disabled={loading}>
                         {loading ? "Updating..." : "Update Password"}
                     </button>
                 </div>

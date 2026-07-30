@@ -1,319 +1,178 @@
+/*
+ * Auth surface primitives.
+ *
+ * Built with Tailwind's @apply. Note there are deliberately no @tailwind
+ * directives here: this file is imported alongside index.css, and repeating
+ * the directives would emit a second full copy of the utility set into the
+ * bundle. @apply resolves fine without them.
+ *
+ * These are class selectors rather than bare element selectors. The previous
+ * version styled `input`, `button` and `label` globally, which leaked into the
+ * dashboard as soon as any auth route had been visited.
+ */
+
 .auth-container {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-background: radial-gradient(circle at top left, #fde68a, #fbcfe8, #c7d2fe);
-  font-family: "Inter", system-ui, -apple-system, sans-serif;
-   position: relative;
-  z-index: 1000;
+  @apply relative z-[1000] flex min-h-screen items-center justify-center
+         px-4 py-10 font-sans;
+  background:
+    radial-gradient(1200px 600px at 12% -10%, #e0e7ff 0%, transparent 55%),
+    radial-gradient(900px 500px at 88% 5%, #fae8ff 0%, transparent 50%),
+    radial-gradient(1000px 700px at 50% 110%, #cffafe 0%, transparent 55%),
+    linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
 }
 
+/*
+ * Breakpoints below use Tailwind's `max-*` variants so they mirror the original
+ * max-width media queries (768 / 480 / 360) one-for-one. Plain `md:` / `sm:`
+ * are min-width and would invert the intent.
+ */
 .auth-card {
-  width: 380px;
-  background: rgba(255,255,255,0.92);
-  padding: 34px;
-  border-radius: 18px;
-  box-shadow:
-    0 20px 40px rgba(0,0,0,0.08),
-    0 4px 12px rgba(0,0,0,0.05);
-  backdrop-filter: blur(10px);
-  animation: fadeUp 0.6s ease;
-   position: relative;
-  z-index: 1100;
-}
-
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
+  @apply relative z-[1100] w-full max-w-[400px] animate-fadeUp
+         rounded-2xl border border-white/70 bg-white/85 p-8
+         shadow-auth backdrop-blur-xl
+         max-md:p-[26px] max-sm:rounded-xl max-sm:p-[22px] max-xs:p-[18px];
 }
 
 .auth-card h2 {
-  margin-bottom: 6px;
-  font-size: 24px;
-  font-weight: 700;
-  letter-spacing: -0.5px;
-  color: #0f172a;
+  @apply mb-1.5 text-2xl font-bold tracking-tight text-slate-900
+         max-md:text-[22px] max-sm:text-xl max-xs:text-lg;
 }
 
-.auth-card p {
-  color: #64748b;
-  font-size: 14px;
-  margin-bottom: 26px;
+.auth-card > p {
+  @apply mb-7 text-sm leading-relaxed text-slate-500 max-sm:text-[13px];
 }
 
-label {
-  font-size: 13px;
-  font-weight: 500;
-  color: #334155;
+/* Form primitives --------------------------------------------------------- */
+
+.auth-label {
+  @apply mb-1.5 block text-[13px] font-medium text-slate-700;
 }
 
-input {
-  width: 100%;
-  height: 44px;
-  margin-top: 6px;
-  margin-bottom: 18px;
-  padding: 0 14px;
-  border-radius: 10px;
-  border: 1px solid #e5e7eb;
-  font-size: 14px;
-  background: #f8fafc;
-  transition: 0.25s ease;
+.auth-input {
+  @apply mb-4 h-11 w-full rounded-xl border border-slate-200 bg-slate-50/80
+         px-3.5 text-sm text-slate-900 placeholder:text-slate-400
+         transition duration-200
+         hover:border-brand-200
+         focus:border-brand-500 focus:bg-white focus:shadow-ring
+         focus:outline-none
+         disabled:cursor-not-allowed disabled:opacity-60
+         max-sm:h-10;
 }
 
-input:hover {
-  border-color: #c7d2fe;
-}
-
-input:focus {
-  outline: none;
-  background: #ffffff;
-  border-color: #6366f1;
-  box-shadow: 0 0 0 4px rgba(99,102,241,0.12);
-}
-
-button {
-  width: 100%;
-  height: 46px;
-  background: linear-gradient(135deg, #6366f1, #4f46e5);
-  color: white;
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
-  font-size: 16px;
-  font-weight: 600;
-  letter-spacing: 0.2px;
-  transition: 0.25s ease;
-}
-
-button:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 10px 22px rgba(99,102,241,0.35);
-}
-
-button:active {
-  transform: translateY(0);
-}
-
-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.auth-footer {
-  margin-top: 18px;
-  text-align: center;
-  font-size: 14px;
-  color: #475569;
-}
-
-.auth-options{
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin: 12px 0 22px;
-  font-size: 14px;
-}
-
-.remember-me {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  color: #334155;
-  cursor: pointer;
-  user-select: none;
-}
-
-.remember-me input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
-  margin: 0;
-  accent-color: #6366f1;
-  cursor: pointer;
-}
-
-.forgot-link {
-  color: #6366f1;
-  font-weight: 500;
-  text-decoration: none;
-}
-
-.forgot-link:hover {
-  text-decoration: underline;
-}
-
-.primary-btn {
-  width: 100%;
-  padding: 12px;
-  background: linear-gradient(135deg, #6366f1, #4f46e5);
-  color: white;
-  border: none;
-  border-radius: 12px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  margin-top: 15px;
-}
-
-.primary-btn:hover {
-  box-shadow: 0 10px 22px rgba(99,102,241,0.35);
-  transform: translateY(-1px);
-}
-
-.secondary-btn {
-  width: 100%;
-  padding: 10px;
-  margin-top: 10px;
-  background: #f8fafc;
-  color: #4f46e5;
-  border: 1px solid #c7d2fe;
-  border-radius: 10px;
-  font-size: 15px;
-  font-weight: 500;
-  cursor: pointer;
-}
-
-.secondary-btn:hover {
-  background: #eef2ff;
-}
-
-.success {
-  display: block;
-  color: #166534;
-  background: linear-gradient(135deg, #dcfce7, #f0fdf4);
-  border: 1px solid #86efac;
-  padding: 10px 12px;
-  border-radius: 10px;
-  font-size: 13px;
-  margin-bottom: 18px;
-
-}
-
-.error {
-  display: block;
-  color: #991b1b;
-  background: linear-gradient(135deg, #fee2e2, #fef2f2);
-  border: 1px solid #fca5a5;
-  padding: 10px 12px;
-  border-radius: 10px;
-  font-size: 13px;
-  margin-bottom: 18px;
-}
-
-.success, .error {
-  position: relative;
-  z-index: 3000;
-}
-
-.row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.two-col {
-  display: flex;
-  gap: 12px;
+/* The eye toggle sits inside the field, so reserve room for it. */
+.password-field .auth-input {
+  @apply pr-11;
 }
 
 .required {
-  color: #ef4444;
-  margin-left: 2px;
-  font-weight: bold;
+  @apply ml-0.5 font-semibold text-rose-500;
+}
+
+/* Buttons ----------------------------------------------------------------- */
+
+.primary-btn {
+  @apply mt-2 flex h-11 w-full items-center justify-center gap-2
+         rounded-xl bg-gradient-to-br from-brand-500 to-brand-600
+         text-base font-semibold tracking-[0.2px] text-white
+         shadow-sm transition duration-200
+         hover:-translate-y-px hover:shadow-lg hover:shadow-brand-500/35
+         active:translate-y-0
+         focus-visible:outline-none focus-visible:ring-2
+         focus-visible:ring-brand-500 focus-visible:ring-offset-2
+         disabled:cursor-not-allowed disabled:opacity-60
+         disabled:hover:translate-y-0 disabled:hover:shadow-sm
+         max-md:h-[42px] max-md:text-[15px] max-sm:h-10 max-sm:text-sm;
+}
+
+.secondary-btn {
+  @apply mt-2.5 flex h-11 w-full items-center justify-center
+         rounded-xl border border-brand-200 bg-white
+         text-[15px] font-medium text-brand-600
+         transition duration-200
+         hover:border-brand-300 hover:bg-brand-50
+         focus-visible:outline-none focus-visible:ring-2
+         focus-visible:ring-brand-500 focus-visible:ring-offset-2
+         disabled:cursor-not-allowed disabled:opacity-60
+         disabled:hover:bg-white
+         max-sm:h-10;
+}
+
+/* Layout helpers ---------------------------------------------------------- */
+
+.auth-options {
+  @apply mb-5 mt-3 flex items-center justify-between text-sm
+         max-sm:flex-col max-sm:items-start max-sm:gap-2.5;
+}
+
+.remember-me {
+  @apply flex cursor-pointer select-none items-center gap-2
+         text-[13px] text-slate-700;
+}
+
+.remember-me input[type="checkbox"] {
+  @apply m-0 h-4 w-4 cursor-pointer rounded border-slate-300
+         accent-brand-600
+         focus-visible:outline-none focus-visible:ring-2
+         focus-visible:ring-brand-500 focus-visible:ring-offset-1;
+}
+
+.forgot-link {
+  @apply rounded font-medium text-brand-600 no-underline
+         transition-colors hover:text-brand-700 hover:underline
+         focus-visible:outline-none focus-visible:ring-2
+         focus-visible:ring-brand-500 focus-visible:ring-offset-2;
+}
+
+.auth-footer {
+  @apply mt-5 text-center text-sm text-slate-600 max-sm:text-[13px];
+}
+
+.auth-footer a {
+  @apply rounded font-semibold text-brand-600 no-underline
+         transition-colors hover:text-brand-700 hover:underline
+         focus-visible:outline-none focus-visible:ring-2
+         focus-visible:ring-brand-500 focus-visible:ring-offset-2;
+}
+
+.two-col {
+  @apply flex gap-3 max-md:gap-2.5 max-sm:flex-col max-sm:gap-0;
+}
+
+.input-group {
+  @apply w-full;
 }
 
 .password-field {
-  position: relative;
+  @apply relative;
 }
 
+/*
+ * Centred on the input itself (h-11 => 22px), not on the wrapper. The wrapper
+ * is taller than the input because of the input's bottom margin, so the old
+ * `top: 50%` sat noticeably below centre.
+ */
 .toggle-password {
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  cursor: pointer;
-  font-size: 18px;
-  user-select: none;
+  @apply absolute right-1.5 top-[22px] flex h-8 w-8 -translate-y-1/2
+         cursor-pointer items-center justify-center rounded-lg
+         border-0 bg-transparent p-0 text-slate-400
+         transition hover:bg-slate-100 hover:text-slate-700
+         focus-visible:outline-none focus-visible:ring-2
+         focus-visible:ring-brand-500
+         max-sm:top-5;
 }
 
-.toggle-password svg {
-  color: #666;
-  transition: 0.2s;
+/* Inline status messages -------------------------------------------------- */
+
+.success {
+  @apply relative z-[3000] mb-4 block rounded-xl border border-emerald-200
+         bg-emerald-50 px-3 py-2.5 text-[13px] font-medium text-emerald-800;
 }
 
-.toggle-password:hover svg {
-  color: #111;
-  transform: scale(1.1);
+.error {
+  @apply relative z-[3000] mb-4 block rounded-xl border border-rose-200
+         bg-rose-50 px-3 py-2.5 text-[13px] font-medium text-rose-800;
 }
 
-@media (max-width: 768px) {
-  .auth-card {
-    width: 92%;
-    padding: 26px;
-  }
-
-  .two-col {
-    gap: 10px;
-  }
-
-  h2 {
-    font-size: 22px;
-  }
-
-  button {
-    height: 42px;
-    font-size: 15px;
-  }
-}
-
-@media (max-width: 480px) {
-  .auth-card {
-    width: 94%;
-    padding: 22px;
-    border-radius: 10px;
-  }
-
-  .two-col {
-    flex-direction: column;
-    gap: 0;
-  }
-
-  .auth-card h2 {
-    font-size: 20px;
-  }
-
-  .auth-card p {
-    font-size: 13px;
-  }
-
-  input {
-    height: 40px;
-    font-size: 14px;
-  }
-
-  button {
-    height: 40px;
-    font-size: 14px;
-  }
-
-  .auth-footer {
-    font-size: 13px;
-  }
-
-  .auth-options {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-}
-
-@media (max-width: 360px) {
-  .auth-card {
-    padding: 18px;
-  }
-
-  .auth-card h2 {
-    font-size: 18px;
-  }
+.row {
+  @apply flex items-center justify-between;
 }

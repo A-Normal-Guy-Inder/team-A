@@ -135,6 +135,7 @@ const Dashboard = () => {
     const handleOpenMenu = useCallback(() => dispatch(setShowMenu(true)), [dispatch]);
     const handleCloseMenu = useCallback(() => dispatch(setShowMenu(false)), [dispatch]);
     const handleToggleNotifications = useCallback(() => dispatch(toggleNotifications()), [dispatch]);
+    const handleCloseNotifications = useCallback(() => dispatch(toggleNotifications(false)), [dispatch]);
     const handleMarkRead = useCallback((id) => dispatch(markNotificationRead(id)), [dispatch]);
     const handleMarkAllRead = useCallback(() => dispatch(markAllNotificationsRead()), [dispatch]);
     const handleLoadMoreNotifications = useCallback(
@@ -186,6 +187,7 @@ const Dashboard = () => {
                     onOpenMenu={handleOpenMenu}
                     showNotifications={showNotifications}
                     onToggleNotifications={handleToggleNotifications}
+                    onCloseNotifications={handleCloseNotifications}
                     notifications={notifications}
                     unreadCount={unreadCount}
                     onMarkAllRead={handleMarkAllRead}

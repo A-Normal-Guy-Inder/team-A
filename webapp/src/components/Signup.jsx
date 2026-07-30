@@ -78,8 +78,12 @@ const Signup = () => {
 
                     <div className="two-col">
                         <div className="input-group">
-                            <label>First Name <span className="required">*</span></label>
+                            <label htmlFor="signup-first-name" className="auth-label">
+                                First Name <span className="required">*</span>
+                            </label>
                             <input
+                                id="signup-first-name"
+                                className="auth-input"
                                 name="first_name"
                                 type="text"
                                 maxLength={50}
@@ -90,8 +94,12 @@ const Signup = () => {
                             />
                         </div>
                         <div className="input-group">
-                            <label>Last Name <span className="required">*</span></label>
+                            <label htmlFor="signup-last-name" className="auth-label">
+                                Last Name <span className="required">*</span>
+                            </label>
                             <input
+                                id="signup-last-name"
+                                className="auth-input"
                                 name="last_name"
                                 type="text"
                                 maxLength={50}
@@ -104,8 +112,12 @@ const Signup = () => {
                     </div>
 
                     <div className="input-group">
-                        <label>Phone Number <span className="required">*</span></label>
+                        <label htmlFor="signup-phone" className="auth-label">
+                            Phone Number <span className="required">*</span>
+                        </label>
                         <input
+                            id="signup-phone"
+                            className="auth-input"
                             name="phone_number"
                             maxLength={10}
                             autoComplete="tel"
@@ -116,8 +128,12 @@ const Signup = () => {
                     </div>
 
                     <div className="input-group">
-                        <label>Email Address <span className="required">*</span></label>
+                        <label htmlFor="signup-email" className="auth-label">
+                            Email Address <span className="required">*</span>
+                        </label>
                         <input
+                            id="signup-email"
+                            className="auth-input"
                             name="email_id"
                             type="email"
                             maxLength={100}
@@ -129,9 +145,13 @@ const Signup = () => {
                     </div>
 
                     <div className="input-group">
-                        <label>Password <span className="required">*</span></label>
+                        <label htmlFor="signup-password" className="auth-label">
+                            Password <span className="required">*</span>
+                        </label>
                         <div className="password-field">
                             <input
+                                id="signup-password"
+                                className="auth-input"
                                 name="password"
                                 type={showPassword ? "text" : "password"}
                                 maxLength={100}
@@ -140,13 +160,14 @@ const Signup = () => {
                                 value={form.password}
                                 onChange={handleChange}
                             />
-                            <span
+                            <button
+                                type="button"
                                 className="toggle-password"
+                                aria-label={showPassword ? "Hide password" : "Show password"}
                                 onClick={() => setShowPassword(!showPassword)}
-                                style={{ cursor: "pointer" }}
                             >
-                                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                            </span>
+                                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                            </button>
                         </div>
                     </div>
 

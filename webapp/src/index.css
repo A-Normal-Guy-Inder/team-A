@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /* Global reset: every route */
 * {
   margin: 0;
@@ -11,4 +15,34 @@ body {
   font-family: 'Inter', sans-serif;
   background-color: #f1f5f9;
 
+}
+
+/*
+ * Form-control normalisation.
+ *
+ * Tailwind's Preflight is disabled (see tailwind.config.js) so it cannot reset
+ * the ground out from under the pre-existing stylesheets. The cost is that
+ * <button> keeps the UA default `border: 2px outset ButtonBorder`, which drew a
+ * dark outline around every gradient button. This is the narrow slice of
+ * Preflight the app actually needs — it only clears UA chrome, and each
+ * component rule still paints its own appearance on top.
+ *
+ * Deliberately a bare element selector, unlike the accidental global leak that
+ * used to live in auth.css.
+ */
+button {
+  border: 0;
+  background-color: transparent;
+  background-image: none;
+  font-family: inherit;
+  font-size: 100%;
+  line-height: inherit;
+  color: inherit;
+  cursor: pointer;
+  -webkit-appearance: button;
+}
+
+/* Keep native focus rings for keyboard users where a rule adds none. */
+button:focus-visible {
+  outline-offset: 2px;
 }

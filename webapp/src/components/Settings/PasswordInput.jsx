@@ -16,13 +16,14 @@ const PasswordInput = ({ name, placeholder, value, onChange, onEnter, autoComple
                 onChange={onChange}
                 onKeyDown={(e) => e.key === "Enter" && onEnter?.()}
             />
-            <span
+            <button
+                type="button"
                 className="toggle-password"
+                aria-label={visible ? "Hide password" : "Show password"}
                 onClick={() => setVisible((current) => !current)}
-                style={{ cursor: "pointer" }}
             >
-                {visible ? <EyeOff size={20} /> : <Eye size={20} />}
-            </span>
+                {visible ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
         </div>
     );
 };

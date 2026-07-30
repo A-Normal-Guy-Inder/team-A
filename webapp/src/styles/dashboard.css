@@ -1,84 +1,62 @@
+/*
+ * Dashboard styles. Tailwind @apply; the @tailwind directives live in
+ * index.css (see auth.css for why they are not repeated here).
+ *
+ * Class names, selectors and every breakpoint are preserved from the original
+ * stylesheet — `max-*` variants and arbitrary `max-[NNNpx]:` variants mirror
+ * the original max-width media queries, since Tailwind's bare `md:` / `sm:`
+ * prefixes are min-width and would invert them.
+ */
+
 .dashboard-layout {
-  display: flex;
-  min-height: 100vh;
-  background: #f8fafc;
+  @apply flex min-h-screen bg-slate-50;
 }
 
 .dashboard-right {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  margin-left: 240px;
-}
-
-@media (max-width: 768px) {
-  .dashboard-right {
-    margin-left: 0;
-  }
+  @apply flex flex-1 flex-col ml-[240px] max-md:ml-0;
 }
 
 .topbar {
-  height: 72px;
-  background: #ffffff;
-  display: flex;
-  align-items: center;
-  padding: 0 24px;
-  border-bottom: 1px solid #e5e7eb;
-  position: sticky;
-  top: 0;
-  z-index: 200;
+  @apply sticky top-0 z-[200] flex h-[72px] items-center
+         border-b border-slate-200 bg-white/85 px-6 backdrop-blur-lg;
 }
 
 .topbar h2 {
-  font-size: 20px;
-  font-weight: 600;
-  color: #0f172a;
+  @apply text-xl font-semibold tracking-tight text-slate-900;
 }
 
 .topbar-left {
-  flex: 1;
+  @apply flex-1;
 }
 
 .topbar-center {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 420px;
-  max-width: 50%;
+  @apply absolute left-1/2 w-[420px] max-w-[50%] -translate-x-1/2;
 }
 
 .topbar-center input {
-  width: 100%;
-  height: 42px;
-  padding: 8px 14px;
-  border-radius: 10px;
-  border: 1px solid #e5e7eb;
+  @apply h-[42px] w-full rounded-xl border border-slate-200 bg-slate-50/80
+         px-3.5 py-2 text-sm text-slate-900 placeholder:text-slate-400
+         transition duration-200
+         hover:border-brand-200
+         focus:border-brand-500 focus:bg-white focus:shadow-ring
+         focus:outline-none;
 }
 
 .topbar-right {
-  margin-left: auto;
-  display: flex;
-  align-items: center;
-  gap: 16px;
+  @apply ml-auto flex items-center gap-4;
 }
 
 .hamburger-icon {
-  font-size: 24px;
-  cursor: pointer;
-  user-select: none;
-  display: none;
+  @apply hidden cursor-pointer select-none rounded-lg p-1 text-2xl
+         text-slate-600 transition hover:bg-slate-100 hover:text-slate-900;
 }
 
 .topbar span {
-  font-size: 20px;
-  cursor: pointer;
-  position: relative;
+  @apply relative cursor-pointer text-xl;
 }
 
 .main {
-  padding: 24px;
-  width: 100%;
-  min-height: calc(100vh - 72px);
+  @apply min-h-[calc(100vh-72px)] w-full p-6;
 }
 
 .feed {
@@ -223,47 +201,30 @@
 }
 
 .my-tasks-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 24px;
+  @apply mb-6 flex items-center justify-between;
 }
 
 .my-tasks-header h2 {
-  font-size: 24px;
-  font-weight: 600;
-  color: #0f172a;
-  margin: 0;
+  @apply m-0 text-2xl font-semibold tracking-tight text-slate-900;
 }
 
 .add-task-btn {
-  background: #6366f1;
-  color: white;
-  padding: 10px 18px;
-  border: none;
-  border-radius: 10px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  transition: all 0.25s ease;
-  box-shadow: 0 4px 10px rgba(99, 102, 241, 0.25);
-  width: auto;
-  white-space: nowrap;
-  flex-shrink: 0;
+  @apply flex w-auto shrink-0 cursor-pointer items-center gap-1.5
+         whitespace-nowrap rounded-xl border-0
+         bg-gradient-to-br from-brand-500 to-brand-600 px-[18px] py-2.5
+         text-sm font-semibold text-white
+         shadow-md shadow-brand-500/25 transition-all duration-200
+         focus-visible:outline-none focus-visible:ring-2
+         focus-visible:ring-brand-500 focus-visible:ring-offset-2;
 }
 
 .add-task-btn:hover {
-  background: #4f46e5;
-  transform: translateY(-1px);
-  box-shadow: 0 6px 14px rgba(99, 102, 241, 0.35);
+  @apply -translate-y-px from-brand-600 to-brand-700 shadow-lg
+         shadow-brand-500/35;
 }
 
 .add-task-btn:active {
-  transform: translateY(0);
-  box-shadow: 0 3px 8px rgba(99, 102, 241, 0.25);
+  @apply translate-y-0 shadow-md shadow-brand-500/25;
 }
 
 @media (max-width: 600px) {
@@ -280,23 +241,13 @@
 }
 
 .task-card {
-  background: #ffffff;
-  border-radius: 12px;
-  padding: 0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  position: relative;
-  transition: all 0.3s ease;
-  overflow: hidden;
-  border: 1px solid #e5e7eb;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  min-height: 360px;
+  @apply relative flex h-full min-h-[360px] flex-col overflow-hidden
+         rounded-xl border border-slate-200 bg-white p-0 shadow-card
+         transition-all duration-300;
 }
 
 .task-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+  @apply -translate-y-1 border-slate-300 shadow-card-hover;
 }
 
 .task-card .task-image-container {
@@ -315,175 +266,108 @@
 }
 
 .badges-container {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 14px 16px;
-  gap: 8px;
+  @apply flex items-center justify-between gap-2 px-4 pb-1 pt-3.5;
 }
 
 .badges-container .tag {
-  max-width: 100px;
-  padding: 4px 10px;
-  border-radius: 4px;
-  font-size: 10px;
-  font-weight: 600;
-  text-transform: lowercase;
-  letter-spacing: 0.3px;
-  background: #e0f2fe;
-  color: #0369a1;
-  border: none;
-  display: inline-block;
- overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  @apply inline-block max-w-[100px] truncate rounded-md border-0
+         bg-sky-50 px-2.5 py-1 text-[10px] font-semibold uppercase
+         tracking-wider text-sky-700 ring-1 ring-inset ring-sky-100;
 }
 
 .badges-container .status-badge {
-  padding: 4px 10px;
-  border-radius: 4px;
-  font-size: 10px;
-  font-weight: 600;
-  text-transform: lowercase;
-  letter-spacing: 0.3px;
-  border: none;
-  display: inline-block;
-  white-space: nowrap;
-  margin-left: auto;
+  @apply ml-auto inline-block whitespace-nowrap rounded-md border-0
+         px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider;
 }
 
+/*
+ * Status palette — one tinted-surface + ring treatment across every state so
+ * badges read as a single family. Each pairing clears WCAG AA for small text.
+ */
 .status-pending {
-  background: #fef3c7;
-  color: #92400e;
+  @apply bg-amber-50 text-amber-800 ring-1 ring-inset ring-amber-200;
 }
 
 .status-active {
-  background: #d1fae5;
-  color: #065f46;
+  @apply bg-emerald-50 text-emerald-800 ring-1 ring-inset ring-emerald-200;
 }
 
 .status-completed {
-  background: #d1fae5;
-  color: #065f46;
+  @apply bg-emerald-50 text-emerald-800 ring-1 ring-inset ring-emerald-200;
 }
 
 .status-cancelled {
-  background: #fee2e2;
-  color: #991b1b;
+  @apply bg-rose-50 text-rose-800 ring-1 ring-inset ring-rose-200;
 }
 
 .status-in-progress {
-  background: #fef3c7;
-  color: #92400e;
+  @apply bg-amber-50 text-amber-800 ring-1 ring-inset ring-amber-200;
 }
 
 .status-badge.status-open {
-  background: #01e5a4;
-  color: #065f46;
+  @apply bg-emerald-50 text-emerald-800 ring-1 ring-inset ring-emerald-200;
 }
 
 .status-badge.status-assigned {
-  background: #c7d2fe;
-  color: #3730a3;
+  @apply bg-brand-50 text-brand-800 ring-1 ring-inset ring-brand-200;
 }
 
 .status-badge.status-in-progress {
-  background: #fef3c7;
-  color: #92400e;
+  @apply bg-amber-50 text-amber-800 ring-1 ring-inset ring-amber-200;
 }
 
 .status-badge.status-completed {
-  background: #d1fae5;
-  color: #065f46;
+  @apply bg-emerald-50 text-emerald-800 ring-1 ring-inset ring-emerald-200;
 }
 
 .status-badge.status-cancelled {
-  background: #fee2e2;
-  color: #991b1b;
+  @apply bg-rose-50 text-rose-800 ring-1 ring-inset ring-rose-200;
 }
 
 .status-closed {
-  background: #da3030;
-  color: #fffefe;
+  @apply bg-slate-100 text-slate-700 ring-1 ring-inset ring-slate-200;
 }
 
 .task-card .card-content {
-  padding: 12px 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  flex: 1;
-
+  @apply flex flex-1 flex-col gap-2.5 px-4 py-3;
 }
 
 .task-card h3 {
-
-  margin: 0;
-  font-size: 18px;
-  font-weight: 600;
-  color: #1f2937;
-  line-height: 1.4;
+  @apply m-0 text-lg font-semibold leading-snug tracking-tight text-slate-800;
 }
 
 .task-card .task-description {
-  margin: 0;
-
-  font-size: 14px;
-  color: #6b7280;
-  line-height: 1.5;
+  @apply m-0 min-h-[4.6em] overflow-hidden text-sm leading-relaxed text-slate-500;
   display: -webkit-box;
   -webkit-line-clamp: 3;
   line-clamp: 3;
   -webkit-box-orient: vertical;
-  overflow: hidden;
-  min-height: 4.6em;
 }
 
 .task-card .task-location,
 .task-card .task-date,
 .task-card .task-budget {
-  padding: 0 16px;
-  margin: 6px 0;
-  font-size: 13px;
-  color: #6b7280;
-  display: flex;
-  align-items: center;
-  gap: 6px;
+  @apply my-1.5 flex items-center gap-1.5 px-4 text-[13px] text-slate-500;
 }
 
 .task-card .icon {
-  font-size: 14px;
+  @apply text-sm;
 }
 
 .task-footer {
-  padding: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-top: 1px solid #f3f4f6;
-  margin-top: auto;
+  @apply mt-auto flex items-center justify-between border-t
+         border-slate-100 bg-slate-50/40 p-4;
 }
 
 .task-author {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex: 1;
-  min-width: 0;
+  @apply flex min-w-0 flex-1 items-center gap-2.5;
 }
 
 .author-avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 600;
-  font-size: 14px;
-  overflow: hidden;
+  @apply flex h-8 w-8 shrink-0 select-none items-center justify-center
+         overflow-hidden rounded-full bg-gradient-to-br from-brand-500
+         to-violet-500 text-sm font-semibold text-white
+         ring-2 ring-white;
 }
 
 .author-name {
@@ -543,58 +427,38 @@
 
 .task-card .edit-btn,
 .task-card .request-btn {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 6px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-  width: auto;
+  @apply w-auto cursor-pointer rounded-lg border-0 px-4 py-2 text-[13px]
+         font-semibold transition-all duration-200
+         focus-visible:outline-none focus-visible:ring-2
+         focus-visible:ring-brand-500 focus-visible:ring-offset-2;
 }
 
 .task-card .edit-btn {
-  background: #f3f4f6;
-  color: #374151;
-}
-
-.task-card .edit-btn:hover {
-  background: #e5e7eb;
+  @apply bg-slate-100 text-slate-700 hover:bg-slate-200 hover:text-slate-900;
 }
 
 .task-card .request-btn {
-  background: #6366f1;
-  color: white;
-}
-
-.task-card .request-btn:hover {
-  background: #4f46e5;
+  @apply bg-brand-600 text-white shadow-sm
+         hover:bg-brand-700 hover:shadow-md hover:shadow-brand-500/25;
 }
 
 .task-image-wrapper {
-  width: 100%;
-  height: 180px;
-  overflow: hidden;
-  border-bottom: 1px solid #f1f5f9;
+  @apply h-[180px] w-full overflow-hidden border-b border-slate-100 bg-slate-50;
 }
 
+/* Gentle zoom on hover — the wrapper clips the overflow. */
 .task-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
+  @apply block h-full w-full object-cover transition-transform duration-500;
+}
+
+.task-card:hover .task-image {
+  @apply scale-105;
 }
 
 .task-image-placeholder {
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, #f8fafc, #eef2f7);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #94a3b8;
-  font-size: 14px;
-  font-weight: 500;
+  @apply flex h-full w-full select-none items-center justify-center
+         bg-gradient-to-br from-slate-50 to-slate-100
+         text-sm font-medium text-slate-400;
 }
 
 .task-date {
@@ -621,38 +485,28 @@
 }
 
 .add-task-form h2 {
-  font-size: 28px;
-  margin-bottom: 30px;
-  color: #1f2937;
+  @apply mb-7 text-[28px] font-semibold tracking-tight text-slate-800;
 }
 
 .form-group {
-  margin-bottom: 20px;
+  @apply mb-5;
 }
 
 .form-group label {
-  display: block;
-  font-weight: 600;
-  margin-bottom: 8px;
-  color: #1f2937;
+  @apply mb-2 block text-sm font-semibold text-slate-800;
 }
 
 .form-group input,
 .form-group textarea {
-  width: 100%;
-  padding: 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  font-size: 14px;
-  font-family: inherit;
-  transition: border-color 0.3s;
+  @apply w-full rounded-lg border border-slate-200 bg-slate-50/80 p-3
+         font-sans text-sm text-slate-900 placeholder:text-slate-400
+         transition duration-200
+         hover:border-brand-200;
 }
 
 .form-group input:focus,
 .form-group textarea:focus {
-  outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  @apply border-brand-500 bg-white shadow-ring outline-none;
 }
 
 .form-group input,
@@ -677,28 +531,18 @@
 }
 
 .file-upload-label {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 40px;
-  border: 2px dashed #d1d5db;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s;
-  text-align: center;
+  @apply flex cursor-pointer flex-col items-center justify-center
+         rounded-lg border-2 border-dashed border-slate-300 bg-slate-50/60
+         p-10 text-center text-sm font-medium text-slate-600
+         transition-all duration-200;
 }
 
 .file-upload-label:hover {
-  border-color: #3b82f6;
-  background: #f0f9ff;
+  @apply border-brand-400 bg-brand-50 text-brand-700;
 }
 
 .file-upload-label span {
-  display: block;
-  font-size: 12px;
-  color: #9ca3af;
-  margin-top: 4px;
+  @apply mt-1 block text-xs font-normal text-slate-400;
 }
 
 .form-actions {
@@ -709,32 +553,25 @@
 
 .btn-submit,
 .btn-cancel {
-  flex: 1;
-  padding: 12px 24px;
-  border: none;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s;
+  @apply flex-1 cursor-pointer rounded-lg border-0 px-6 py-3 text-base
+         font-semibold transition-all duration-200
+         focus-visible:outline-none focus-visible:ring-2
+         focus-visible:ring-brand-500 focus-visible:ring-offset-2;
 }
 
+/* Was #3b82f6 blue, which read as a second brand colour next to the indigo. */
 .btn-submit {
-  background: #3b82f6;
-  color: #fff;
-}
-
-.btn-submit:hover {
-  background: #2563eb;
+  @apply bg-gradient-to-br from-brand-500 to-brand-600 text-white shadow-sm
+         hover:-translate-y-px hover:shadow-lg hover:shadow-brand-500/30
+         active:translate-y-0
+         disabled:cursor-not-allowed disabled:from-slate-300
+         disabled:to-slate-300 disabled:shadow-none
+         disabled:hover:translate-y-0;
 }
 
 .btn-cancel {
-  background: #e5e7eb;
-  color: #374151;
-}
-
-.btn-cancel:hover {
-  background: #d1d5db;
+  @apply bg-slate-100 text-slate-700
+         hover:bg-slate-200 hover:text-slate-900;
 }
 
 @media (max-width: 600px) {
@@ -787,36 +624,20 @@
 }
 
 .select-wrapper select {
-  margin-top: 5.5px;
-  width: 100%;
-  padding: 12px 40px 12px 14px;
-  font-size: 14px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  background: #ffffff;
-  color: #374151;
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  cursor: pointer;
-  transition: border 0.2s ease, box-shadow 0.2s ease;
+  @apply mt-1.5 w-full cursor-pointer appearance-none rounded-lg
+         border border-slate-200 bg-white py-3 pl-3.5 pr-10 text-sm
+         text-slate-700 transition duration-200
+         hover:border-brand-200;
 }
 
 .select-wrapper::after {
   content: "▾";
-  position: absolute;
-  right: 14px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 14px;
-  color: #6b7280;
-  pointer-events: none;
+  @apply pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2
+         text-sm text-slate-400;
 }
 
 .select-wrapper select:focus {
-  outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+  @apply border-brand-500 shadow-ring outline-none;
 }
 
 @media (max-width: 768px) {
@@ -853,39 +674,23 @@
 }
 
 .notification-bell {
-  position: relative;
-  cursor: pointer;
-  font-size: 18px;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 8px;
-  background: transparent;
-  line-height: 1;
-
+  @apply relative flex h-10 w-10 cursor-pointer items-center justify-center
+         rounded-lg bg-transparent text-lg leading-none text-slate-600
+         transition duration-200
+         hover:bg-slate-100 hover:text-slate-900
+         focus-visible:outline-none focus-visible:ring-2
+         focus-visible:ring-brand-500;
 }
 
 .notification-bell span {
-  display: flex;
-  transform: translateY(-1px);
+  @apply flex -translate-y-px;
 }
 
+/* Was flat `red`; tuned to the palette and ringed so it reads on any surface. */
 .notification-badge {
-  position: absolute;
-  top: -10px;
-  right: -2px;
-  background: red;
-  color: white;
-  font-size: 10px;
-  font-weight: 600;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  @apply absolute -right-0.5 -top-1 flex h-[18px] min-w-[18px] items-center
+         justify-center rounded-full bg-rose-500 px-1 text-[10px]
+         font-semibold leading-none text-white ring-2 ring-white;
 }
 
 .notification-dropdown {
@@ -1026,13 +831,10 @@
 .edit-modal input[type="datetime-local"],
 .edit-modal textarea,
 .edit-modal select {
-  width: 100%;
-  padding: 12px 16px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  font-size: 14px;
-  transition: all 0.2s;
-  font-family: inherit;
+  @apply w-full rounded-lg border border-slate-200 bg-slate-50/80 px-4 py-3
+         font-sans text-sm text-slate-900 placeholder:text-slate-400
+         transition-all duration-200
+         hover:border-brand-200;
 }
 
 .edit-modal input[type="text"]:focus,
@@ -1040,14 +842,12 @@
 .edit-modal input[type="datetime-local"]:focus,
 .edit-modal textarea:focus,
 .edit-modal select:focus {
-  outline: none;
-  border-color: #6366f1;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+  @apply border-brand-500 bg-white shadow-ring outline-none;
 }
 
 .edit-modal textarea {
+  @apply min-h-[100px];
   resize: vertical;
-  min-height: 100px;
 }
 
 .edit-modal .form-row {
@@ -1057,11 +857,12 @@
 }
 
 .edit-modal input[type="file"] {
-  padding: 10px;
-  border: 1px dashed #d1d5db;
-  border-radius: 8px;
-  cursor: pointer;
-  background: #f9fafb;
+  @apply cursor-pointer rounded-lg border border-dashed border-slate-300
+         bg-slate-50 p-2.5 text-sm text-slate-600
+         transition hover:border-brand-400 hover:bg-brand-50
+         file:mr-3 file:cursor-pointer file:rounded-md file:border-0
+         file:bg-white file:px-3 file:py-1.5 file:text-sm
+         file:font-medium file:text-brand-700;
 }
 
 .edit-modal .current-image {
@@ -1210,76 +1011,75 @@
 }
 
 .logout-btn {
-  width: 100%;
-  padding: 10px;
-  border: none;
-  border-radius: 10px;
-  background: linear-gradient(135deg, #ef4444, #dc2626);
-  color: white;
-  font-weight: 600;
-  cursor: pointer;
-  transition: 0.3s;
-}
-
-.logout-btn:hover {
-  opacity: 0.9;
+  @apply w-full cursor-pointer rounded-xl border-0
+         bg-white/10 p-2.5 text-sm font-semibold text-rose-300
+         transition duration-200
+         hover:bg-rose-500/15 hover:text-rose-200
+         focus-visible:outline-none focus-visible:ring-2
+         focus-visible:ring-rose-400 focus-visible:ring-offset-2
+         focus-visible:ring-offset-slate-900;
 }
 
 .modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(0, 0, 0, 0.4);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
+  @apply fixed left-0 top-0 z-[1000] flex h-screen w-screen items-center
+         justify-center bg-slate-900/50 p-4 backdrop-blur-sm;
+  animation: modalFade 0.2s ease;
 }
 
 .modal {
-  background: #fff;
-  padding: 24px;
-  border-radius: 12px;
-  width: 320px;
-  text-align: center;
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+  @apply w-[320px] max-w-full rounded-2xl border border-slate-200 bg-white
+         p-6 text-center shadow-2xl;
+  animation: modalPop 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .modal p {
-  margin-bottom: 24px;
-  font-size: 16px;
-  color: #111827;
+  @apply mb-6 text-base leading-relaxed text-slate-900;
 }
 
 .modal button {
-  flex: 1;
-  padding: 12px 20px;
-  margin: 0 8px;
-  border-radius: 8px;
-  border: none;
-  font-weight: 600;
-  cursor: pointer;
-  transition: 0.3s;
+  @apply mx-2 flex-1 cursor-pointer rounded-lg border-0 px-5 py-3
+         font-semibold transition duration-200
+         focus-visible:outline-none focus-visible:ring-2
+         focus-visible:ring-brand-500 focus-visible:ring-offset-2
+         disabled:cursor-not-allowed disabled:opacity-60;
 }
 
+/*
+ * Confirm dialogs put the affirmative action first and the dismissive one
+ * last. Both were solid indigo, so the two choices were visually identical —
+ * the trailing button is now a quiet secondary.
+ */
 .modal button:first-child {
-  background: #6366f1;
-  color: white;
-}
-
-.modal button:last-child {
-  background: #6366f1;
-  color: white;
+  @apply bg-gradient-to-br from-brand-500 to-brand-600 text-white shadow-sm;
 }
 
 .modal button:hover:first-child {
-  background: #4f46e5;
+  @apply from-brand-600 to-brand-700 shadow-md;
+}
+
+.modal button:last-child {
+  @apply bg-slate-100 text-slate-700;
 }
 
 .modal button:hover:last-child {
-  background: #4f46e5;
+  @apply bg-slate-200 text-slate-900;
+}
+
+@keyframes modalFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modalPop {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modal-overlay,
+  .modal {
+    animation: none;
+  }
 }
 
 .modal button-container {
@@ -1288,108 +1088,77 @@
   gap: 12px;
 }
 
+/* Was #8b2c00 rust, the only brown in the app. */
 .request-card h3 {
-  color: #8b2c00;
-  margin-bottom: 8px;
+  @apply mb-2 font-semibold tracking-tight text-slate-800;
 }
 
 .request-actions {
-  margin-top: 15px;
-  display: flex;
-  gap: 15px;
+  @apply mt-4 flex gap-4;
 }
 
 .approve-btn {
-  flex: 1;
-  background: #22c55e;
-  color: white;
-  border: none;
-  padding: 14px;
-  border-radius: 8px;
-  font-size: 16px;
-  cursor: pointer;
+  @apply flex-1 cursor-pointer rounded-lg border-0 bg-emerald-600 p-3.5
+         text-base font-semibold text-white shadow-sm transition duration-200
+         hover:bg-emerald-700 hover:shadow-md
+         focus-visible:outline-none focus-visible:ring-2
+         focus-visible:ring-emerald-500 focus-visible:ring-offset-2
+         disabled:cursor-not-allowed disabled:opacity-60;
 }
 
 .reject-btn {
-  flex: 1;
-  background: #ef4444;
-  color: white;
-  border: none;
-  padding: 14px;
-  border-radius: 8px;
-  font-size: 16px;
-  cursor: pointer;
+  @apply flex-1 cursor-pointer rounded-lg border border-rose-200
+         bg-white p-3.5 text-base font-semibold text-rose-600
+         transition duration-200
+         hover:border-rose-300 hover:bg-rose-50
+         focus-visible:outline-none focus-visible:ring-2
+         focus-visible:ring-rose-500 focus-visible:ring-offset-2
+         disabled:cursor-not-allowed disabled:opacity-60;
 }
 
+/* Was a flat #2f2f2f grey; now a slate ramp that ties into the brand. */
 .sidebar {
-  width: 240px;
-  background: #2f2f2f;
-  color: #fff;
-  min-height: calc(100vh - 72px);
-  padding: 20px;
-  position: fixed;
-  top: 0;
-  left: 0;
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  overflow: hidden;
+  @apply fixed left-0 top-0 flex h-screen min-h-[calc(100vh-72px)] w-[240px]
+         flex-col justify-between overflow-hidden
+         bg-gradient-to-b from-slate-900 to-slate-800 p-5
+         text-white ring-1 ring-inset ring-white/5;
 }
 
 .sidebar .logo {
-  margin-bottom: 30px;
+  @apply mb-7;
 }
 
 .sidebar-menu {
-  list-style: none;
-  padding: 0;
-  margin-bottom: auto;
-
+  @apply mb-auto list-none space-y-1 p-0;
 }
 
 .sidebar-menu li {
-  padding: 12px 10px;
-  cursor: pointer;
-  border-radius: 8px;
+  @apply relative cursor-pointer rounded-lg px-2.5 py-3 text-sm
+         font-medium text-slate-300 transition duration-200
+         hover:bg-white/10 hover:text-white;
 }
 
-.sidebar-menu li:hover,
+/* Active row gets an accent rail so it reads without relying on fill alone. */
 .sidebar-menu li.active {
-  background: #404040;
+  @apply bg-white/10 text-white
+         before:absolute before:left-0 before:top-1/2 before:h-5 before:w-[3px]
+         before:-translate-y-1/2 before:rounded-r-full before:bg-brand-400
+         before:content-[''];
 }
 
 .sidebar-footer {
-  margin-top: auto;
-  border-top: 1px solid #444;
-  padding-top: 20px;
-  padding-bottom: 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  @apply mt-auto flex flex-col gap-2 border-t border-white/10 pb-2.5 pt-5;
 }
 
 .sidebar-footer-user {
-  flex-shrink: 0;
-  width: 56px;
-height: 56px;
-font-size: 24px;
-  border-radius: 12px;
-  overflow: hidden;
-  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-  border: 2px solid #404040;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-weight: bold;
-  font-size: 18px;
-  transition: all 0.3s ease;
+  @apply flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden
+         rounded-xl border-2 border-white/10
+         bg-gradient-to-br from-brand-500 to-violet-500
+         text-lg font-bold text-white transition-all duration-300;
 }
 
 .sidebar-footer-user:hover {
-  border-color: #3b82f6;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+  @apply border-brand-400 shadow-lg shadow-brand-500/25;
 }
 
 .sidebar-footer-avatar {
@@ -1483,59 +1252,47 @@ font-size: 24px;
 }
 
 .request-modal textarea {
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-family: inherit;
+  @apply rounded-lg border border-slate-200 font-sans;
   resize: vertical;
 }
 
 .request-modal textarea:focus {
-  outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  @apply border-brand-500 shadow-ring outline-none;
 }
 
 .modal-actions {
-  display: flex;
-  gap: 10px;
-  justify-content: flex-end;
-  margin-top: 20px;
+  @apply mt-5 flex justify-end gap-2.5;
 }
 
 .modal-actions button {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 6px;
-  font-size: 14px;
-  cursor: pointer;
-  transition: all 0.3s;
+  @apply cursor-pointer rounded-lg border-0 px-5 py-2.5 text-sm
+         transition-all duration-200
+         focus-visible:outline-none focus-visible:ring-2
+         focus-visible:ring-brand-500 focus-visible:ring-offset-2;
 }
 
+/*
+ * This re-declaration of .btn-submit / .btn-cancel sits after the one in the
+ * add-task form section and therefore wins. It used to flip the button from
+ * blue to green, so the two submit buttons in the app never matched. Both
+ * definitions now resolve to the same brand treatment.
+ */
 .btn-submit {
-  background: #22c55e;
-  color: white;
-  flex: 1;
+  @apply flex-1 bg-gradient-to-br from-brand-500 to-brand-600 text-white shadow-sm;
 }
 
 .btn-submit:hover:not(:disabled) {
-  background: #16a34a;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+  @apply -translate-y-px from-brand-600 to-brand-700 shadow-lg
+         shadow-brand-500/30;
 }
 
 .btn-submit:disabled {
-  background: #d1d5db;
-  cursor: not-allowed;
-  opacity: 0.6;
+  @apply cursor-not-allowed from-slate-300 to-slate-300 opacity-60 shadow-none;
 }
 
 .btn-cancel {
-  background: #e5e7eb;
-  color: #374151;
-}
-
-.btn-cancel:hover {
-  background: #d1d5db;
+  @apply bg-slate-100 text-slate-700
+         hover:bg-slate-200 hover:text-slate-900;
 }
 
 .request-card {
@@ -3346,47 +3103,35 @@ font-size: 24px;
 }
 
 .pagination-btn {
-  background: #ffffff;
-  color: #374151;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  padding: 8px 16px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  @apply cursor-pointer rounded-lg border border-slate-200 bg-white
+         px-4 py-2 text-sm font-medium text-slate-700 shadow-sm
+         transition duration-150
+         focus-visible:outline-none focus-visible:ring-2
+         focus-visible:ring-brand-500 focus-visible:ring-offset-2;
 }
 
 .pagination-btn:hover:not(:disabled) {
-  background: #f3f4f6;
-  border-color: #9ca3af;
-  color: #1f2937;
+  @apply border-brand-200 bg-brand-50 text-brand-700;
 }
 
 .pagination-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+  @apply cursor-not-allowed opacity-50 shadow-none;
 }
 
 .pagination-info {
-  font-size: 14px;
-  color: #6b7280;
-  white-space: nowrap;
+  @apply whitespace-nowrap text-sm text-slate-500;
 }
 
 .pagination-total {
-  color: #9ca3af;
+  @apply text-slate-400;
 }
 
 .notification-load-more {
-  justify-content: center;
-  text-align: center;
-  cursor: pointer;
+  @apply cursor-pointer justify-center text-center;
 }
 
 .notification-load-more .notification-message {
-  color: #3b82f6;
-  font-weight: 500;
+  @apply font-medium text-brand-600;
 }
 
 @media (max-width: 480px) {

@@ -72,8 +72,12 @@ const Login = () => {
                     <h2>Welcome Back</h2>
                     <p>Sign in to your Hire-a-Helper account</p>
 
-                    <label>Email Address <span className="required">*</span></label>
+                    <label htmlFor="login-email" className="auth-label">
+                        Email Address <span className="required">*</span>
+                    </label>
                     <input
+                        id="login-email"
+                        className="auth-input"
                         type="email"
                         value={email_id}
                         autoComplete="email"
@@ -83,9 +87,13 @@ const Login = () => {
                         placeholder="Enter your email"
                     />
 
-                    <label>Password <span className="required">*</span></label>
+                    <label htmlFor="login-password" className="auth-label">
+                        Password <span className="required">*</span>
+                    </label>
                     <div className="password-field">
                         <input
+                            id="login-password"
+                            className="auth-input"
                             type={showPassword ? "text" : "password"}
                             value={password}
                             autoComplete="current-password"
@@ -94,9 +102,14 @@ const Login = () => {
                             onKeyDown={handleKeyDown}
                             placeholder="Enter your password"
                         />
-                        <span className="toggle-password" onClick={() => setShowPassword(!showPassword)}>
-                            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                        </span>
+                        <button
+                            type="button"
+                            className="toggle-password"
+                            aria-label={showPassword ? "Hide password" : "Show password"}
+                            onClick={() => setShowPassword(!showPassword)}
+                        >
+                            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                        </button>
                     </div>
 
                     <div className="auth-options">
@@ -109,10 +122,10 @@ const Login = () => {
                             Remember me
                         </label>
 
-                        <Link to="/ForgotPassword" className="forget-link">Forgot password?</Link>
+                        <Link to="/ForgotPassword" className="forgot-link">Forgot password?</Link>
                     </div>
 
-                    <button onClick={handleLogin} disabled={loading} className={loading ? "btn disabled" : "btn"}>
+                    <button onClick={handleLogin} disabled={loading} className="primary-btn">
                         {loading ? "Signing in..." : "Sign In"}
                     </button>
 

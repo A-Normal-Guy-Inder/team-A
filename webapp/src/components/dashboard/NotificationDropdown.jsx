@@ -1,7 +1,7 @@
 import React, { memo } from "react";
 
-const NotificationDropdown = ({ notifications, hasUnread, onMarkAllRead, onMarkRead, onLoadMore, canLoadMore }) => (
-    <div className="notification-dropdown">
+const NotificationDropdown = ({ ref, notifications, hasUnread, onMarkAllRead, onMarkRead, onLoadMore, canLoadMore }) => (
+    <div className="notification-dropdown" ref={ref}>
         <div className="notification-header">
             <span>Notifications</span>
             {hasUnread && (

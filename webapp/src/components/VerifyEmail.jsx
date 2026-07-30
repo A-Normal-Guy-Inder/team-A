@@ -91,12 +91,19 @@ const VerifyEmail = () => {
                     <h2>Verify Your OTP</h2>
                     <p>OTP sent to: {email}</p>
 
-                    <label>Verification Code <span className="required">*</span></label>
+                    <label htmlFor="verify-otp" className="auth-label">
+                        Verification Code <span className="required">*</span>
+                    </label>
                     <input
+                        id="verify-otp"
+                        className="auth-input text-center text-lg font-semibold tracking-[0.5em]
+                                   placeholder:tracking-normal placeholder:text-base
+                                   placeholder:font-normal"
                         placeholder="Enter OTP"
                         value={otp}
                         maxLength={6}
                         inputMode="numeric"
+                        autoComplete="one-time-code"
                         onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
                         onKeyDown={(e) => e.key === "Enter" && handleVerify()}
                     />
