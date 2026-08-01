@@ -66,11 +66,13 @@ const UNAVAILABLE_STATUSES = ['completed', 'cancelled', 'assigned', 'closed'];
                   {{ authorInitial() }}
                 }
               </div>
-              <div class="author-name">
-                <span>{{ author()?.first_name || 'User' }}</span>
-                @if (author()?.last_name) {
-                  <span> {{ author()?.last_name }}</span>
-                }
+              <!--
+                One span, not one per name part: as two spans in a column flex
+                the surname dropped onto its own line, and each was clipped
+                independently. The full name now wraps as a single phrase.
+              -->
+              <div class="author-name" [title]="authorName()">
+                <span>{{ authorName() }}</span>
               </div>
             </div>
 
@@ -112,6 +114,11 @@ export class TaskCard {
   readonly authorInitial = computed(() =>
     (this.author()?.first_name || 'U').charAt(0).toUpperCase(),
   );
+
+  readonly authorName = computed(() => {
+    const author = this.author();
+    return `${author?.first_name || ''} ${author?.last_name || ''}`.trim() || 'User';
+  });
 
   readonly button = computed<RequestButton>(() => {
     const task = this.task();

@@ -27,7 +27,7 @@ import { AuthStore } from '../state/auth.store';
 import { TasksStore } from '../state/tasks.store';
 import { RequestsStore } from '../state/requests.store';
 import { NotificationsStore } from '../state/notifications.store';
-import { UiStore } from '../state/ui.store';
+import { Page, UiStore } from '../state/ui.store';
 import { RealtimeService } from '../core/realtime.service';
 import { ToastService } from '../core/toast/toast.service';
 import { readNavigationState } from '../core/navigation-state';
@@ -175,16 +175,38 @@ export class Dashboard {
     this.ui.setShowLogoutConfirm(true);
   }
 
-  onMarkRead(id: string): void {
-    this.notifications.markRead(id);
+  /*
+   * The store only commits the read state once the server confirms it, so a
+   * failure leaves the row exactly as it was — visually identical to the click
+   * never having registered. Surfacing the error is what tells the two apart.
+   * It matters most for the dropdown's cross icon, where going read is the only
+   * feedback the button has.
+   */
+  async onMarkRead(id: string): Promise<void> {
+    const result = await this.notifications.markRead(id);
+    if (!result.ok) this.toasts.error(result.error);
   }
 
-  onMarkAllRead(): void {
-    this.notifications.markAllRead();
+  async onMarkAllRead(): Promise<void> {
+    const result = await this.notifications.markAllRead();
+    if (!result.ok) this.toasts.error(result.error);
   }
 
-  onLoadMoreNotifications(): void {
-    this.notifications.fetch({ page: (this.notificationsMeta().page || 1) + 1 });
+  async onLoadMoreNotifications(): Promise<void> {
+    const result = await this.notifications.fetch({
+      page: (this.notificationsMeta().page || 1) + 1,
+    });
+    if (!result.ok) this.toasts.error(result.error);
+  }
+
+  /*
+   * Opening a notification lands on the page it is about. The panel closes with
+   * it — leaving it hanging over the page you just asked to see would hide the
+   * row you came to look at.
+   */
+  onNotificationNavigate(page: Page): void {
+    this.ui.setActivePage(page);
+    this.ui.toggleNotifications(false);
   }
 
   async handleLogout(): Promise<void> {

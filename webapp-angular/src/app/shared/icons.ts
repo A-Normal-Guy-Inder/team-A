@@ -1,12 +1,12 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
 /*
- * The four lucide-react glyphs the app actually used, inlined.
+ * The handful of lucide-react glyphs the app actually uses, inlined.
  *
  * lucide-angular exists, but pulling in an icon library to render Eye, EyeOff,
- * Bell and Upload is a dependency and a peer-version constraint for four
- * <path> elements. These are the same lucide outlines, drawn with currentColor
- * so the surrounding CSS keeps control of them.
+ * Bell, Upload and X is a dependency and a peer-version constraint for a
+ * handful of <path> elements. These are the same lucide outlines, drawn with
+ * currentColor so the surrounding CSS keeps control of them.
  */
 
 @Component({
@@ -124,4 +124,30 @@ export class IconUpload {
   readonly size = input(24);
 }
 
-export const ICONS = [IconEye, IconEyeOff, IconBell, IconUpload];
+@Component({
+  selector: 'app-icon-x',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      [attr.width]="size()"
+      [attr.height]="size()"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path d="M18 6 6 18" />
+      <path d="m6 6 12 12" />
+    </svg>
+  `,
+})
+export class IconX {
+  readonly size = input(14);
+}
+
+export const ICONS = [IconEye, IconEyeOff, IconBell, IconUpload, IconX];

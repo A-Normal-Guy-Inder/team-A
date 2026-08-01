@@ -74,6 +74,14 @@ export interface AppNotification {
   message?: string;
   read?: boolean;
   createdAt?: string;
+  /*
+   * The backend has always sent these two — both the list endpoint and the
+   * socket payload include them — they just were not declared here. `type` is
+   * what tells the dropdown which page a notification belongs to; see
+   * notification-routing.ts.
+   */
+  type?: string;
+  reference_id?: string | null;
 }
 
 /** The envelope every backend endpoint wraps its payload in. */

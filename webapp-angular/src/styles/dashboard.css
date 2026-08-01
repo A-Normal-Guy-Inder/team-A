@@ -51,6 +51,18 @@
          text-slate-600 transition hover:bg-slate-100 hover:text-slate-900;
 }
 
+/*
+ * The page title goes when the hamburger arrives, at the same 768px breakpoint
+ * that hides the sidebar. Below it the topbar has to fit burger, search and
+ * bell in one row, and the heading was the piece squeezing the search field —
+ * the burger's own menu already names the current page, so nothing is lost.
+ */
+@media (max-width: 768px) {
+  .topbar-left h2 {
+    display: none;
+  }
+}
+
 .topbar span {
   @apply relative cursor-pointer text-xl;
 }
@@ -269,8 +281,14 @@
   @apply flex items-center justify-between gap-2 px-4 pb-1 pt-3.5;
 }
 
+/*
+ * The 100px cap truncated half the category list — "Moving & Shifting",
+ * "Shopping Assistance" and "Household Help" all rendered clipped. The badge
+ * sizes to its text instead; at 10px uppercase even the longest category leaves
+ * room for the status badge beside it.
+ */
 .badges-container .tag {
-  @apply inline-block max-w-[100px] truncate rounded-md border-0
+  @apply inline-block min-w-0 whitespace-nowrap rounded-md border-0
          bg-sky-50 px-2.5 py-1 text-[10px] font-semibold uppercase
          tracking-wider text-sky-700 ring-1 ring-inset ring-sky-100;
 }
@@ -354,13 +372,25 @@
   @apply text-sm;
 }
 
+/*
+ * `flex-wrap` is the release valve for the name. When the author block needs
+ * more width than the row can spare, the button drops to its own line instead
+ * of squeezing the name into a mid-word break.
+ */
 .task-footer {
-  @apply mt-auto flex items-center justify-between border-t
-         border-slate-100 bg-slate-50/40 p-4;
+  @apply mt-auto flex flex-wrap items-center justify-between gap-y-2.5
+         border-t border-slate-100 bg-slate-50/40 p-4;
 }
 
+/*
+ * `min-w-0` used to be here. It let the block shrink past its own min-content
+ * width, which is what actually produced "Harmanpree / t Kaur" — no
+ * overflow-wrap value can prevent a break once the box is narrower than the
+ * longest word. `min-content` floors it at that word instead.
+ */
 .task-author {
-  @apply flex min-w-0 flex-1 items-center gap-2.5;
+  @apply flex flex-1 items-center gap-2.5;
+  min-width: min-content;
 }
 
 .author-avatar {
@@ -370,17 +400,22 @@
          ring-2 ring-white;
 }
 
+/*
+ * Show the whole name.
+ *
+ * This was a column flex whose spans each carried `nowrap` + ellipsis, so a
+ * two-part name stacked onto two lines and both halves were cut at the card
+ * edge — "Harmanpreet Kaur" rendered as "Harmanpre…" over "Kaur". It is one
+ * phrase on one line now, wrapping to a second only when it truly has to.
+ */
 .author-name {
-  display: flex;
-  flex-direction: column;
   font-size: 13px;
   font-weight: 500;
   color: #374151;
-  line-height: 1.25;
+  line-height: 1.3;
 
-  min-width: 0;
+  min-width: min-content;
   flex: 1;
-
 }
 
 .author-name span {
@@ -388,9 +423,15 @@
   font-weight: 500;
   color: #374151;
 
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  /*
+   * `break-word`, not `anywhere`. They break identically once a word is too
+   * wide, but `anywhere` also drops the min-content width to one character, so
+   * the flex item collapsed and "Harmanpreet Kaur" wrapped as "Harmanpree /
+   * t Kaur". `break-word` leaves the intrinsic width at the longest word, so
+   * the break lands on the space and only a genuinely oversized name splits.
+   */
+  white-space: normal;
+  overflow-wrap: break-word;
 }
 
 .task-footer button {
@@ -707,6 +748,112 @@
   flex-direction: column;
   z-index: 999;
   border: 1px solid #e6e6e6;
+
+  /*
+   * The panel unfolds from the bell rather than being swapped in. The origin is
+   * the top-right corner so the growth reads as coming out of the icon that
+   * opened it, and the easing is a soft overshoot-free decelerate — the panel
+   * arrives quickly and settles, instead of drifting.
+   */
+  transform-origin: top right;
+  animation: notification-panel-in 200ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes notification-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/*
+ * Rows follow the panel in a short cascade. The delays are deliberately tiny —
+ * this is a list you open to read, so the stagger should register as the list
+ * arriving rather than as something to sit through. Only the first six are
+ * staggered; past that the panel is scrolled anyway and later rows just fade.
+ */
+.notification-list .notification-item {
+  animation: notification-item-in 240ms ease both;
+}
+
+.notification-list .notification-item:nth-child(1) {
+  animation-delay: 60ms;
+}
+.notification-list .notification-item:nth-child(2) {
+  animation-delay: 100ms;
+}
+.notification-list .notification-item:nth-child(3) {
+  animation-delay: 140ms;
+}
+.notification-list .notification-item:nth-child(4) {
+  animation-delay: 175ms;
+}
+.notification-list .notification-item:nth-child(5) {
+  animation-delay: 205ms;
+}
+.notification-list .notification-item:nth-child(n + 6) {
+  animation-delay: 230ms;
+}
+
+@keyframes notification-item-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* The unread dot lands last, with a small pop that draws the eye to it. */
+.notification-item.unread .notification-dot {
+  animation: notification-dot-in 280ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  animation-delay: 180ms;
+}
+
+@keyframes notification-dot-in {
+  from {
+    transform: scale(0);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+/*
+ * Motion here is decoration, so under a reduced-motion preference the panel and
+ * its rows simply appear. A plain fade is kept: it still signals that something
+ * opened, without anything moving or scaling.
+ */
+@media (prefers-reduced-motion: reduce) {
+  /*
+   * `:nth-child(n)` matches every row and matches the specificity of the
+   * per-row delay rules above — without it those delays outrank this override
+   * and the cascade survives into reduced motion.
+   */
+  .notification-dropdown,
+  .notification-list .notification-item:nth-child(n) {
+    animation: notification-fade-in 120ms ease both;
+    animation-delay: 0ms;
+  }
+
+  .notification-item.unread .notification-dot {
+    animation: none;
+  }
+}
+
+@keyframes notification-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .notification-header {
@@ -747,6 +894,49 @@
 
 .notification-item:hover {
   background: #f7f9ff;
+}
+
+/* Only rows that actually go somewhere advertise themselves as clickable. */
+.notification-item.notification-linked:hover {
+  background: #eef2ff;
+}
+
+.notification-item:focus-visible {
+  outline: none;
+  background: #eef2ff;
+  box-shadow: inset 0 0 0 2px #6366f1;
+}
+
+/*
+ * The "just mark it read" affordance. It sits inside the row, so its own click
+ * handler stops propagation (see notification-dropdown.ts) — the styling here
+ * only has to make it look like a separate target from the row behind it.
+ */
+.notification-dismiss {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  margin-top: -2px;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.notification-dismiss:hover {
+  background: #e2e8f0;
+  color: #334155;
+}
+
+.notification-dismiss:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px #6366f1;
 }
 
 .notification-item.unread {
@@ -1118,18 +1308,65 @@
 
 /* Was a flat #2f2f2f grey; now a slate ramp that ties into the brand. */
 .sidebar {
-  @apply fixed left-0 top-0 flex h-screen min-h-[calc(100vh-72px)] w-[240px]
-         flex-col justify-between overflow-hidden
+  @apply fixed left-0 top-0 flex h-screen w-[240px]
+         flex-col overflow-hidden
          bg-gradient-to-b from-slate-900 to-slate-800 p-5
          text-white ring-1 ring-inset ring-white/5;
 }
+
+/*
+ * Only the menu scrolls — the logo and the footer stay put.
+ *
+ * Scrolling the whole rail instead meant its scroll height was logo + menu +
+ * footer, which overshoots a 100vh rail by a few pixels on a normal window: a
+ * scrollbar appeared at full screen for ~14px of overflow that no one needed to
+ * reach. Confining the overflow to the list keeps the bar absent until the
+ * menu itself genuinely cannot fit, and it keeps Logout on screen at every
+ * height rather than parked below the fold.
+ *
+ * `min-h-0` is the part that makes it work: a flex child defaults to
+ * `min-height: auto`, which refuses to shrink below its content and hands the
+ * overflow back to the rail.
+ */
+.sidebar-header {
+  @apply shrink-0;
+}
+
+.sidebar-menu {
+  @apply min-h-0 flex-1 overflow-y-auto overflow-x-hidden;
+
+  /* Stops the list's scroll from chaining into the feed at either end. */
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.4) transparent;
+}
+
+/* WebKit needs the explicit pseudo-elements; keep the bar dark-theme subtle. */
+.sidebar-menu::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar-menu::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-menu::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.35);
+  border-radius: 999px;
+}
+
+.sidebar-menu::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.6);
+}
+
 
 .sidebar .logo {
   @apply mb-7;
 }
 
+/* `mb-auto` is gone: the menu now flexes to fill the gap itself (see below). */
 .sidebar-menu {
-  @apply mb-auto list-none space-y-1 p-0;
+  @apply list-none space-y-1 p-0;
 }
 
 .sidebar-menu li {
@@ -1225,6 +1462,47 @@
 
 .logout-btn:active {
   transform: translateY(0);
+}
+
+/*
+ * Short-window density pass for the sidebar.
+ *
+ * At its normal spacing the rail wants ~565px, so on a laptop window (a 720p
+ * screen leaves roughly 495px of viewport once browser chrome and the taskbar
+ * are gone) the menu overflowed and showed a scrollbar on what the user
+ * reasonably calls a full screen. Tightening the logo margin, the row padding
+ * and the footer reclaims ~85px and brings it under 480px, so the bar stays
+ * away until the window is genuinely small.
+ *
+ * Every selector is scoped with `.sidebar` on purpose. These rules have to
+ * outrank the base declarations further up the file and the `max-width` blocks
+ * further down, and matching their specificity would leave it to source order —
+ * which is what silently defeated the first attempt at this.
+ */
+@media (max-height: 640px) {
+  .sidebar .logo {
+    margin-bottom: 12px;
+  }
+
+  .sidebar .sidebar-menu {
+    @apply space-y-0.5;
+  }
+
+  .sidebar .sidebar-menu li {
+    @apply py-2;
+  }
+
+  .sidebar .sidebar-footer {
+    @apply gap-1.5 pb-1 pt-3;
+  }
+
+  .sidebar .sidebar-footer-user {
+    @apply h-10 w-10 text-base;
+  }
+
+  .sidebar .sidebar-footer-info {
+    gap: 6px;
+  }
 }
 
 .request-modal {

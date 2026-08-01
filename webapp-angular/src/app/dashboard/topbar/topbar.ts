@@ -13,6 +13,7 @@ import {
 import { IconBell } from '../../shared/icons';
 import { NotificationDropdown } from '../notification-dropdown/notification-dropdown';
 import { AppNotification } from '../../core/api.types';
+import { Page } from '../../state/ui.store';
 
 const NO_SEARCH_PAGES = ['Settings', 'Add Task'];
 
@@ -55,6 +56,7 @@ const NO_SEARCH_PAGES = ['Settings', 'Add Task'];
             (markAllRead)="markAllRead.emit()"
             (markRead)="markRead.emit($event)"
             (loadMore)="loadMoreNotifications.emit()"
+            (navigate)="notificationNavigate.emit($event)"
           />
         }
       </div>
@@ -76,6 +78,8 @@ export class Topbar {
   readonly markAllRead = output<void>();
   readonly markRead = output<string>();
   readonly loadMoreNotifications = output<void>();
+  /** A notification was opened; carries the page it wants the dashboard on. */
+  readonly notificationNavigate = output<Page>();
 
   private readonly bell = viewChild<ElementRef<HTMLElement>>('bell');
   private readonly dropdown = viewChild('dropdown', { read: ElementRef<HTMLElement> });
