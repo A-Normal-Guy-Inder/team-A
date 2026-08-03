@@ -40,11 +40,7 @@ import { AuthStore } from '../state/auth.store';
         </div>
 
         @if (confirming()) {
-          <!--
-            Both directions ask for the password. Disabling is the one that
-            matters — a hijacked session that could switch this off silently
-            would make the whole feature decorative.
-          -->
+          <!-- Both directions require password -->
           <label class="settings-hint" for="twofactor-password">
             Enter your password to {{ enabled() ? 'disable' : 'enable' }} two-factor
             authentication
@@ -105,8 +101,7 @@ export class Settings {
       return;
     }
 
-    // Read the target state before the request; patchUser below flips the
-    // source this was computed from.
+    // Read before patchUser flips
     const next = !this.enabled();
 
     try {

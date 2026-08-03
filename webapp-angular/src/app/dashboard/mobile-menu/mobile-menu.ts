@@ -6,9 +6,9 @@ import { NAV_PAGES } from '../../state/ui.store';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="hamburger-overlay" (click)="close.emit()">
-      <!-- Clicks inside the drawer must not reach the backdrop that closes it. -->
+      <!-- Backdrop closes; drawer stops -->
       <div class="hamburger-menu" (click)="$event.stopPropagation()">
-        <h3>Hire-a-Helper</h3>
+        <h3>HelperHub</h3>
         <ul class="menu-list">
           @for (page of pages; track page) {
             <li (click)="navigate.emit(page)" style="cursor: pointer">{{ page }}</li>

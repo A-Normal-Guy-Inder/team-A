@@ -142,12 +142,7 @@ async function listReceivedRequests(userId, query = {}) {
             .filter((value) => Object.values(REQUEST_STATUS).includes(value));
         if (statuses.length) requestFilter.status = statuses.length === 1 ? statuses[0] : { $in: statuses };
     } else {
-        /*
-         * A withdrawn application is no longer the owner's to act on, so it
-         * drops out of their inbox — they were told about it by notification.
-         * Asking for it explicitly by status still returns it, which is what
-         * keeps it reachable as history.
-         */
+        /* Withdrawn drops from inbox */
         requestFilter.status = { $ne: REQUEST_STATUS.WITHDRAWN };
     }
 
@@ -215,12 +210,7 @@ async function listSentRequests(userId, query = {}) {
     };
     const unwindTask = { $unwind: { path: "$task", preserveNullAndEmptyArrays: true } };
 
-    /*
-     * Everything this user has sent, narrowed by the search box but deliberately
-     * NOT by the status filter: the filter tabs each show how many requests they
-     * would reveal, and a status-filtered pipeline could only ever report on the
-     * tab already selected.
-     */
+    /* Search-narrowed, deliberately not status-filtered */
     const basePipeline = [{ $match: { requester_id: userId } }];
     if (search) {
         basePipeline.push(taskLookup, unwindTask, {
@@ -231,8 +221,7 @@ async function listSentRequests(userId, query = {}) {
     const pipeline = [...basePipeline];
     if (statusMatch) pipeline.push({ $match: statusMatch });
 
-    // Without a search there has been no lookup yet, so paginate first and join
-    // only the page's worth of rows — the order the original built it in.
+    // Paginate first, then join
     pipeline.push({ $sort: sort }, { $skip: skip }, { $limit: limit });
     if (!search) pipeline.push(taskLookup, unwindTask);
 
@@ -282,7 +271,7 @@ async function listSentRequests(userId, query = {}) {
     for (const row of countRows) {
         if (row._id in statusCounts) statusCounts[row._id] = row.count;
     }
-    // Summed before `all` is added, so it does not count itself.
+    // Summed before adding `all`
     statusCounts.all = Object.values(statusCounts).reduce((sum, count) => sum + count, 0);
 
     const mapped = items.map((item) => {
@@ -307,15 +296,7 @@ async function listSentRequests(userId, query = {}) {
     return { items: mapped, meta: { ...buildMeta({ page, limit, total }), statusCounts } };
 }
 
-/*
- * The requester retracting their own application.
- *
- * The row is kept, not deleted: the requester should still be able to see that
- * they applied and changed their mind, and the owner's notification refers to
- * it. Only a still-pending request can be withdrawn — once it has been accepted
- * the other side has made plans around it, and once rejected there is nothing
- * left to retract.
- */
+/* Retracts application; row kept */
 async function withdrawRequest(requestId, requester) {
     const request = await Requests.findById(requestId);
     if (!request) throw ApiError.notFound("Request not found");
@@ -350,8 +331,7 @@ async function withdrawRequest(requestId, requester) {
             reference_id: String(request._id),
         });
 
-        // Refreshes the owner's list and the pending badge, which no longer
-        // counts this one.
+        // Refreshes owner list, badge
         emitToUser(task.user_id, SOCKET_EVENTS.REQUEST_UPDATED, { scope: "received" });
     }
 

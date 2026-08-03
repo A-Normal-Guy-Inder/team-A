@@ -54,7 +54,7 @@ export class NotificationsStore {
       this.state.update((s) => ({
         ...s,
         status: 'succeeded',
-        // Page 1 replaces; later pages append — this is the "load older" path.
+        // Page 1 replaces
         items: page > 1 ? [...s.items, ...items] : items,
         meta: { ...s.meta, ...meta, page },
         unreadCount: typeof meta.unreadCount === 'number' ? meta.unreadCount : s.unreadCount,
@@ -102,7 +102,7 @@ export class NotificationsStore {
 
   received(incoming: AppNotification | null | undefined): void {
     if (!incoming?._id) return;
-    // Untracked, for the reason given on TasksStore.snapshot.
+    // Untracked; see TasksStore.snapshot
     if (untracked(this.state).items.some((item) => item._id === incoming._id)) return;
 
     this.state.update((s) => ({

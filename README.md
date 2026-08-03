@@ -1,12 +1,13 @@
-# Hire-a-Helper
+# HelperHub
 
-**Hire-a-Helper** is a full-stack task management marketplace where users can create tasks requiring assistance and others can request to perform those tasks. The platform implements a **one-to-one assignment model**: when a task owner accepts a request, the task is assigned to that requester and all other pending requests are automatically rejected.
+**HelperHub** is a full-stack task management marketplace where users can create tasks requiring assistance and others can request to perform those tasks. The platform implements a **one-to-one assignment model**: when a task owner accepts a request, the task is assigned to that requester and all other pending requests are automatically rejected.
 
 ## 🚀 Key Features
 
 *   **Secure Authentication**: Multi-stage verification using **cryptographically random 6-digit OTPs** (sent via Gmail SMTP) with per-purpose scoping, attempt limiting (6 attempts → 10-minute block, counter resets after 30 minutes idle) and JWT-based sessions stored in **HTTP-only cookies**.
+*   **Optional Two-Factor Login**: An account can require an emailed code after the password check. No session cookie is minted until that code is redeemed.
 *   **Task Management**: Users can create, edit, and browse tasks with details like location, category, and time range.
-*   **Request System**: A transactional workflow for sending, accepting, and rejecting task requests, with a cooldown before a rejected requester may re-apply.
+*   **Request System**: A transactional workflow for sending, accepting, rejecting and withdrawing task requests, with a cooldown before a rejected requester may re-apply.
 *   **Server-Side Pagination, Search, Filtering & Sorting**: Every list endpoint accepts `page`, `limit`, `search`, `status`, `category`, `sortBy` and `sortOrder`, and returns a `meta` block. The client never downloads a whole collection to filter it in the browser.
 *   **Automated Background Jobs**: Powered by **node-cron**, a scheduled job closes expired tasks. A **MongoDB-backed lease lock** guarantees exactly one execution per tick no matter how many API instances are running.
 *   **Media Management**: Integrated **Multer** and **Cloudinary** pipeline with type/size validation and guaranteed temp-file cleanup.
@@ -17,12 +18,17 @@
 
 | Layer | Technologies |
 | :--- | :--- |
-| **Frontend** | React, Redux Toolkit, React Router DOM, Socket.IO Client, Axios, React Toastify, Lucide Icons |
+| **Frontend** | Angular 21 (zoneless, standalone components), Angular Signals, Angular Router, Socket.IO Client, Tailwind CSS |
 | **Backend** | Node.js, Express.js, JWT, bcryptjs, Helmet, express-rate-limit, Socket.IO |
 | **Database** | MongoDB with Mongoose (UUID primary keys, compound indexes & transactions) |
 | **Automation** | node-cron with a database lease lock |
 | **Storage** | Cloudinary (Image hosting & transformations) |
 | **Email** | Nodemailer (Gmail SMTP for OTPs) |
+| **Testing** | Vitest via the Angular CLI test target |
+
+> The frontend was ported from React 19 + Redux Toolkit to Angular. `webapp-angular/README.md`
+> documents the port: how each React concept maps across, the three deliberate behavioural
+> differences, and the re-entrancy defect the port surfaced.
 
 ## 🏗️ Architecture Overview
 
@@ -41,7 +47,22 @@ Every endpoint answers with the same envelope, so the client never has to guess 
 { "success": true, "message": "…", "data": …, "meta": { "page": 1, "totalPages": 4, … } }
 ```
 
-The frontend mirrors this with feature-sliced Redux Toolkit state (`auth`, `tasks`, `requests`, `notifications`, `ui`) and presentational components that receive data through selectors.
+The frontend mirrors this with five signal-based stores (`auth`, `tasks`, `requests`,
+`notifications`, `ui`) and standalone components that read `computed()` fields. Store actions
+are `async` methods returning a `Result<T>` discriminated union rather than throwing, so call
+sites branch on `if (!result.ok)`.
+
+### Two frontend invariants
+
+The app runs **zoneless**. Anything a template reads must be a signal — a plain class field
+mutated in a click handler will not repaint.
+
+**Store actions must not be called from a tracked reactive context.** An action reads current
+state to build its request and writes that state back; if the read is tracked, an enclosing
+`effect` gains a dependency on the store, the write re-triggers the effect, and it fetches
+forever. Two defences are in place and both should stay: actions read through an untracked
+`snapshot()`, and callers wrap the action in `untracked(...)`.
+`src/app/state/store-reentrancy.spec.ts` pins this.
 
 ## 📂 Directory Structure
 
@@ -64,18 +85,23 @@ backend/
 
 ### Frontend
 ```text
-webapp/src/
-├── app/            # Redux store
-├── config/         # Environment-driven runtime config
-├── features/       # Redux slices + thunks (auth, tasks, requests, notifications, ui)
-├── components/
-│   └── dashboard/  # Layout, pages, cards, modals — the former monolith, split up
-├── hooks/          # useRealtime (Socket.IO), useDebouncedValue
-├── routes/         # Protected and public-only route guards
-├── services/       # Axios client and Socket.IO client
-├── utils/          # Shared validation and date helpers
-└── styles/         # Plain CSS files organized by functional area
+webapp-angular/src/
+├── app/
+│   ├── core/           # config, HTTP, socket, realtime, toasts, guards, nav state
+│   ├── state/          # the five signal stores
+│   ├── shared/         # validation, datetime, pagination, icons, loader, result type
+│   ├── auth/           # login, signup, verify-email, forgot-password, reset-password
+│   ├── dashboard/      # shell, sidebar, topbar, cards, modals, pages
+│   ├── settings/       # settings, update-profile, change-email, change-password
+│   ├── app.routes.ts   # route table + derived PROTECTED_PATH_PREFIXES
+│   └── app.config.ts   # providers (zoneless, router, HTTP interceptors)
+├── environments/       # environment.ts / environment.production.ts
+└── styles/             # global CSS: auth, dashboard, loader, settings, not-found
 ```
+
+The stylesheets are registered as **global** styles in `angular.json`, not as component
+styles. They are written as global class selectors and Angular's default style scoping
+would break every one of them.
 
 ## 🚥 Getting Started
 
@@ -98,25 +124,30 @@ webapp/src/
     ```bash
     cd backend
     npm install
-    cp .env.example .env   # then fill in MONGO_URI, JWT_SECRET and the rest
+    # create .env with at least MONGO_URI and JWT_SECRET — see the table below
     npm run dev            # nodemon;  npm start for plain node
     ```
 
 3.  **Frontend Setup**:
     ```bash
-    cd ../webapp
+    cd ../webapp-angular
     npm install
-    cp .env.example .env   # point REACT_APP_API_URL at your backend
     npm start              # runs on port 3000
+    npm run build          # production bundle into ./build
+    npm test               # vitest, single run
     ```
 
-### Environment Variables
+#### The dev server runs on 3000, not Angular's default 4200
 
-Only `MONGO_URI` and `JWT_SECRET` are mandatory — everything else has a working
-default. See `backend/.env.example` and `webapp/.env.example` for the annotated
-full list.
+This is deliberate. The backend's CORS allowlist defaults to `http://localhost:3000`. On
+4200 every request is CORS-rejected, which the browser surfaces as `status 0` and the app
+reports as "Cannot reach the server" — a misleading message for what is really a blocked
+origin. To use another port, add it to `FRONTEND_URL` in `backend/.env` (comma-separated)
+and restart the backend.
 
-**`backend/.env`**
+### Backend environment variables
+
+Only `MONGO_URI` and `JWT_SECRET` are mandatory — everything else has a working default.
 
 | Variable | Description |
 | :--- | :--- |
@@ -124,37 +155,45 @@ full list.
 | `PORT` | Server listening port (default: 5000) |
 | `MONGO_URI` | MongoDB connection string **(required)** |
 | `JWT_SECRET` | Secret for signing session tokens **(required, ≥32 chars in production)** |
-| `COOKIE_NAME` | Name for the HTTP-only JWT cookie |
+| `COOKIE_NAME` | Name for the HTTP-only JWT cookie (default: `helperhub_token`) |
 | `COOKIE_SECURE` / `COOKIE_SAMESITE` | Override the `NODE_ENV`-derived cookie defaults |
 | `FRONTEND_URL` | Comma-separated allowed origins for CORS **and** websockets |
 | `CLOUDINARY_*` | Cloud Name, API Key, and API Secret |
 | `GMAIL_USER` / `GMAIL_PASS` | Sending address and Gmail App-specific password |
 | `SMTP_HOST` / `SMTP_PORT` / `SMTP_SECURE` | Mail transport (defaults: `smtp.gmail.com`, `465`, `true`) |
-| `RATE_LIMIT_*`, `OTP_*`, `PAGINATION_*` | Tunables for limits, OTP policy and page sizes |
+| `RATE_LIMIT_*`, `OTP_*` | Tunables for limits and OTP policy |
+| `LOGIN_MAX_ATTEMPTS`, `LOGIN_BLOCK_MS` | Per-account login lockout |
+| `TWO_FACTOR_WINDOW_MS` | How long a password-verified login may wait for its second factor |
 | `CRON_ENABLED`, `CRON_LOCK_TTL_MS` | Background job toggle and lease duration |
 | `ENSURE_INDEXES` | Build schema indexes on boot (default `true`) |
 
-**`webapp/.env`**
+### Frontend configuration
 
-| Variable | Description |
+Angular has no `REACT_APP_*` equivalent — it swaps a whole file per build configuration
+via `fileReplacements` in `angular.json`:
+
+*   `src/environments/environment.ts` — development
+*   `src/environments/environment.production.ts` — production
+
+| Field | Description |
 | :--- | :--- |
-| `REACT_APP_API_URL` | Base URL of the REST API, including `/api`. Unset in development — defaults to the host the page was served from |
-| `REACT_APP_SOCKET_URL` | Socket.IO origin (defaults to the API URL without `/api`) |
-| `REACT_APP_API_PORT` | Port used when deriving the default API origin (default `5000`) |
-| `REACT_APP_API_TIMEOUT` | Request timeout in ms (default `90000`). Sized for a cold-starting free-tier backend; drop to ~`30000` on an always-on plan so real failures surface quickly |
-| `REACT_APP_PAGE_SIZE` | Items per page for the paginated lists |
+| `apiUrl` | Base URL of the REST API, including `/api`. Leave empty to derive from the page host |
+| `socketUrl` | Socket.IO origin (defaults to `apiUrl` without `/api`) |
+| `apiPort` | Port used when deriving the default API origin (default `5000`) |
+| `apiTimeout` | Request timeout in ms (default `90000`). Sized for a cold-starting free-tier backend; drop to ~`30000` on an always-on plan so real failures surface quickly |
+| `pageSize` | Items per page for the paginated lists |
 
-> Create React App inlines `REACT_APP_*` variables at build time — restart the dev
-> server after changing them.
+> **These are build-time values, committed to the repo.** Setting them in a host's
+> dashboard does nothing; change `environment.production.ts` (or pass `ng build --define`)
+> and redeploy.
 
-> **Leave `REACT_APP_API_URL` unset locally.** The session is an HTTP-only
-> `SameSite=Lax` cookie, and browsers treat `localhost` and `127.0.0.1` as
-> different *sites*. Pointing the app at one while serving it from the other makes
-> the browser discard the cookie set by `POST /auth/login`, so every following
-> request fails with `401 Not authorized, no token` and the websocket handshake is
-> rejected. Deriving the API origin from `window.location` keeps the two aligned;
-> set the variable explicitly only when the API really is on another origin, and
-> add that origin to the backend's `FRONTEND_URL`.
+> **Leave `apiUrl` empty locally.** The session is an HTTP-only `SameSite=Lax` cookie, and
+> browsers treat `localhost` and `127.0.0.1` as different *sites*. Pointing the app at one
+> while serving it from the other makes the browser discard the cookie set by
+> `POST /auth/login`, so every following request fails with `401 Not authorized, no token`
+> and the websocket handshake is rejected. Deriving the API origin from `window.location`
+> keeps the two aligned; set the field explicitly only when the API really is on another
+> origin, and add that origin to the backend's `FRONTEND_URL`.
 
 ### Running Multiple Backend Instances
 
@@ -166,14 +205,17 @@ ticks.
 
 ## ☁️ Deployment
 
-The frontend and backend deploy independently: the webapp is a static Create React
-App bundle, the backend is a long-lived process that owns websockets and the
-scheduler and therefore cannot run on serverless functions.
+The frontend and backend deploy independently: the webapp is a static Angular bundle, the
+backend is a long-lived process that owns websockets and the scheduler and therefore cannot
+run on serverless functions.
 
 | Piece | Target | Root directory |
 | :--- | :--- | :--- |
-| `webapp/` | Vercel (static build) | `webapp` — it reads `webapp/vercel.json`, not the repo root |
+| `webapp-angular/` | Vercel (static build) | `webapp-angular` — it reads `webapp-angular/vercel.json`, not the repo root |
 | `backend/` | Render / Railway / Fly (persistent instance) | `backend` |
+
+`vercel.json` sets framework `angular`, output directory `build`, an SPA rewrite to
+`index.html`, and immutable caching for Angular's hashed `*-XXXXXXXX.js/css` filenames.
 
 ### Cross-site cookies
 
@@ -191,12 +233,11 @@ cookieSecure:   toBool(process.env.COOKIE_SECURE, isProduction),        // → t
 cookieSameSite: required("COOKIE_SAMESITE", isProduction ? "none" : "lax"),  // → "none"
 ```
 
-> **Do not copy `backend/.env` into your host's dashboard wholesale.** The local
-> file carries `COOKIE_SECURE=false` and `COOKIE_SAMESITE=lax` — correct for
-> development, since `Secure` cookies are not sent over `http://localhost`, but an
-> explicit `false` **overrides** the `NODE_ENV` default above and silently breaks
-> authentication in production. Set `NODE_ENV=production` and leave both cookie
-> variables **unset**.
+> **Do not copy `backend/.env` into your host's dashboard wholesale.** A local file
+> carrying `COOKIE_SECURE=false` and `COOKIE_SAMESITE=lax` is correct for development,
+> since `Secure` cookies are not sent over `http://localhost` — but an explicit `false`
+> **overrides** the `NODE_ENV` default above and silently breaks authentication in
+> production. Set `NODE_ENV=production` and leave both cookie variables **unset**.
 
 ### Host configuration
 
@@ -213,15 +254,14 @@ Set on the **backend** host:
 (`realtime/socket.js`); if it still points at `localhost`, the browser blocks every
 request before cookies are even considered.
 
-Set on the **frontend** host (Vercel dashboard, not a committed `.env` — CRA inlines
-`REACT_APP_*` at build time, so changes need a redeploy rather than a restart):
+For the **frontend**, commit the deployed API origin to `environment.production.ts`:
 
-| Variable | Value |
-| :--- | :--- |
-| `REACT_APP_API_URL` | `https://your-backend.onrender.com/api` |
-| `REACT_APP_SOCKET_URL` | `https://your-backend.onrender.com` |
+```ts
+apiUrl: 'https://your-backend.onrender.com/api',
+socketUrl: 'https://your-backend.onrender.com',
+```
 
-> Leave these unset and the frontend falls back to `<page-host>:5000`, so every
+> Leave these empty and the frontend falls back to `<page-host>:5000`, so every
 > request fails with `401 Not authorized, no token`.
 
 ### Free-tier caveats
@@ -237,7 +277,7 @@ blocked or stalled SMTP connection fails fast with a logged error instead of
 hanging the request until the client aborts.
 
 Free instances also sleep when idle and cold-start on the next request, which is
-why `REACT_APP_API_TIMEOUT` defaults to 90s. Lower it on an always-on plan.
+why `apiTimeout` defaults to 90s. Lower it on an always-on plan.
 
 ## 🔌 API Conventions
 
@@ -248,3 +288,6 @@ why `REACT_APP_API_TIMEOUT` defaults to 90s. Lower it on an always-on plan.
 *   Failures: `{ success: false, message, details? }` with an accurate status code —
     `400` validation, `401` unauthenticated, `403` forbidden, `404` missing,
     `409` conflict, `413` payload too large, `429` rate limited.
+*   Authentication failures are deliberately indistinguishable from one another. A wrong
+    password, an unknown address and an unmet second factor all answer with the same
+    message and status so the endpoints cannot be used to enumerate accounts.

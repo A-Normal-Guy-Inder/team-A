@@ -35,15 +35,7 @@ export class TasksStore {
   readonly myTasks = computed(() => this.state().myTasks);
   readonly saving = computed(() => this.state().saving);
 
-  /*
-   * Reads current state WITHOUT registering a reactive dependency.
-   *
-   * An action that reads state to build its request and then writes that state
-   * back is a loop waiting to happen: called from inside an `effect`, the read
-   * makes the effect depend on this store, and the very next write re-triggers
-   * it, forever. That froze the browser tab outright. Every read inside an
-   * action goes through here so an action is safe to call from anywhere.
-   */
+  /* Untracked; prevents loops */
   private snapshot(): TasksState {
     return untracked(this.state);
   }
@@ -56,10 +48,7 @@ export class TasksStore {
     return this.fetchList('myTasks', '/task/me', overrides, 'Failed to load your tasks');
   }
 
-  /**
-   * Both list endpoints differ only in URL and target slice; the thunks were
-   * copies of each other, so the shared body lives here once.
-   */
+  /** Shared list body */
   private async fetchList(
     key: 'feed' | 'myTasks',
     path: string,
@@ -129,14 +118,7 @@ export class TasksStore {
     }
   }
 
-  /**
-   * Deletes a task and drops it from the local list.
-   *
-   * The row is removed here rather than left to the next refetch: the card the
-   * user just deleted lingering on screen reads as a failure. The total is
-   * decremented with it so the pagination footer does not claim a page that is
-   * now short.
-   */
+  /** Deletes task, updates list */
   async deleteTask(taskId: string): Promise<Result<void>> {
     this.state.update((s) => ({ ...s, saving: true, error: null }));
 
@@ -175,7 +157,7 @@ export class TasksStore {
     }));
   }
 
-  /** Flips the feed card to "Requested" without waiting for a refetch. */
+  /** Optimistic "Requested" flip */
   markTaskRequested(taskId: string): void {
     this.state.update((s) => ({
       ...s,

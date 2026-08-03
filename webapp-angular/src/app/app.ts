@@ -29,23 +29,13 @@ export class App {
   private readonly router = inject(Router);
   private readonly auth = inject(AuthStore);
 
-  /**
-   * Covers what <Suspense fallback={<Loader />}> used to: the wait on a lazy
-   * route chunk, and now also the /auth/me probe the auth guard makes before it
-   * lets a protected route through.
-   */
+  /** Loader for pending navigation */
   readonly navigating = signal(false);
 
   constructor() {
     warmBackend();
 
-    /*
-     * A page served from the back/forward cache is a frozen snapshot: no guard
-     * re-runs, no request is re-issued, and the DOM is exactly as it was — which
-     * after a logout means a fully rendered dashboard belonging to someone who
-     * is no longer signed in. `persisted` is what distinguishes that restore
-     * from a normal load, and it is the only moment we get to re-check.
-     */
+    /* BFCache restore; re-check session */
     window.addEventListener('pageshow', (event) => {
       if ((event as PageTransitionEvent).persisted) void this.revalidateSession();
     });
@@ -62,11 +52,7 @@ export class App {
     });
   }
 
-  /**
-   * Asks the server who we are and, if the answer is nobody, leaves whatever
-   * protected page was restored. Public pages are left alone — being signed out
-   * on /login is the normal state, not something to redirect away from.
-   */
+  /** Leaves protected pages */
   private async revalidateSession(): Promise<void> {
     if (!isProtectedUrl(this.router.url)) return;
 

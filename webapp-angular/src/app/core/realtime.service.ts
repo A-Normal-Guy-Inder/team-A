@@ -8,19 +8,7 @@ export interface RealtimeHandlers {
   onRequestUpdated?: (payload: unknown) => void;
 }
 
-/**
- * The Angular counterpart to the `useRealtime` hook.
- *
- * The hook re-ran whenever the user id changed and cleaned up on unmount;
- * `connect` is called from Dashboard's constructor with a signal for the id and
- * an effect does the same job. Notification events land straight in the store,
- * while task and request events are forwarded to the caller — those need to know
- * which page is showing before deciding whether to refetch.
- *
- * `connect` must be called from an injection context (a constructor or a field
- * initialiser), the same constraint `takeUntilDestroyed` carries: it reaches for
- * the caller's DestroyRef so the socket closes when that component goes away.
- */
+/** Socket feed subscription */
 @Injectable({ providedIn: 'root' })
 export class RealtimeService {
   private readonly sockets = inject(SocketService);

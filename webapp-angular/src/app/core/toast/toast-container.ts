@@ -59,12 +59,12 @@ import { TOAST_AUTO_CLOSE_MS, ToastService } from './toast.service';
       box-shadow:
         0 10px 30px rgb(15 23 42 / 0.13),
         0 3px 8px rgb(15 23 42 / 0.07);
-      /* Overshoots slightly on the way in, so it lands rather than slides. */
+      /* Slight overshoot on entry */
       animation: toast-in 0.42s cubic-bezier(0.21, 1.13, 0.36, 1) both;
     }
 
     .toast--leaving {
-      /* Duration must match EXIT_MS in toast.service.ts. */
+      /* Must match EXIT_MS */
       animation: toast-out 0.26s cubic-bezier(0.4, 0, 1, 0.6) forwards;
     }
 
@@ -110,7 +110,7 @@ import { TOAST_AUTO_CLOSE_MS, ToastService } from './toast.service';
       background: rgb(15 23 42 / 0.06);
     }
 
-    /* Drains left-to-right over the auto-close window; freezes while hovered. */
+    /* Drains; freezes while hovered */
     .toast__progress {
       position: absolute;
       left: 0;
@@ -215,10 +215,7 @@ import { TOAST_AUTO_CLOSE_MS, ToastService } from './toast.service';
       }
     }
 
-    /*
-     * Motion is decoration here — the message itself carries the meaning, so a
-     * reduced-motion preference drops straight to a fade.
-     */
+    /* Reduced motion: plain fade */
     @media (prefers-reduced-motion: reduce) {
       .toast,
       .toast--leaving,
@@ -241,7 +238,7 @@ import { TOAST_AUTO_CLOSE_MS, ToastService } from './toast.service';
 export class ToastContainer {
   readonly toasts = inject(ToastService);
 
-  /** Handed to CSS so the progress bar and the JS countdown cannot drift apart. */
+  /** Keeps CSS, JS aligned */
   readonly durationVar = `${TOAST_AUTO_CLOSE_MS}ms`;
 
   icon(kind: string): string {

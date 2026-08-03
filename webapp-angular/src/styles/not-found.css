@@ -1,7 +1,4 @@
-/*
- * The 404 screen. Global rather than route-scoped: it is reachable from any
- * address, including ones no lazy chunk is loaded for.
- */
+/* 404 screen; global scope */
 
 .notfound-container {
   @apply flex min-h-screen items-center justify-center bg-slate-100 p-5;

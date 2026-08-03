@@ -66,11 +66,7 @@ const UNAVAILABLE_STATUSES = ['completed', 'cancelled', 'assigned', 'closed'];
                   {{ authorInitial() }}
                 }
               </div>
-              <!--
-                One span, not one per name part: as two spans in a column flex
-                the surname dropped onto its own line, and each was clipped
-                independently. The full name now wraps as a single phrase.
-              -->
+              <!-- One span, not two -->
               <div class="author-name" [title]="authorName()">
                 <span>{{ authorName() }}</span>
               </div>
@@ -105,7 +101,7 @@ export class TaskCard {
   readonly remove = output<Task>();
   readonly requestTask = output<Task>();
 
-  /** The feed populates user_id; My Tasks returns it as a bare id. */
+  /** Object in feed only */
   readonly author = computed<TaskAuthor | null>(() => {
     const value = this.task()?.user_id;
     return typeof value === 'object' && value !== null ? value : null;

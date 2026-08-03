@@ -8,7 +8,7 @@ import { User } from '../../core/api.types';
   template: `
     <aside class="sidebar">
       <div class="sidebar-header">
-        <h3 class="logo">Hire-a-Helper</h3>
+        <h3 class="logo">HelperHub</h3>
       </div>
 
       <ul class="sidebar-menu">
@@ -51,12 +51,7 @@ export class Sidebar {
 
   readonly pages = NAV_PAGES;
 
-  /*
-   * Dashboard used to reshape the user before handing it down
-   * (`{...user, email: user.email_id, picture: user.profile_picture}`). The
-   * renaming belongs to the view, so it happens here and the parent passes the
-   * user through untouched.
-   */
+  /* Field renaming lives here */
   readonly picture = computed(() => this.user()?.profile_picture ?? '');
 
   readonly email = computed(() => this.user()?.email_id || 'user@email.com');

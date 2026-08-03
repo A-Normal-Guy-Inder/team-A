@@ -31,8 +31,7 @@ export class ResetPassword {
     const state = readNavigationState<{ email?: string }>(this.router);
     this.email.set(state.email ?? '');
 
-    // The reset grant is tied to the address that just cleared OTP. Without it
-    // there is nothing to reset, so the journey restarts.
+    // No email: restart journey
     if (!state.email) {
       this.toasts.error('Session expired. Please try again.');
       this.router.navigate(['/ForgotPassword'], { replaceUrl: true });

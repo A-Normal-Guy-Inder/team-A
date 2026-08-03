@@ -11,7 +11,7 @@ const Verification_Email_Template=`
           <!-- Header -->
           <tr>
             <td align="center" style="background:linear-gradient(135deg,#4f46e5,#7c3aed); padding:30px; color:#ffffff; font-size:28px; font-weight:bold;">
-              Hire Helper
+              HelperHub
             </td>
           </tr>
 
@@ -39,7 +39,7 @@ const Verification_Email_Template=`
 
               <p style="margin:0;">
                 Best Regards,<br>
-                <strong>Hire Helper Team</strong>
+                <strong>HelperHub Team</strong>
               </p>
 
             </td>
@@ -56,7 +56,7 @@ const Verification_Email_Template=`
               </div>
 
               <p style="margin:0 0 10px 0;">
-                © 2026 Hire Helper. All rights reserved.
+                © 2026 HelperHub. All rights reserved.
               </p>
 
               <p style="margin:0;">
@@ -92,7 +92,7 @@ const Welcome_Email_Template= `
           <!-- Header -->
           <tr>
             <td align="center" style="background:linear-gradient(135deg,#4f46e5,#7c3aed); padding:30px; color:#ffffff; font-size:28px; font-weight:bold;">
-              Welcome to Hire Helper 🎉
+              Welcome to HelperHub 🎉
             </td>
           </tr>
 
@@ -106,11 +106,11 @@ const Welcome_Email_Template= `
 
               <p style="margin:0 0 20px 0;">
                 We're excited to have you on board! 🎉  
-                <strong>Hire Helper</strong> makes it easy to post tasks, find helpers, and get things done quickly and efficiently.
+                <strong>HelperHub</strong> makes it easy to post tasks, find helpers, and get things done quickly and efficiently.
               </p>
 
               <p style="margin:0 0 20px 0;">
-                With Hire Helper, you can:
+                With HelperHub, you can:
               </p>
 
               <ul style="padding-left:20px; margin:0 0 25px 0;">
@@ -134,7 +134,7 @@ const Welcome_Email_Template= `
 
               <p style="margin:20px 0 0 0;">
                 Cheers,<br>
-                <strong>Hire Helper Team</strong>
+                <strong>HelperHub Team</strong>
               </p>
 
             </td>
@@ -151,7 +151,7 @@ const Welcome_Email_Template= `
               </div>
 
               <p style="margin:0 0 10px 0;">
-                © 2026 Hire Helper. All rights reserved.
+                © 2026 HelperHub. All rights reserved.
               </p>
 
               <p style="margin:0;">

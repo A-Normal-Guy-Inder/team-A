@@ -45,11 +45,7 @@ const STATUS_LABELS: Record<string, string> = {
           <span class="status-badge status-{{ r.status }}">{{ statusLabel() }}</span>
           <p class="request-date">{{ sentDate() }}</p>
 
-          <!--
-            Only a pending application can be retracted — once the owner has
-            accepted or rejected it there is nothing left to take back, which is
-            what the backend enforces too.
-          -->
+          <!-- Only pending can retract -->
           @if (canWithdraw()) {
             <button class="withdraw-btn" (click)="withdraw.emit(r)" [disabled]="busy()">
               {{ busy() ? 'Withdrawing…' : 'Withdraw' }}

@@ -16,7 +16,7 @@ import { isValidPhone } from '../../shared/validation';
 
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 
-/** Matches the 500-character cap the user schema enforces. */
+/** Matches the schema cap */
 const BIO_MAX_LENGTH = 500;
 
 @Component({
@@ -40,31 +40,20 @@ export class UpdateProfile {
 
   readonly BIO_MAX = BIO_MAX_LENGTH;
 
-  /*
-   * The picture and the address are not edited by this form — the buttons above
-   * set the one, the change-email flow sets the other — so both simply follow
-   * the session rather than being copied into local state that could go stale.
-   */
+  /* Follow session, not form */
   readonly preview = computed(() => this.auth.user()?.profile_picture || '');
   readonly email = computed(() => this.auth.user()?.email_id || '');
 
-  /** Offered only when there is something stored to remove. */
+  /** Only when picture exists */
   readonly canRemovePicture = computed(() => Boolean(this.auth.user()?.profile_picture));
 
-  /** True while either picture button is mid-flight; each disables the other. */
+  /** Either button mid-flight */
   readonly pictureBusy = computed(() => this.uploading() || this.removing());
 
   private seededFor: string | null = null;
 
   constructor() {
-    /*
-     * Fills the editable fields once per signed-in user.
-     *
-     * Keyed on the id rather than the user object on purpose: the picture
-     * buttons write the updated user back through patchUser while the form is
-     * open, and re-seeding on that would throw away a name or bio the user had
-     * typed but not yet saved.
-     */
+    /* Seeds per user id */
     effect(() => {
       const id = this.auth.user()?._id ?? null;
       if (!id || id === this.seededFor) return;
@@ -83,22 +72,13 @@ export class UpdateProfile {
     });
   }
 
-  /**
-   * Uploads the chosen file straight away, the mirror of removing one below.
-   *
-   * Both controls now commit on the spot, so the picture never sits in the form
-   * as an unsaved choice — which is what made "Remove" ambiguous while a file
-   * was pending, and what made Save Changes silently responsible for two
-   * unrelated things.
-   */
+  /** Uploads immediately */
   async onImageChange(event: Event): Promise<void> {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     if (!file) return;
 
-    // The picker is cleared either way: on success the stored picture is the
-    // one that counts, and on failure a rejected file left in the input would
-    // not fire `change` again if it were picked a second time.
+    // Always clear the picker
     const done = () => {
       input.value = '';
     };
@@ -136,7 +116,7 @@ export class UpdateProfile {
     }
   }
 
-  /** Removes the stored picture immediately — the counterpart of the upload above. */
+  /** Removes picture immediately */
   async handleRemovePicture(): Promise<void> {
     if (this.pictureBusy()) return;
 

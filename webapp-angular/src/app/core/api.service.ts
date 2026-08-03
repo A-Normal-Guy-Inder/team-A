@@ -3,15 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { TimeoutError, firstValueFrom, timeout } from 'rxjs';
 import config from './config';
 
-/**
- * Thin wrapper over HttpClient that reproduces the axios instance the React app
- * used: a fixed base URL, credentials on every call, and a shared timeout.
- *
- * Requests are handed back as Promises rather than Observables. The stores that
- * consume them are written as async methods — the direct descendants of the
- * createAsyncThunk bodies — and a Promise keeps that code readable. Anything
- * that genuinely needs a stream (the socket feed) does not go through here.
- */
+/** Promise-based HttpClient wrapper */
 @Injectable({ providedIn: 'root' })
 export class ApiService {
   private readonly http = inject(HttpClient);
@@ -52,11 +44,7 @@ export class ApiService {
   }
 }
 
-/**
- * Drops empty params so the query string matches what the backend saw before —
- * axios omitted undefined keys, and the original `toQueryParams` stripped null
- * and "" as well.
- */
+/** Drops empty params */
 export function toHttpParams(params: Record<string, unknown> = {}): HttpParams {
   let httpParams = new HttpParams();
 
@@ -78,7 +66,7 @@ export function getErrorMessage(
     const serverMessage = (error.error as { message?: string } | null)?.message;
     if (serverMessage) return serverMessage;
 
-    // Angular reports an unreachable host or a CORS rejection as status 0.
+    // Status 0: unreachable/CORS
     if (error.status === 0) return 'Cannot reach the server. Please check your connection.';
 
     return error.message || fallback;
@@ -89,11 +77,7 @@ export function getErrorMessage(
   return fallback;
 }
 
-/**
- * Fired once at startup so an idle free-tier backend begins waking while the
- * user is still reading the page, instead of on their first login attempt.
- * Failure is expected and ignored — this is a warm-up, not a health gate.
- */
+/** Startup warm-up; failure ignored */
 export function warmBackend(): Promise<void> {
   const healthUrl = config.apiUrl.replace(/\/api$/, '') + '/health';
   return fetch(healthUrl, { credentials: 'include', cache: 'no-store' }).then(

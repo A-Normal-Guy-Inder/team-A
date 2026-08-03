@@ -2,14 +2,7 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthStore } from '../../state/auth.store';
 
-/**
- * Shown for any URL the router does not recognise.
- *
- * The catch-all used to redirect to /login, which told a signed-in user with a
- * typo in the address bar that they had been signed out — and gave anyone else
- * a login form in place of an answer. A 404 says the one true thing: there is
- * nothing at this address.
- */
+/** Catch-all 404 route */
 @Component({
   selector: 'app-not-found',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -35,12 +28,7 @@ export class NotFound {
   readonly signedIn = this.auth.user;
 
   constructor() {
-    /*
-     * This route has no auth guard — it must render for anyone — so on a cold
-     * load nothing has asked /auth/me yet and a signed-in visitor would be
-     * offered "Back to login". Ask once, purely so the way out points somewhere
-     * useful; the answer changes the label, never whether the page is shown.
-     */
+    /* Probe sets button label */
     if (!this.auth.checked() && this.auth.status() !== 'loading') {
       void this.auth.fetchCurrentUser();
     }

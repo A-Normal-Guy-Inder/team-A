@@ -1,13 +1,6 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
-/*
- * The handful of lucide-react glyphs the app actually uses, inlined.
- *
- * lucide-angular exists, but pulling in an icon library to render Eye, EyeOff,
- * Bell, Upload and X is a dependency and a peer-version constraint for a
- * handful of <path> elements. These are the same lucide outlines, drawn with
- * currentColor so the surrounding CSS keeps control of them.
- */
+/* Inlined lucide outlines */
 
 @Component({
   selector: 'app-icon-eye',

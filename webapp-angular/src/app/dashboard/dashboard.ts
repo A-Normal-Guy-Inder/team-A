@@ -76,7 +76,7 @@ export class Dashboard {
   readonly unreadCount = this.notifications.unreadCount;
   readonly logoutPending = this.auth.logoutPending;
 
-  /** One overlay covers every in-flight write, exactly as the React `busy` flag did. */
+  /** Covers every in-flight write */
   readonly busy = computed(
     () =>
       this.tasks.saving() ||
@@ -95,7 +95,7 @@ export class Dashboard {
 
   private readonly debouncedSearch = debouncedSignal(this.searchTerm, 400);
 
-  /** Clearing the box refetches at once; typing waits out the debounce. */
+  /** Clearing skips the debounce */
   private readonly effectiveSearch = computed(() =>
     this.searchTerm() === '' ? '' : this.debouncedSearch(),
   );
@@ -103,12 +103,7 @@ export class Dashboard {
   private seeded = false;
 
   constructor() {
-    /*
-     * The URL owns the open section, so it is read here rather than kept in
-     * component state — a reload lands back on the same page instead of
-     * resetting to the feed. An unrecognised slug is a URL that does not exist,
-     * and is treated like any other: 404.
-     */
+    /* URL owns the section */
     inject(ActivatedRoute)
       .paramMap.pipe(takeUntilDestroyed())
       .subscribe((params) => {
@@ -123,15 +118,7 @@ export class Dashboard {
       onTaskUpdated: () => this.handleTaskUpdated(),
     });
 
-    /*
-     * Whichever list the active page shows, reload it when the page or the
-     * search term changes.
-     *
-     * The two signals read above the `untracked` boundary are the entire
-     * dependency set, deliberately. A fetch writes to its store, so if the call
-     * were tracked the write would re-run this effect and fetch again, forever —
-     * that is exactly what locked up the browser on the dashboard.
-     */
+    /* Untracked; prevents refetch loop */
     effect(() => {
       const page = this.activePage();
       const search = this.effectiveSearch();
@@ -144,8 +131,7 @@ export class Dashboard {
       });
     });
 
-    // Runs once the session is known: the bell and the Requests badge need
-    // their counts even on a page that does not otherwise load them.
+    // Loads badge counts globally
     effect(() => {
       const userId = this.user()?._id;
       if (!userId || this.seeded) return;
@@ -184,13 +170,7 @@ export class Dashboard {
     this.ui.setShowLogoutConfirm(true);
   }
 
-  /*
-   * The store only commits the read state once the server confirms it, so a
-   * failure leaves the row exactly as it was — visually identical to the click
-   * never having registered. Surfacing the error is what tells the two apart.
-   * It matters most for the dropdown's cross icon, where going read is the only
-   * feedback the button has.
-   */
+  /* Error surfacing distinguishes failure */
   async onMarkRead(id: string): Promise<void> {
     const result = await this.notifications.markRead(id);
     if (!result.ok) this.toasts.error(result.error);
@@ -208,17 +188,13 @@ export class Dashboard {
     if (!result.ok) this.toasts.error(result.error);
   }
 
-  /*
-   * Opening a notification lands on the page it is about. The panel closes with
-   * it — leaving it hanging over the page you just asked to see would hide the
-   * row you came to look at.
-   */
+  /* Navigates and closes panel */
   onNotificationNavigate(page: Page): void {
     this.ui.setActivePage(page);
     this.ui.toggleNotifications(false);
   }
 
-  /** Spells out the consequence, since deleting also cancels other people's applications. */
+  /** Warns about cancelled applications */
   deleteMessage(task: Task): string {
     return `Delete "${task.title}"? Anyone who applied will be told it has been closed.`;
   }
@@ -234,7 +210,7 @@ export class Dashboard {
     }
 
     this.toasts.success('Task deleted');
-    // The badge counts applications against tasks that no longer exist.
+    // Badge count now stale
     this.requests.fetchReceived();
   }
 

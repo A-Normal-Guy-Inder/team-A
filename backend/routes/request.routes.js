@@ -10,7 +10,7 @@ router.get("/received", controller.listReceived);
 router.get("/sent", controller.listSent);
 
 router.post("/:taskId/send", writeLimiter, validate(schemas.createRequestSchema), controller.createRequest);
-// Declared before the generic PUT so "withdraw" is never read as a request id.
+// Must precede generic PUT
 router.patch(
     "/:requestId/withdraw",
     writeLimiter,

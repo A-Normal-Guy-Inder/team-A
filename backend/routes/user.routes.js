@@ -16,10 +16,7 @@ router.put(
     controller.updateProfile
 );
 
-/*
- * The picture is set and cleared on its own, outside the profile form's save —
- * so the pair sits here together rather than the upload hiding inside PUT /profile.
- */
+/* Picture set/cleared independently */
 router.post(
     "/profile-picture",
     writeLimiter,

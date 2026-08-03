@@ -6,11 +6,7 @@ import { RequestsStore } from '../../state/requests.store';
 import { ToastService } from '../../core/toast/toast.service';
 import { HelpRequest } from '../../core/api.types';
 
-/*
- * Withdrawn earns a tab of its own: withdrawing keeps the application rather
- * than deleting it, so without somewhere to see them those rows would only ever
- * surface under "All".
- */
+/* Withdrawn needs a tab */
 const STATUS_FILTERS = [
   { value: 'all', label: 'All' },
   { value: 'pending', label: 'Pending' },
@@ -25,7 +21,7 @@ const STATUS_FILTERS = [
   imports: [SentRequestCard, Pagination, ConfirmModal],
   template: `
     <div class="my-requests-page">
-      <!-- Heading and subtitle live in the topbar, which every section shares. -->
+      <!-- Heading lives in topbar -->
       <div class="request-filters" role="tablist" aria-label="Filter requests by status">
         @for (filter of FILTERS; track filter.value) {
           <button
@@ -93,14 +89,10 @@ export class SentRequestsPage {
   readonly isLoading = computed(() => this.sent().status === 'loading');
   readonly confirming = signal<HelpRequest | null>(null);
 
-  /** Empty query status means no filter, which the tabs call "all". */
+  /** Empty status means "all" */
   readonly activeFilter = computed(() => this.sent().query.status || 'all');
 
-  /*
-   * Counts come from the server and span every request the user has sent,
-   * regardless of which tab is open — a tab has to say how many rows it would
-   * show, not how many the current one does.
-   */
+  /* Counts span all tabs */
   countFor(value: string): number {
     return this.sent().meta.statusCounts?.[value] ?? 0;
   }
@@ -108,8 +100,7 @@ export class SentRequestsPage {
   setFilter(value: string): void {
     if (this.activeFilter() === value) return;
 
-    // 'all' is sent as an empty status, which is what the endpoint treats as
-    // unfiltered. Page resets to 1 — page 4 of pending rarely exists.
+    // Empty status, reset page
     this.requests.fetchSent({ status: value === 'all' ? '' : value, page: 1 });
   }
 

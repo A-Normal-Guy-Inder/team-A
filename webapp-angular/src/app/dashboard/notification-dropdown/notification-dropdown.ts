@@ -39,11 +39,7 @@ import { IconX } from '../../shared/icons';
                 <p class="notification-time">{{ formatTimestamp(note.createdAt) }}</p>
               </div>
 
-              <!--
-                The escape hatch from the whole-row click: marks the notification
-                read and leaves you where you are. Only unread rows get one —
-                on a row that is already read it would be a no-op button.
-              -->
+              <!-- Unread rows only -->
               @if (!note.read) {
                 <button
                   type="button"
@@ -78,7 +74,7 @@ export class NotificationDropdown {
   readonly markAllRead = output<void>();
   readonly markRead = output<string>();
   readonly loadMore = output<void>();
-  /** The dashboard page the clicked notification belongs to. */
+  /** Target dashboard page */
   readonly navigate = output<Page>();
 
   targetPage(note: AppNotification): Page | null {
@@ -90,12 +86,7 @@ export class NotificationDropdown {
     return page ? `Open ${page}` : '';
   }
 
-  /*
-   * Clicking the row does both jobs: it clears the unread state and takes you
-   * to the page the notification is about. Notifications whose type has no
-   * destination still mark themselves read — that was the whole behaviour
-   * before, and it is still right for them.
-   */
+  /* Marks read, then navigates */
   onItemClick(note: AppNotification): void {
     if (!note.read) this.markRead.emit(note._id);
 
@@ -104,8 +95,7 @@ export class NotificationDropdown {
   }
 
   onDismissClick(event: Event, note: AppNotification): void {
-    // Without this the row handler behind the button would navigate anyway,
-    // which is exactly what the cross exists to avoid.
+    // Stops the row navigating
     event.stopPropagation();
     if (!note.read) this.markRead.emit(note._id);
   }

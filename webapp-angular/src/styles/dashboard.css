@@ -1,12 +1,4 @@
-/*
- * Dashboard styles. Tailwind @apply; the @tailwind directives live in
- * index.css (see auth.css for why they are not repeated here).
- *
- * Class names, selectors and every breakpoint are preserved from the original
- * stylesheet — `max-*` variants and arbitrary `max-[NNNpx]:` variants mirror
- * the original max-width media queries, since Tailwind's bare `md:` / `sm:`
- * prefixes are min-width and would invert them.
- */
+/* Dashboard styles; max-* variants */
 
 .dashboard-layout {
   @apply flex min-h-screen bg-slate-50;
@@ -25,20 +17,12 @@
   @apply text-xl font-semibold tracking-tight text-slate-900;
 }
 
-/*
- * Heading and subtitle stack inside the topbar's fixed 72px. `leading-tight`
- * on the pair is what keeps them inside it — at the default line height the two
- * lines together overflow the bar.
- */
+/* leading-tight fits 72px */
 .topbar-heading {
   @apply flex min-w-0 flex-col justify-center leading-tight;
 }
 
-/*
- * Truncated rather than wrapped: a second line would push the heading off
- * centre and grow the bar. The subtitle is orientation, not content, so losing
- * its tail on a narrow window costs nothing.
- */
+/* Truncated, never wrapped */
 .topbar-subtitle {
   @apply mt-0.5 truncate text-xs font-normal text-slate-500;
 }
@@ -69,12 +53,7 @@
          text-slate-600 transition hover:bg-slate-100 hover:text-slate-900;
 }
 
-/*
- * The page title goes when the hamburger arrives, at the same 768px breakpoint
- * that hides the sidebar. Below it the topbar has to fit burger, search and
- * bell in one row, and the heading was the piece squeezing the search field —
- * the burger's own menu already names the current page, so nothing is lost.
- */
+/* Title yields to hamburger */
 @media (max-width: 768px) {
   .topbar-left .topbar-heading {
     display: none;
@@ -299,12 +278,7 @@
   @apply flex items-center justify-between gap-2 px-4 pb-1 pt-3.5;
 }
 
-/*
- * The 100px cap truncated half the category list — "Moving & Shifting",
- * "Shopping Assistance" and "Household Help" all rendered clipped. The badge
- * sizes to its text instead; at 10px uppercase even the longest category leaves
- * room for the status badge beside it.
- */
+/* Sizes to text, uncapped */
 .badges-container .tag {
   @apply inline-block min-w-0 whitespace-nowrap rounded-md border-0
          bg-sky-50 px-2.5 py-1 text-[10px] font-semibold uppercase
@@ -316,10 +290,7 @@
          px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider;
 }
 
-/*
- * Status palette — one tinted-surface + ring treatment across every state so
- * badges read as a single family. Each pairing clears WCAG AA for small text.
- */
+/* Status palette; WCAG AA */
 .status-pending {
   @apply bg-amber-50 text-amber-800 ring-1 ring-inset ring-amber-200;
 }
@@ -390,22 +361,13 @@
   @apply text-sm;
 }
 
-/*
- * `flex-wrap` is the release valve for the name. When the author block needs
- * more width than the row can spare, the button drops to its own line instead
- * of squeezing the name into a mid-word break.
- */
+/* flex-wrap protects the name */
 .task-footer {
   @apply mt-auto flex flex-wrap items-center justify-between gap-y-2.5
          border-t border-slate-100 bg-slate-50/40 p-4;
 }
 
-/*
- * `min-w-0` used to be here. It let the block shrink past its own min-content
- * width, which is what actually produced "Harmanpree / t Kaur" — no
- * overflow-wrap value can prevent a break once the box is narrower than the
- * longest word. `min-content` floors it at that word instead.
- */
+/* min-content, never min-w-0 */
 .task-author {
   @apply flex flex-1 items-center gap-2.5;
   min-width: min-content;
@@ -418,14 +380,7 @@
          ring-2 ring-white;
 }
 
-/*
- * Show the whole name.
- *
- * This was a column flex whose spans each carried `nowrap` + ellipsis, so a
- * two-part name stacked onto two lines and both halves were cut at the card
- * edge — "Harmanpreet Kaur" rendered as "Harmanpre…" over "Kaur". It is one
- * phrase on one line now, wrapping to a second only when it truly has to.
- */
+/* One phrase, one line */
 .author-name {
   font-size: 13px;
   font-weight: 500;
@@ -441,13 +396,7 @@
   font-weight: 500;
   color: #374151;
 
-  /*
-   * `break-word`, not `anywhere`. They break identically once a word is too
-   * wide, but `anywhere` also drops the min-content width to one character, so
-   * the flex item collapsed and "Harmanpreet Kaur" wrapped as "Harmanpree /
-   * t Kaur". `break-word` leaves the intrinsic width at the longest word, so
-   * the break lands on the space and only a genuinely oversized name splits.
-   */
+  /* break-word, never anywhere */
   white-space: normal;
   overflow-wrap: break-word;
 }
@@ -497,11 +446,7 @@
   @apply bg-slate-100 text-slate-700 hover:bg-slate-200 hover:text-slate-900;
 }
 
-/*
- * The owner's two actions share the footer slot. `.task-footer button` adds a
- * left margin to every button, which would double up between the pair — the
- * gap here is the only spacing they need, so the margin is reset.
- */
+/* Gap only; margin reset */
 .owner-actions {
   @apply flex shrink-0 items-center gap-2;
 }
@@ -510,10 +455,7 @@
   margin-left: 0;
 }
 
-/*
- * Destructive, so it reads as such — but muted until hover rather than a
- * permanent red block competing with Edit for attention.
- */
+/* Muted until hover */
 .task-card .delete-btn {
   @apply bg-rose-50 text-rose-600
          hover:bg-rose-600 hover:text-white hover:shadow-md hover:shadow-rose-500/25
@@ -529,7 +471,7 @@
   @apply h-[180px] w-full overflow-hidden border-b border-slate-100 bg-slate-50;
 }
 
-/* Gentle zoom on hover — the wrapper clips the overflow. */
+/* Wrapper clips the zoom */
 .task-image {
   @apply block h-full w-full object-cover transition-transform duration-500;
 }
@@ -642,7 +584,7 @@
          focus-visible:ring-brand-500 focus-visible:ring-offset-2;
 }
 
-/* Was #3b82f6 blue, which read as a second brand colour next to the indigo. */
+/* Was #3b82f6 blue */
 .btn-submit {
   @apply bg-gradient-to-br from-brand-500 to-brand-600 text-white shadow-sm
          hover:-translate-y-px hover:shadow-lg hover:shadow-brand-500/30
@@ -769,7 +711,7 @@
   @apply flex -translate-y-px;
 }
 
-/* Was flat `red`; tuned to the palette and ringed so it reads on any surface. */
+/* Was flat red */
 .notification-badge {
   @apply absolute -right-0.5 -top-1 flex h-[18px] min-w-[18px] items-center
          justify-center rounded-full bg-rose-500 px-1 text-[10px]
@@ -791,12 +733,7 @@
   z-index: 999;
   border: 1px solid #e6e6e6;
 
-  /*
-   * The panel unfolds from the bell rather than being swapped in. The origin is
-   * the top-right corner so the growth reads as coming out of the icon that
-   * opened it, and the easing is a soft overshoot-free decelerate — the panel
-   * arrives quickly and settles, instead of drifting.
-   */
+  /* Unfolds from the bell */
   transform-origin: top right;
   animation: notification-panel-in 200ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
@@ -812,12 +749,7 @@
   }
 }
 
-/*
- * Rows follow the panel in a short cascade. The delays are deliberately tiny —
- * this is a list you open to read, so the stagger should register as the list
- * arriving rather than as something to sit through. Only the first six are
- * staggered; past that the panel is scrolled anyway and later rows just fade.
- */
+/* Short cascade; first six */
 .notification-list .notification-item {
   animation: notification-item-in 240ms ease both;
 }
@@ -852,7 +784,7 @@
   }
 }
 
-/* The unread dot lands last, with a small pop that draws the eye to it. */
+/* Unread dot lands last */
 .notification-item.unread .notification-dot {
   animation: notification-dot-in 280ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
   animation-delay: 180ms;
@@ -867,17 +799,9 @@
   }
 }
 
-/*
- * Motion here is decoration, so under a reduced-motion preference the panel and
- * its rows simply appear. A plain fade is kept: it still signals that something
- * opened, without anything moving or scaling.
- */
+/* Reduced motion: plain fade */
 @media (prefers-reduced-motion: reduce) {
-  /*
-   * `:nth-child(n)` matches every row and matches the specificity of the
-   * per-row delay rules above — without it those delays outrank this override
-   * and the cascade survives into reduced motion.
-   */
+  /* nth-child(n) matches specificity */
   .notification-dropdown,
   .notification-list .notification-item:nth-child(n) {
     animation: notification-fade-in 120ms ease both;
@@ -938,7 +862,7 @@
   background: #f7f9ff;
 }
 
-/* Only rows that actually go somewhere advertise themselves as clickable. */
+/* Only navigable rows clickable */
 .notification-item.notification-linked:hover {
   background: #eef2ff;
 }
@@ -949,11 +873,7 @@
   box-shadow: inset 0 0 0 2px #6366f1;
 }
 
-/*
- * The "just mark it read" affordance. It sits inside the row, so its own click
- * handler stops propagation (see notification-dropdown.ts) — the styling here
- * only has to make it look like a separate target from the row behind it.
- */
+/* Separate target inside row */
 .notification-dismiss {
   flex-shrink: 0;
   display: flex;
@@ -1276,11 +1196,7 @@
          disabled:cursor-not-allowed disabled:opacity-60;
 }
 
-/*
- * Confirm dialogs put the affirmative action first and the dismissive one
- * last. Both were solid indigo, so the two choices were visually identical —
- * the trailing button is now a quiet secondary.
- */
+/* Affirmative first, dismissive last */
 .modal button:first-child {
   @apply bg-gradient-to-br from-brand-500 to-brand-600 text-white shadow-sm;
 }
@@ -1320,7 +1236,7 @@
   gap: 12px;
 }
 
-/* Was #8b2c00 rust, the only brown in the app. */
+/* Was #8b2c00 rust */
 .request-card h3 {
   @apply mb-2 font-semibold tracking-tight text-slate-800;
 }
@@ -1348,7 +1264,7 @@
          disabled:cursor-not-allowed disabled:opacity-60;
 }
 
-/* Was a flat #2f2f2f grey; now a slate ramp that ties into the brand. */
+/* Was flat #2f2f2f grey */
 .sidebar {
   @apply fixed left-0 top-0 flex h-screen w-[240px]
          flex-col overflow-hidden
@@ -1356,20 +1272,7 @@
          text-white ring-1 ring-inset ring-white/5;
 }
 
-/*
- * Only the menu scrolls — the logo and the footer stay put.
- *
- * Scrolling the whole rail instead meant its scroll height was logo + menu +
- * footer, which overshoots a 100vh rail by a few pixels on a normal window: a
- * scrollbar appeared at full screen for ~14px of overflow that no one needed to
- * reach. Confining the overflow to the list keeps the bar absent until the
- * menu itself genuinely cannot fit, and it keeps Logout on screen at every
- * height rather than parked below the fold.
- *
- * `min-h-0` is the part that makes it work: a flex child defaults to
- * `min-height: auto`, which refuses to shrink below its content and hands the
- * overflow back to the rail.
- */
+/* Menu scrolls; min-h-0 */
 .sidebar-header {
   @apply shrink-0;
 }
@@ -1377,13 +1280,13 @@
 .sidebar-menu {
   @apply min-h-0 flex-1 overflow-y-auto overflow-x-hidden;
 
-  /* Stops the list's scroll from chaining into the feed at either end. */
+  /* Prevents scroll chaining */
   overscroll-behavior: contain;
   scrollbar-width: thin;
   scrollbar-color: rgba(148, 163, 184, 0.4) transparent;
 }
 
-/* WebKit needs the explicit pseudo-elements; keep the bar dark-theme subtle. */
+/* WebKit needs explicit pseudo-elements */
 .sidebar-menu::-webkit-scrollbar {
   width: 6px;
 }
@@ -1406,7 +1309,7 @@
   @apply mb-7;
 }
 
-/* `mb-auto` is gone: the menu now flexes to fill the gap itself (see below). */
+/* Menu flexes; no mb-auto */
 .sidebar-menu {
   @apply list-none space-y-1 p-0;
 }
@@ -1417,7 +1320,7 @@
          hover:bg-white/10 hover:text-white;
 }
 
-/* Active row gets an accent rail so it reads without relying on fill alone. */
+/* Accent rail, not fill */
 .sidebar-menu li.active {
   @apply bg-white/10 text-white
          before:absolute before:left-0 before:top-1/2 before:h-5 before:w-[3px]
@@ -1506,21 +1409,7 @@
   transform: translateY(0);
 }
 
-/*
- * Short-window density pass for the sidebar.
- *
- * At its normal spacing the rail wants ~565px, so on a laptop window (a 720p
- * screen leaves roughly 495px of viewport once browser chrome and the taskbar
- * are gone) the menu overflowed and showed a scrollbar on what the user
- * reasonably calls a full screen. Tightening the logo margin, the row padding
- * and the footer reclaims ~85px and brings it under 480px, so the bar stays
- * away until the window is genuinely small.
- *
- * Every selector is scoped with `.sidebar` on purpose. These rules have to
- * outrank the base declarations further up the file and the `max-width` blocks
- * further down, and matching their specificity would leave it to source order —
- * which is what silently defeated the first attempt at this.
- */
+/* Density pass; .sidebar-scoped */
 @media (max-height: 640px) {
   .sidebar .logo {
     margin-bottom: 12px;
@@ -1591,12 +1480,7 @@
          focus-visible:ring-brand-500 focus-visible:ring-offset-2;
 }
 
-/*
- * This re-declaration of .btn-submit / .btn-cancel sits after the one in the
- * add-task form section and therefore wins. It used to flip the button from
- * blue to green, so the two submit buttons in the app never matched. Both
- * definitions now resolve to the same brand treatment.
- */
+/* Later declaration wins */
 .btn-submit {
   @apply flex-1 bg-gradient-to-br from-brand-500 to-brand-600 text-white shadow-sm;
 }
@@ -2099,7 +1983,7 @@
   margin-top: 4px;
 }
 
-/* My Requests status filters ---------------------------------------------- */
+/* My Requests filters ----------------------------------------------------- */
 
 .request-filters {
   @apply mb-5 flex flex-wrap gap-2;
@@ -2119,10 +2003,7 @@
   @apply border-brand-600 bg-brand-600 text-white shadow-sm;
 }
 
-/*
- * The count pill inherits its colours from the tab, so the active tab does not
- * need a second rule to keep the pill legible against its filled background.
- */
+/* Pill inherits tab colours */
 .request-filter-count {
   @apply rounded-full bg-slate-100 px-2 py-0.5 text-xs tabular-nums
          text-slate-600;
@@ -2139,7 +2020,7 @@
   justify-content: space-between;
   align-items: center;
   margin-top: auto;
-  /* The Withdraw button is a third item here; let it drop rather than squeeze. */
+  /* Third item may drop */
   flex-wrap: wrap;
   gap: 8px;
 }
@@ -2151,10 +2032,7 @@
   font-weight: 600;
 }
 
-/*
- * A quiet outline button. Retracting an application is deliberate but not
- * destructive — nothing is deleted — so it does not carry the red of a delete.
- */
+/* Outline, not destructive red */
 .withdraw-btn {
   @apply cursor-pointer rounded-lg border border-slate-300 bg-white px-3 py-1.5
          text-[13px] font-semibold text-slate-600 transition-all duration-200

@@ -1,12 +1,4 @@
-/*
- * Settings surfaces. Tailwind @apply; directives live in index.css.
- *
- * `.password-field` / `.toggle-password` are scoped under `.settings-card`
- * here. Both this file and auth.css define those class names, and because the
- * settings routes are lazy-loaded their stylesheet lands after the auth one —
- * previously the settings rules won globally and shifted the eye icon on the
- * login form for the rest of the session. Scoping keeps the two apart.
- */
+/* Settings; scoped under .settings-card */
 
 .settings-container {
   @apply mx-auto flex max-w-[700px] flex-col gap-5 p-2.5
@@ -42,7 +34,7 @@
          disabled:text-slate-500;
 }
 
-/* The file picker is not a text field — drop the text-input chrome. */
+/* Drop text-input chrome */
 .settings-card input[type="file"] {
   @apply mb-0 cursor-pointer border-0 bg-transparent p-0 text-sm
          text-slate-600 shadow-none
@@ -65,12 +57,7 @@
          max-[600px]:w-full;
 }
 
-/*
- * The two credential actions share one card, so they sit side by side and split
- * the row evenly — `.settings-save-btn` is 35% wide on its own, which would
- * leave them huddled against the left edge. They stack below 600px, matching
- * how that breakpoint already widens the button to full width.
- */
+/* Stacks below 600px */
 .credentials-actions {
   @apply flex gap-3 max-[600px]:flex-col;
 }
@@ -79,7 +66,7 @@
   @apply w-auto flex-1;
 }
 
-/* A quieter sibling to .settings-save-btn, for the escape hatch in a pair. */
+/* Quieter .settings-save-btn sibling */
 .settings-cancel-btn {
   @apply w-auto flex-1 rounded-lg border border-slate-200 bg-white p-3 text-sm
          font-semibold text-slate-600 shadow-sm transition duration-200
@@ -132,7 +119,7 @@
   @apply flex flex-1 flex-wrap items-center gap-3;
 }
 
-/* Sized to the row it sits in, not the full-width block a card button gets. */
+/* Row-sized, not full-width */
 .profile-picture-controls .settings-cancel-btn {
   @apply w-auto flex-none px-4 py-2 text-[13px]
          max-[600px]:w-auto;
@@ -150,7 +137,7 @@
   @apply float-right text-xs tabular-nums text-slate-400;
 }
 
-/* Password field (scoped — see file header) -------------------------------- */
+/* Password field (scoped) ------------------------------------------------- */
 
 .settings-card .password-field {
   @apply relative w-full;
@@ -160,11 +147,7 @@
   @apply w-full pr-12;
 }
 
-/*
- * Centred on the input itself rather than the wrapper: the wrapper is taller
- * than the input because of the input's bottom margin, so `top: 50%` sat low.
- * Input height = 12px padding * 2 + ~20px line-box ≈ 44px, so 22px.
- */
+/* Centred on input */
 .settings-card .toggle-password {
   @apply absolute right-2 top-[22px] flex h-8 w-8 -translate-y-1/2
          cursor-pointer items-center justify-center rounded-lg border-0

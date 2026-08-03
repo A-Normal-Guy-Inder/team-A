@@ -22,7 +22,7 @@ export class ChangeEmail {
   private readonly auth = inject(AuthStore);
   private readonly toasts = inject(ToastService);
 
-  /** 1: confirm identity, 2: name the new address, 3: prove you own it. */
+  /** Password, address, OTP */
   readonly step = signal(1);
   readonly loading = signal(false);
   readonly timer = signal(0);
@@ -90,7 +90,7 @@ export class ChangeEmail {
       if (body?.data?.user) this.auth.patchUser(body.data.user);
       this.toasts.success('Email updated successfully');
 
-      // Back to the section this was launched from, rather than the feed.
+      // Back to settings section
       this.router.navigate(['/Dashboard', 'settings']);
     } catch (error) {
       this.toasts.error(getErrorMessage(error, 'Failed to verify OTP'));

@@ -1,11 +1,6 @@
 import { PAGES, PAGE_SUBTITLES, Page } from '../state/ui.store';
 
-/*
- * The subtitle map is keyed by Page, so a missing entry is a type error rather
- * than a blank line in the UI. What the type cannot catch is an entry that
- * exists but says nothing useful, or one left identical to the heading it sits
- * under — which is what these check.
- */
+/* Checks what types cannot */
 describe('dashboard page subtitles', () => {
   it('covers every section', () => {
     for (const page of PAGES) {

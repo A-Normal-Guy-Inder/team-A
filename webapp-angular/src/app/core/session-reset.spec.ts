@@ -9,12 +9,7 @@ import { TasksStore } from '../state/tasks.store';
 import { UiStore } from '../state/ui.store';
 import { PROTECTED_PATH_PREFIXES, isProtectedUrl } from '../app.routes';
 
-/*
- * Logging out has to leave nothing behind that a restored page could render.
- * The token is an httpOnly cookie the server clears, but everything already
- * fetched with it lives in the stores — if that survives, the next paint of a
- * back-navigated dashboard shows the previous user's content.
- */
+/* Logout must clear stores */
 describe('session teardown', () => {
   function setup() {
     TestBed.configureTestingModule({
@@ -82,11 +77,7 @@ describe('session teardown', () => {
   });
 });
 
-/*
- * A BFCache restore re-checks the session, but only where being signed out
- * actually matters — bouncing someone off /login for not being logged in would
- * be absurd.
- */
+/* Only protected URLs re-check */
 describe('protected URL detection', () => {
   it('derives its list from the guarded routes', () => {
     expect(PROTECTED_PATH_PREFIXES).toContain('/Dashboard');

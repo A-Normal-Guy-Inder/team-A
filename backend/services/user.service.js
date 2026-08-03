@@ -21,12 +21,7 @@ async function getProfile(userId) {
     return user;
 }
 
-/*
- * Uploads `file` and points the document at it, in memory only. Hands back the
- * public id it displaced so the caller can drop that from Cloudinary — but only
- * after the save has gone through, since a failed save has to leave the old
- * image exactly where it was.
- */
+/* Returns displaced public id */
 async function attachPicture(user, file) {
     const image = await uploadToCloudinary(file.path, "profile_pictures").catch((err) => {
         throw ApiError.badRequest(err.message || "Failed to upload the profile picture");
@@ -49,7 +44,7 @@ async function updateProfile(userId, payload, file) {
     if (payload.first_name !== undefined) user.first_name = payload.first_name;
     if (payload.last_name !== undefined) user.last_name = payload.last_name;
     if (payload.phone_number !== undefined) user.phone_number = payload.phone_number;
-    // An empty string is a real value here — it is how the field is cleared.
+    // Empty string clears field
     if (payload.bio !== undefined) user.bio = String(payload.bio).trim();
 
     try {
@@ -66,12 +61,7 @@ async function updateProfile(userId, payload, file) {
     return { user: user.toPublicJSON(), message: "Profile updated successfully" };
 }
 
-/*
- * Sets the profile picture on its own, as the mirror image of
- * removeProfilePicture below. The picture is no longer part of what the profile
- * form saves, so choosing a file takes effect there and then and the two
- * controls beside each other behave the same way.
- */
+/* Sets picture standalone */
 async function uploadProfilePicture(userId, file) {
     if (!file) throw ApiError.badRequest("Please choose an image to upload.");
 
@@ -94,14 +84,7 @@ async function uploadProfilePicture(userId, file) {
     return { user: user.toPublicJSON(), message: "Profile picture updated" };
 }
 
-/*
- * Drops the profile picture.
- *
- * The Cloudinary object goes only after the document has been saved without it:
- * if the remote delete fails the user still has no picture, which is what they
- * asked for. Doing it the other way round could leave the field pointing at an
- * image that no longer exists.
- */
+/* Drops picture, saves first */
 async function removeProfilePicture(userId) {
     const user = await User.findById(userId);
     if (!user) throw ApiError.notFound("User not found");
@@ -159,11 +142,7 @@ async function sendChangeEmailOtp(newEmailRaw, userId) {
 
     await issueOtp(user, { purpose: OTP_PURPOSE.EMAIL_CHANGE, email: newEmail });
 
-    /*
-     * The code went to the new address, so the old one — the only address the
-     * real owner is guaranteed to hold — would otherwise learn nothing about an
-     * attempt to move the account away from them.
-     */
+    /* Warn the old address */
     await sendEmailChangeWarning(previousEmail, newEmail);
 
     return { message: "OTP sent to new email address" };
@@ -193,8 +172,7 @@ async function verifyChangeEmailOtp(otp, userId) {
 
     await user.save();
 
-    // Last message the old address will ever get from us — it is no longer on
-    // the account, so it has to be told the change actually went through.
+    // Final notice, old address
     await sendEmailChangedNotice(previousEmail, user.email_id);
 
     return { message: "Email updated successfully", user: user.toPublicJSON() };
@@ -219,11 +197,7 @@ async function resendChangeEmailOtp(userId) {
     return { message: "OTP resent successfully" };
 }
 
-/*
- * Both directions ask for the password. Turning 2FA *off* is the one that
- * matters — a hijacked session that could quietly disable it would make the
- * feature decorative — but requiring it symmetrically keeps the UI honest.
- */
+/* Both directions require password */
 async function setTwoFactor(userId, { enabled, password }) {
     const user = await User.findById(userId).select("+password");
     if (!user) throw ApiError.notFound("User not found");
@@ -233,7 +207,7 @@ async function setTwoFactor(userId, { enabled, password }) {
 
     const next = enabled === true || enabled === "true";
     user.two_factor_enabled = next;
-    // A stale pending window must not survive the setting being turned off.
+    // Clear stale pending window
     if (!next) user.two_factor_pending_until = null;
     await user.save();
 

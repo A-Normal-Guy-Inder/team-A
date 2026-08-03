@@ -39,15 +39,7 @@ async function sendWelcomeEmail(email, name) {
     }
 }
 
-/*
- * Security notices to the address being moved away from.
- *
- * The OTP for an email change goes to the *new* address, which means the person
- * who owns the old one — the account's actual owner, if this was not them —
- * would otherwise see nothing at all until they were locked out. These are the
- * only warning they get, so a failure to send is logged rather than thrown: it
- * must not roll back a change the user legitimately asked for.
- */
+/* Notices to old address */
 function maskEmail(email) {
     const [name = "", domain = ""] = String(email).split("@");
     const visible = name.slice(0, 2);

@@ -6,8 +6,7 @@ const { setNoStore } = require("./noStore.middleware");
 const env = require("../config/env");
 
 const protect = asyncHandler(async (req, res, next) => {
-    // Applied before any check below, so the 401s are uncacheable too.
-    // Everything behind this middleware is somebody's private data.
+    // Before checks: 401s uncacheable
     setNoStore(res);
 
     const token = req.cookies?.[env.cookieName];
@@ -40,16 +39,7 @@ const protect = asyncHandler(async (req, res, next) => {
         throw ApiError.unauthorized("Session is no longer valid, please login again");
     }
 
-    /*
-     * Clearing the cookie only removes the browser's copy — the token itself
-     * stays valid until it expires, so anything that captured it could keep
-     * using it after the user believed they had logged out. Logout stamps
-     * sessions_valid_from, and every token minted earlier dies here.
-     *
-     * `iat` has one-second resolution, so a token issued in the same second as
-     * the logout would survive a strict comparison; rounding the cutoff up
-     * closes that window.
-     */
+    /* Logout cutoff; ceil iat */
     if (user.sessions_valid_from) {
         const invalidBeforeSeconds = Math.ceil(new Date(user.sessions_valid_from).getTime() / 1000);
         if (decoded.iat < invalidBeforeSeconds) {

@@ -24,11 +24,7 @@ export const emptyList = <T>(): ListState<T> => ({
   error: null,
 });
 
-/*
- * The Redux versions of these mutated a draft in place — Immer made that safe.
- * Signals hold plain values, so each helper returns a fresh object instead and
- * the store writes it back with `.update()`.
- */
+/* Helpers return fresh objects */
 
 export function listPending<T>(slice: ListState<T>): ListState<T> {
   return { ...slice, status: 'loading', error: null };
@@ -67,7 +63,7 @@ export function unwrapList<T>(
   return { items, meta };
 }
 
-/** Shared by tasks and requests: the query keys the list endpoints accept. */
+/** Query keys for lists */
 export function buildListParams(
   query: ListQuery,
   extra: { category?: boolean } = {},

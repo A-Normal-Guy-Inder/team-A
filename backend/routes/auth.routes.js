@@ -8,11 +8,7 @@ const schemas = require("../validators/auth.validator");
 
 const router = express.Router();
 
-/*
- * No auth response is cacheable: they mint and clear session cookies and echo
- * back the signed-in user. A stored copy of /auth/me is precisely what lets a
- * logged-out back-navigation look logged in.
- */
+/* No auth response cacheable */
 router.use(noStore);
 
 router.post("/register", otpLimiter, validate(schemas.registerSchema), controller.register);

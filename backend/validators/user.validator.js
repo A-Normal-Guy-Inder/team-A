@@ -5,7 +5,7 @@ const updateProfileSchema = {
         first_name: [rules.required("First name"), rules.string("First name", { min: 1, max: 50 })],
         last_name: [rules.required("Last name"), rules.string("Last name", { min: 1, max: 50 })],
         phone_number: [rules.required("Phone number"), rules.phone()],
-        // Optional, and blank is allowed — that is how you clear it.
+        // Optional; blank clears it
         bio: [rules.string("Bio", { max: 500 })],
     },
 };

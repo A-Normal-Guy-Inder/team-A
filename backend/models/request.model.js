@@ -8,7 +8,7 @@ const requestSchema = new mongoose.Schema(
         status: { type: String, enum: REQUEST_STATUSES, default: REQUEST_STATUS.PENDING },
         description: { type: String, default: "", trim: true, maxlength: 1000 },
         rejectedAt: { type: Date, default: null },
-        // When the requester retracted it — the audit trail for a withdrawal.
+        // Withdrawal audit trail
         withdrawnAt: { type: Date, default: null },
         resolvedAt: { type: Date, default: null },
     },

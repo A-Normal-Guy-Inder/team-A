@@ -2,16 +2,13 @@
 module.exports = {
   content: ["./src/**/*.{html,ts}"],
 
-  // The app ships ~4,000 lines of hand-written CSS that relies on browser
-  // defaults. Preflight would reset those out from under it, so it stays off
-  // and utilities are layered on top instead.
+  // Off: hand-written CSS
   corePlugins: {
     preflight: false,
   },
 
   theme: {
-    // Mirrors the breakpoints already used across auth.css / dashboard.css so
-    // responsive behaviour is unchanged.
+    // Mirrors existing stylesheet breakpoints
     screens: {
       xs: "360px",
       sm: "480px",

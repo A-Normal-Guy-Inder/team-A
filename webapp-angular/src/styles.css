@@ -16,16 +16,7 @@ body {
   background-color: #f1f5f9;
 }
 
-/*
- * Form-control normalisation.
- *
- * Tailwind's Preflight is disabled (see tailwind.config.js) so it cannot reset
- * the ground out from under the pre-existing stylesheets. The cost is that
- * <button> keeps the UA default `border: 2px outset ButtonBorder`, which drew a
- * dark outline around every gradient button. This is the narrow slice of
- * Preflight the app actually needs — it only clears UA chrome, and each
- * component rule still paints its own appearance on top.
- */
+/* Clears UA chrome */
 button {
   border: 0;
   background-color: transparent;
@@ -38,17 +29,12 @@ button {
   -webkit-appearance: button;
 }
 
-/* Keep native focus rings for keyboard users where a rule adds none. */
+/* Keep native focus rings */
 button:focus-visible {
   outline-offset: 2px;
 }
 
-/*
- * React components render straight into the parent flow; Angular wraps each one
- * in a host element that defaults to `display: inline`. The layout stylesheets
- * assume the class-carrying div is the outermost box, so every host that only
- * exists to hold a laid-out child is taken back out of the flow here.
- */
+/* Hosts leave flow */
 app-root,
 app-loader,
 app-sidebar,

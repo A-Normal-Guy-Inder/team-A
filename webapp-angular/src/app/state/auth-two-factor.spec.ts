@@ -2,13 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { ApiService } from '../core/api.service';
 import { AuthStore } from './auth.store';
 
-/*
- * The second factor exists to stop a correct password alone from signing anyone
- * in. That guarantee lives in what the store does with the two shapes
- * /auth/login can answer with, so this pins the branch: a twoFactorRequired
- * reply must leave the session empty and report the pending step, and only the
- * follow-up verify call may populate `user`.
- */
+/* Password alone insufficient */
 describe('AuthStore two-factor login', () => {
   function setup(responses: Record<string, unknown>) {
     const calls: { path: string; body: unknown }[] = [];
@@ -45,7 +39,7 @@ describe('AuthStore two-factor login', () => {
     expect(result.value.email).toBe('a@b.com');
     expect(result.value.user).toBeNull();
 
-    // The guards read these; a half-signed-in state here would defeat the point.
+    // Guards read this
     expect(store.user()).toBeNull();
   });
 
@@ -69,7 +63,7 @@ describe('AuthStore two-factor login', () => {
     expect(store.user()).toEqual(user);
     expect(store.checked()).toBe(true);
 
-    // The session length chosen on the login form has to survive the detour.
+    // rememberMe survives the detour
     expect(calls[1].path).toBe('/auth/verify-2fa');
     expect((calls[1].body as { rememberMe: boolean }).rememberMe).toBe(true);
   });

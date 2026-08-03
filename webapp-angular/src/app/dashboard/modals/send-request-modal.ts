@@ -63,8 +63,7 @@ export class SendRequestModal {
 
     if (!result.ok) {
       this.toasts.error(result.error);
-      // "You have already requested this task" is not something retrying fixes,
-      // so that one closes the modal instead of leaving it open.
+      // Not retryable; close modal
       if (result.error.toLowerCase().includes('already')) this.closed.emit();
       return;
     }

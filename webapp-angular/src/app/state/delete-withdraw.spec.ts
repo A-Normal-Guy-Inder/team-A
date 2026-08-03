@@ -3,11 +3,7 @@ import { ApiService } from '../core/api.service';
 import { TasksStore } from './tasks.store';
 import { RequestsStore } from './requests.store';
 
-/*
- * Both actions have to leave the on-screen list telling the truth immediately.
- * A deleted card that stays put, or a withdrawn application that vanishes
- * entirely, each read as the action having gone wrong.
- */
+/* List must update immediately */
 describe('deleting a task', () => {
   function setup(fail = false) {
     const calls: string[] = [];
@@ -99,7 +95,7 @@ describe('withdrawing an application', () => {
     expect(result.ok).toBe(true);
     expect(calls).toEqual(['/requests/r1/withdraw']);
 
-    // Kept, not deleted — the user should see what became of it.
+    // Kept, not deleted
     expect(store.sent().items).toHaveLength(2);
     expect(store.sent().items.find((r) => r.requestId === 'r1')?.status).toBe('withdrawn');
     expect(store.sent().items.find((r) => r.requestId === 'r2')?.status).toBe('accepted');
@@ -121,7 +117,7 @@ describe('withdrawing an application', () => {
     const result = await store.withdraw('r1');
 
     expect(result.ok).toBe(false);
-    // Still retryable: a stuck marker would disable the button for good.
+    // Still retryable
     expect(store.actionInFlight()['r1']).toBeUndefined();
     expect(store.sent().items.find((r) => r.requestId === 'r1')?.status).toBe('pending');
   });

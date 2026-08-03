@@ -1,4 +1,4 @@
-# HireHelper — Angular webapp
+# HelperHub — Angular webapp
 
 An Angular 21 port of `../webapp` (React 19 + Redux Toolkit + react-router 7). Same
 backend, same API contract, same stylesheets. Nothing about the server changed.

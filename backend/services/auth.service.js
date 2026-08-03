@@ -16,15 +16,10 @@ const OTP_PURPOSE = {
 
 const BCRYPT_ROUNDS = 10;
 
-/*
- * One message for every way a login can be wrong. Splitting it into "no such
- * user" and "wrong password" turns the endpoint into an account-existence
- * oracle, and the status code has to match for the same reason.
- */
+/* Avoids account-existence oracle */
 const GENERIC_LOGIN_ERROR = "Invalid email or password.";
 
-// Hash of a value nobody can submit, used to burn an equivalent amount of
-// bcrypt time when the account does not exist. See the comment in login().
+// Burns equivalent bcrypt time
 const DUMMY_PASSWORD_HASH = bcrypt.hashSync(crypto.randomBytes(32).toString("hex"), BCRYPT_ROUNDS);
 
 function normaliseEmail(email) {
@@ -151,24 +146,14 @@ async function resendOtp({ email_id }) {
     const user = await findByEmailWithSecrets(email_id);
     if (!user) throw ApiError.notFound("User not found.");
 
-    /*
-     * A consumed code leaves otp_purpose null, so the fallback has to be applied
-     * before the guards rather than only at the issue call below — otherwise a
-     * verified account with no pending code sails past the check and gets an
-     * account-verification OTP it can never use.
-     */
+    /* Fallback must precede guards */
     const purpose = user.otp_purpose || OTP_PURPOSE.ACCOUNT_VERIFICATION;
 
     if (user.is_verified && purpose === OTP_PURPOSE.ACCOUNT_VERIFICATION) {
         throw ApiError.badRequest("Email is already verified. Please login.");
     }
 
-    /*
-     * A second-factor code may only be reissued inside the window a successful
-     * password check opened. Without this, knowing the address alone would be
-     * enough to keep minting codes for an account you cannot get past the
-     * first factor on.
-     */
+    /* Reissue only inside window */
     if (purpose === OTP_PURPOSE.TWO_FACTOR && twoFactorPendingMs(user) === 0) {
         throw ApiError.forbidden("Verification session expired. Please log in again.");
     }
@@ -197,12 +182,7 @@ function loginLockRemainingMs(user) {
     return Math.max(0, new Date(user.login_blocked_until).getTime() - Date.now());
 }
 
-/*
- * Failed logins decay the same way OTP attempts do: once the account has been
- * quiet for a whole window, the counter no longer describes an attack in
- * progress, so the next attempt starts from zero. Mutates in memory only — the
- * caller persists it alongside whatever else it was saving.
- */
+/* Decays stale counter */
 function resetStaleLoginAttempts(user) {
     if (!user.login_attempts) return;
 
@@ -227,14 +207,13 @@ async function clearFailedLogins(user) {
     await user.save();
 }
 
-/** Always throws — either the generic failure or, on the last strike, the lockout. */
+/** Always throws */
 async function registerFailedLogin(user) {
     user.login_attempts = (user.login_attempts || 0) + 1;
     user.login_last_attempt_at = new Date();
 
     if (user.login_attempts >= env.security.loginMaxAttempts) {
-        // Counter resets alongside the block so the next window starts clean
-        // rather than locking again on the very first attempt after it lifts.
+        // Reset counter with block
         user.login_attempts = 0;
         user.login_blocked_until = new Date(Date.now() + env.security.loginBlockMs);
         await user.save();
@@ -248,12 +227,7 @@ async function registerFailedLogin(user) {
 async function login({ email_id, password, rememberMe }) {
     const user = await findByEmailWithSecrets(email_id);
 
-    /*
-     * A missing account and a wrong password must be indistinguishable, in both
-     * the response and the time taken to produce it — otherwise the endpoint
-     * confirms which addresses are registered. Hence the throwaway comparison
-     * here: it costs the same bcrypt work a real check would.
-     */
+    /* Timing-equalized dummy compare */
     if (!user) {
         await bcrypt.compare(String(password), DUMMY_PASSWORD_HASH);
         throw ApiError.unauthorized(GENERIC_LOGIN_ERROR);
@@ -267,12 +241,7 @@ async function login({ email_id, password, rememberMe }) {
     const valid = await bcrypt.compare(password, user.password);
     if (!valid) await registerFailedLogin(user);
 
-    /*
-     * Ordered after the password check on purpose. Announcing an unverified
-     * account to anyone who merely guessed the address would leak the same
-     * thing the generic error above exists to hide; once the password is
-     * right, the caller already knows the account is theirs.
-     */
+    /* Must follow password check */
     if (!user.is_verified) {
         await clearFailedLogins(user);
         await resendOtp({ email_id }).catch(() => {});
@@ -281,25 +250,16 @@ async function login({ email_id, password, rememberMe }) {
 
     await clearFailedLogins(user);
 
-    /*
-     * A fresh, correct login supersedes any cutoff an earlier logout left
-     * behind. Without this, logging out and straight back in inside the same
-     * second would mint a token the cutoff immediately rejects — `iat` is only
-     * accurate to the second, and the cutoff rounds up.
-     */
+    /* Login supersedes logout cutoff */
     if (user.sessions_valid_from) {
         user.sessions_valid_from = null;
         await user.save();
     }
 
-    /*
-     * With 2FA on, the password alone buys nothing but a pending window. No
-     * token is minted here — the caller has to come back through
-     * verifyTwoFactor with the emailed code.
-     */
+    /* No token until verifyTwoFactor */
     if (user.two_factor_enabled) {
         user.two_factor_pending_until = new Date(Date.now() + env.security.twoFactorWindowMs);
-        // issueOtp persists the document, so the window above rides along with it.
+        // issueOtp persists the document
         await issueOtp(user, { purpose: OTP_PURPOSE.TWO_FACTOR });
 
         return { twoFactorRequired: true, email: user.email_id };
@@ -327,12 +287,7 @@ function twoFactorPendingMs(user) {
 async function verifyTwoFactor({ email_id, otp, rememberMe }) {
     const user = await findByEmailWithSecrets(email_id);
 
-    /*
-     * Every rejection below is the same 403. The endpoint must not become the
-     * enumeration oracle that login() was just cured of — "no such account",
-     * "2FA is off here" and "you never passed the password step" are all
-     * things an unauthenticated caller should be unable to tell apart.
-     */
+    /* Every rejection: same 403 */
     if (!user || !user.two_factor_enabled || twoFactorPendingMs(user) === 0) {
         throw ApiError.forbidden("Verification session expired. Please log in again.");
     }
@@ -345,14 +300,7 @@ async function verifyTwoFactor({ email_id, otp, rememberMe }) {
     return issueSession(user, rememberMe);
 }
 
-/*
- * Retires every token this account currently holds.
- *
- * Called on logout with whatever cookie the caller presented. It is best-effort
- * by design: an absent or unreadable token means there is no session to retire,
- * and logout still has to succeed — the endpoint must never fail in a way that
- * leaves someone stuck holding a session they asked to end.
- */
+/* Retires all tokens; best-effort */
 async function invalidateSessions(token) {
     if (!token) return;
 

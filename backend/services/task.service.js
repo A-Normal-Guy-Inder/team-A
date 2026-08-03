@@ -138,15 +138,7 @@ async function updateTask(taskId, payload, file, userId) {
     return { task: task.toObject(), message: "Task updated successfully" };
 }
 
-/*
- * Removes a task and everything hanging off it.
- *
- * The applicants are read out first: once the requests are gone there is no
- * record of who had applied, and telling them is the whole point — from their
- * side a task that simply vanished from the feed is indistinguishable from a
- * bug. Their requests go with it rather than being left pointing at a task that
- * no longer exists, which would show up in their list as "Task Unavailable".
- */
+/* Deletes task and dependents */
 async function deleteTask(taskId, userId) {
     const task = await Task.findById(taskId);
     if (!task) throw ApiError.notFound("Task not found");
@@ -170,7 +162,7 @@ async function deleteTask(taskId, userId) {
     await AcceptedTasks.deleteMany({ task_id: task._id });
     await task.deleteOne();
 
-    // After the row is gone — a failed image cleanup must not keep the task alive.
+    // After row deletion
     await deleteFromCloudinary(pictureId);
 
     if (applicantIds.length) {

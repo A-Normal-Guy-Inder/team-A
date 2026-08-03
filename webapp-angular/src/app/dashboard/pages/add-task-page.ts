@@ -31,7 +31,7 @@ export class AddTaskPage {
   readonly image = signal<File | null>(null);
   readonly imagePreview = signal<string | null>(null);
 
-  /** `min` on the end field follows the start the user picked, as before. */
+  /** End follows chosen start */
   readonly minEndDate = computed(() => this.startDate() || nowForInput());
 
   minStartDate(): string {
@@ -48,14 +48,7 @@ export class AddTaskPage {
     this.imagePreview.set(null);
   }
 
-  /**
-   * Abandons the form.
-   *
-   * The fields are cleared before leaving, not just navigated away from: the
-   * dashboard keeps this component's state alive between sections, so without
-   * the reset a half-written task would still be sitting there on the next
-   * visit — and nothing is sent to the server either way.
-   */
+  /** Clears fields, then leaves */
   handleCancel(): void {
     if (this.saving()) return;
 
@@ -104,14 +97,7 @@ export class AddTaskPage {
     this.tasks.fetchMyTasks({ page: 1 });
   }
 
-  /**
-   * Returns to the list this form was opened from.
-   *
-   * The Add Task entry is replaced rather than pushed over, because the form is
-   * finished with either way: a Back out of My Tasks that landed on the blank
-   * form again — or worse, on the one whose task was just created — is not
-   * where the user was before.
-   */
+  /** Replaces entry, not pushes */
   private leave(): void {
     this.ui.setActivePage('My Tasks', { replaceUrl: true });
   }

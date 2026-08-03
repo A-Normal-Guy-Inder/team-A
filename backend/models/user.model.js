@@ -29,15 +29,10 @@ const userSchema = new mongoose.Schema(
             enum: ["account_verification", "password_reset", "email_change", "two_factor", null],
             default: null,
         },
-        /*
-         * Tokens issued before this instant are refused. Logging out stamps it,
-         * which is what makes a logout invalidate the token rather than merely
-         * deleting the browser's copy of it.
-         */
+        /* Earlier tokens are refused */
         sessions_valid_from: { type: Date, default: null },
         two_factor_enabled: { type: Boolean, default: false },
-        // Set once a login clears the password check, so a second factor can only
-        // be redeemed by someone who already passed the first one.
+        // Set after password check
         two_factor_pending_until: { type: Date, default: null },
         login_attempts: { type: Number, default: 0 },
         login_last_attempt_at: { type: Date, default: null },

@@ -11,7 +11,7 @@ import { ToastService } from '../../core/toast/toast.service';
   imports: [ReceivedRequestCard, Pagination],
   template: `
     <div class="requests-page">
-      <!-- Heading and subtitle live in the topbar, which every section shares. -->
+      <!-- Heading lives in topbar -->
       @if (isLoading() && received().items.length === 0) {
         <p style="padding: 20px">Loading requests...</p>
       } @else if (received().items.length === 0) {
@@ -59,7 +59,7 @@ export class ReceivedRequestsPage {
     this.toasts.success(status === 'accepted' ? 'Request accepted! ✅' : 'Request rejected');
 
     this.requests.fetchReceived();
-    // Accepting assigns the task, so the owner's own list is now stale too.
+    // Accepting also assigns task
     if (status === 'accepted') this.tasks.fetchMyTasks();
   }
 

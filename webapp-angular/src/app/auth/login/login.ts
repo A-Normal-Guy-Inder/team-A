@@ -54,8 +54,7 @@ export class Login {
       const message = result.error || 'Login failed';
       this.toasts.error(message);
 
-      // An unverified account is not a failed login — it is a login that needs
-      // one more step, so it goes to the OTP screen instead of stopping here.
+      // Unverified: continue to OTP
       if (message.toLowerCase().includes('verif')) {
         this.router.navigate(['/verify'], {
           state: { email, flow: OTP_FLOW.LOGIN_UNVERIFIED },
@@ -64,8 +63,7 @@ export class Login {
       return;
     }
 
-    // 2FA account: the password was right but there is no session yet, so the
-    // OTP screen takes over rather than the dashboard.
+    // 2FA: OTP screen next
     if (result.value.twoFactorRequired) {
       this.toasts.success('Verification code sent to your email');
       this.router.navigate(['/verify'], {

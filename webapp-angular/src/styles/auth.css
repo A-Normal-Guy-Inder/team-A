@@ -1,15 +1,4 @@
-/*
- * Auth surface primitives.
- *
- * Built with Tailwind's @apply. Note there are deliberately no @tailwind
- * directives here: this file is imported alongside index.css, and repeating
- * the directives would emit a second full copy of the utility set into the
- * bundle. @apply resolves fine without them.
- *
- * These are class selectors rather than bare element selectors. The previous
- * version styled `input`, `button` and `label` globally, which leaked into the
- * dashboard as soon as any auth route had been visited.
- */
+/* Auth primitives; class-scoped */
 
 .auth-container {
   @apply relative z-[1000] flex min-h-screen items-center justify-center
@@ -21,11 +10,7 @@
     linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
 }
 
-/*
- * Breakpoints below use Tailwind's `max-*` variants so they mirror the original
- * max-width media queries (768 / 480 / 360) one-for-one. Plain `md:` / `sm:`
- * are min-width and would invert the intent.
- */
+/* Use max-* variants only */
 .auth-card {
   @apply relative z-[1100] w-full max-w-[400px] animate-fadeUp
          rounded-2xl border border-white/70 bg-white/85 p-8
@@ -59,7 +44,7 @@
          max-sm:h-10;
 }
 
-/* The eye toggle sits inside the field, so reserve room for it. */
+/* Room for eye toggle */
 .password-field .auth-input {
   @apply pr-11;
 }
@@ -146,11 +131,7 @@
   @apply relative;
 }
 
-/*
- * Centred on the input itself (h-11 => 22px), not on the wrapper. The wrapper
- * is taller than the input because of the input's bottom margin, so the old
- * `top: 50%` sat noticeably below centre.
- */
+/* Centred on input */
 .toggle-password {
   @apply absolute right-1.5 top-[22px] flex h-8 w-8 -translate-y-1/2
          cursor-pointer items-center justify-center rounded-lg

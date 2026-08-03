@@ -32,8 +32,7 @@ export class EditTaskModal {
   readonly newImage = signal<File | null>(null);
 
   constructor() {
-    // Refills the fields whenever a different task is handed in, the same job
-    // the [task] effect did in the React version.
+    // Refills fields per task
     effect(() => {
       const task = this.task();
 

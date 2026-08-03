@@ -37,7 +37,7 @@ export class VerifyEmail {
   private readonly flow = signal<string | undefined>(undefined);
   private rememberMe = false;
 
-  /** The second factor is a login step, so the screen words itself differently. */
+  /** Changes the screen wording */
   readonly isTwoFactor = computed(() => this.flow() === OTP_FLOW.TWO_FACTOR);
 
   private timer: ReturnType<typeof setInterval> | null = null;
@@ -48,9 +48,7 @@ export class VerifyEmail {
     this.flow.set(state.flow);
     this.rememberMe = Boolean(state.rememberMe);
 
-    // Landing here without an email means the screen was opened directly rather
-    // than reached through one of its three entry points; send the visitor back
-    // to whichever of those it was supposed to be.
+    // Opened directly; send back
     if (!state.email) {
       this.router.navigate([state.flow === OTP_FLOW.SIGNUP ? '/signup' : '/login'], {
         replaceUrl: true,
@@ -69,11 +67,7 @@ export class VerifyEmail {
       return;
     }
 
-    /*
-     * The second factor goes to a different endpoint and ends somewhere else:
-     * it establishes the session outright, so it lands on the dashboard rather
-     * than sending the user back to log in again.
-     */
+    /* Different endpoint, different destination */
     if (this.isTwoFactor()) {
       this.loading.set(true);
       const result = await this.auth.verifyTwoFactor({
@@ -102,10 +96,7 @@ export class VerifyEmail {
 
       this.toasts.success(body?.message || 'OTP verified');
 
-      // Only the forgot-password journey earns a password-reset grant from the
-      // backend, so it is the only one allowed on to /ResetPassword. Every other
-      // flow (including an unverified login) has just verified its account and
-      // belongs back at the login screen.
+      // Only flow reaching /ResetPassword
       if (this.flow() === OTP_FLOW.PASSWORD_RESET) {
         this.router.navigate(['/ResetPassword'], {
           replaceUrl: true,
@@ -146,7 +137,7 @@ export class VerifyEmail {
     }
   }
 
-  /** Keeps the field to digits, rewriting the element so a stripped character cannot linger. */
+  /** Digits only */
   onOtpInput(event: Event): void {
     const input = event.target as HTMLInputElement;
     const digits = input.value.replace(/\D/g, '');

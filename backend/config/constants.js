@@ -8,12 +8,11 @@ const REQUEST_STATUS = Object.freeze({
     PENDING: "pending",
     ACCEPTED: "accepted",
     REJECTED: "rejected",
-    // Retracted by the requester. Kept rather than deleted so the requester
-    // still has a record of having applied.
+    // Retracted; kept, not deleted
     WITHDRAWN: "withdrawn",
 });
 
-/* Statuses the task owner is expected to act on. */
+/* Statuses owner must action */
 const ACTIONABLE_REQUEST_STATUSES = [REQUEST_STATUS.PENDING];
 
 const ACCEPTED_TASK_STATUS = Object.freeze({

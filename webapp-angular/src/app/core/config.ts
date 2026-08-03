@@ -36,11 +36,7 @@ export const config = {
   apiUrl,
   socketUrl,
   pageSize: environment.pageSize,
-  // Free-tier hosts (Render, Fly) suspend an idle service and cold-start it on
-  // the next request, which regularly takes 50s+ — longer than a typical 30s
-  // timeout. The first request after an idle period would otherwise always
-  // abort before the server finished waking. Lower this once the backend is on
-  // an always-on plan.
+  // High: free-tier cold starts
   apiTimeout: environment.apiTimeout,
   isProduction: environment.production,
 };

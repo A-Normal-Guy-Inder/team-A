@@ -39,16 +39,13 @@ async function issueOtp(user, { purpose, invalidatePassword = false, email = nul
     await sendOtpEmail(otp, email || user.email_id);
 }
 
-// Failed attempts decay on their own instead of sticking to the account forever:
-// once the user has been idle for the whole attempt window, the counter is stale
-// and the next attempt starts from scratch. Mutates in memory only, so the caller
-// persists it along with whatever it was already going to save.
+// Decays counter; caller persists
 function resetStaleAttempts(user) {
     if (!user.otp_attempts) return false;
 
     const lastAttemptAt = user.otp_last_attempt_at ? new Date(user.otp_last_attempt_at).getTime() : null;
 
-    // Documents predating this field carry no activity marker, so treat them as stale.
+    // Older documents count stale
     if (lastAttemptAt !== null && Date.now() - lastAttemptAt < env.otp.attemptWindowMs) {
         return false;
     }

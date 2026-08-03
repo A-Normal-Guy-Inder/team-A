@@ -83,7 +83,7 @@ export class Topbar {
   readonly markAllRead = output<void>();
   readonly markRead = output<string>();
   readonly loadMoreNotifications = output<void>();
-  /** A notification was opened; carries the page it wants the dashboard on. */
+  /** Carries the target page */
   readonly notificationNavigate = output<Page>();
 
   private readonly bell = viewChild<ElementRef<HTMLElement>>('bell');
@@ -95,14 +95,7 @@ export class Topbar {
   readonly searchPlaceholder = computed(() => `Search in ${this.activePage().toLowerCase()}...`);
 
   constructor() {
-    /*
-     * Dismiss the dropdown on any press outside it. The bell is excluded too —
-     * its own click already toggles, so closing here as well would fire twice
-     * and reopen it. Listening on `pointerdown` covers mouse, touch and pen in
-     * one pass; it is registered only while the panel is open, and it lands
-     * after this render commits, so the press that opened the panel is long
-     * finished and cannot close it again.
-     */
+    /* Outside press closes dropdown */
     let detach: (() => void) | null = null;
 
     const removeListener = () => {

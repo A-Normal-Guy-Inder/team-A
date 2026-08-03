@@ -16,7 +16,7 @@ export class ChangePassword {
   private readonly api = inject(ApiService);
   private readonly toasts = inject(ToastService);
 
-  /** 1: prove you know the old password, 2: choose the new one. */
+  /** Old password, then new */
   readonly step = signal(1);
   readonly loading = signal(false);
 
@@ -24,13 +24,7 @@ export class ChangePassword {
   readonly newPassword = signal('');
   readonly confirmPassword = signal('');
 
-  /**
-   * Leaves without changing anything — no request is sent from here at all.
-   *
-   * The typed passwords are cleared first. They are only in component state,
-   * which this navigation tears down, but wiping them explicitly means a
-   * cancel never depends on that happening.
-   */
+  /** Clears passwords, then leaves */
   handleCancel(): void {
     if (this.loading()) return;
 

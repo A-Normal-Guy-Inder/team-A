@@ -1,22 +1,11 @@
-/* Tailwind @apply; directives live in index.css (see auth.css for rationale). */
+/* Directives live in index.css */
 
 .loader-overlay {
   @apply fixed inset-0 z-[2000] flex items-center justify-center
          bg-white/60 backdrop-blur-sm;
 }
 
-/*
- * Ported from css-loader-51.html (html-code-generator "balls" #30): six dots on
- * a ring, each pulsing a fraction of a beat behind the last so the scale reads
- * as a wave travelling around the circle.
- *
- * The source sits on a dark page and cycles the Material palette — red, purple,
- * blue, green, orange. Both are wrong here: the overlay is a light frosted
- * sheet, and the app is indigo throughout. So the geometry and timing are kept
- * verbatim and only the six fills are re-mapped, onto the brand ramp running
- * into violet, which is the same gradient the sidebar avatar and the primary
- * buttons already use.
- */
+/* Six dots; brand fills */
 .loader {
   position: relative;
   width: 96px;
@@ -73,17 +62,9 @@
   }
 }
 
-/*
- * Respect users who have asked the OS to reduce motion: the travelling wave is
- * exactly the kind of repeating movement that setting is about, so it drops to
- * a single slow breath with every dot in phase and nothing scaling to zero.
- */
+/* Reduced motion: slow breath */
 @media (prefers-reduced-motion: reduce) {
-  /*
-   * `:nth-of-type(n)` matches every circle, and matches the specificity of the
-   * per-dot rules above — without it their `animation-delay` outranks this one
-   * and the stagger survives the override.
-   */
+  /* nth-of-type(n) matches specificity */
   .loader circle:nth-of-type(n) {
     animation: loader-ball-fade 1.8s ease-in-out infinite alternate both;
     animation-delay: 0s;

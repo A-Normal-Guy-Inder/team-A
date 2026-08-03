@@ -16,7 +16,7 @@ interface RequestsState {
   received: ListState<HelpRequest>;
   sent: ListState<HelpRequest>;
   sending: boolean;
-  /** requestId -> the status being written, so each row can disable itself. */
+  /** requestId to pending status */
   actionInFlight: Record<string, string>;
 }
 
@@ -41,7 +41,7 @@ export class RequestsStore {
   readonly sending = computed(() => this.state().sending);
   readonly actionInFlight = computed(() => this.state().actionInFlight);
 
-  /** Untracked state read — see the note on TasksStore.snapshot. */
+  /** Untracked; see TasksStore.snapshot */
   private snapshot(): RequestsState {
     return untracked(this.state);
   }
@@ -130,13 +130,7 @@ export class RequestsStore {
     }
   }
 
-  /**
-   * Retracts one of the user's own applications.
-   *
-   * The row stays in the list with its new status rather than disappearing —
-   * the application is withdrawn, not deleted, and the user should be able to
-   * see that is what happened.
-   */
+  /** Retracts application; row stays */
   async withdraw(requestId: string): Promise<Result<void>> {
     this.state.update((s) => ({
       ...s,

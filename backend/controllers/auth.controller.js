@@ -23,8 +23,7 @@ const login = asyncHandler(async (req, res) => {
     const rememberMe = Boolean(req.body.rememberMe ?? req.body.remember);
     const result = await authService.login({ ...req.body, rememberMe });
 
-    // 2FA accounts get a step, not a session: no cookie is set until the code
-    // comes back through /verify-2fa.
+    // 2FA: no cookie yet
     if (result.twoFactorRequired) {
         return sendSuccess(res, {
             message: "Verification code sent to your email",
@@ -58,8 +57,7 @@ const resetPassword = asyncHandler(async (req, res) => {
 });
 
 const logout = asyncHandler(async (req, res) => {
-    // Retire the token as well as the cookie, so a copy taken before logout
-    // cannot go on being used afterwards.
+    // Retire token, not cookie
     await authService.invalidateSessions(req.cookies?.[env.cookieName]);
 
     clearAuthCookie(res);

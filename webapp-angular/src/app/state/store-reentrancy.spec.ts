@@ -4,19 +4,7 @@ import { ApiService } from '../core/api.service';
 import { TasksStore } from './tasks.store';
 import { RequestsStore } from './requests.store';
 
-/*
- * Guards the defect that locked up the browser on the dashboard.
- *
- * Dashboard reloads its list from an `effect` that watches the active page and
- * the search term. A store action reads current state to build its query and
- * then writes that state back. If the read is tracked, the effect gains a
- * dependency on the store, the write re-triggers the effect, and it fetches
- * forever — the tab pegs a core and stops responding to input.
- *
- * The fix is that store actions read through an untracked snapshot. These tests
- * assert the observable consequence: calling an action from inside an effect
- * issues exactly one request.
- */
+/* Guards against infinite refetch */
 describe('store actions called from a reactive context', () => {
   function setup() {
     let calls = 0;
@@ -35,7 +23,7 @@ describe('store actions called from a reactive context', () => {
     return { calls: () => calls };
   }
 
-  /** Flushes effects and lets the in-flight promises settle, a few rounds over. */
+  /** Flushes effects and promises */
   async function settle() {
     for (let i = 0; i < 3; i++) {
       TestBed.tick();
@@ -93,7 +81,7 @@ describe('store actions called from a reactive context', () => {
     await settle();
     expect(calls()).toBe(1);
 
-    // The untracked boundary must not deafen the effect to its real inputs.
+    // Real inputs still tracked
     search.set('plumbing');
     await settle();
 

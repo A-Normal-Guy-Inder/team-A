@@ -24,13 +24,7 @@ const globalLimiter = build({
     message: "Too many requests. Please slow down and try again shortly.",
 });
 
-/*
- * Only failures count. The limiter runs before the handler, so without this a
- * completed signup — verify-otp, then login, then the second factor — spends
- * three of the window's attempts, and a shared address is refused partway
- * through the next one. Brute force is still answered by the per-account
- * lockout in auth.service, which an attacker cannot shed by changing IP.
- */
+/* Only failures count */
 const authLimiter = build({
     windowMs: env.rateLimit.authWindowMs,
     max: env.rateLimit.authMax,

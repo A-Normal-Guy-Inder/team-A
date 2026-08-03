@@ -50,7 +50,7 @@ const env = {
     jwtShortExpiry: required("JWT_SHORT_EXPIRY", "2h"),
     jwtLongExpiry: required("JWT_LONG_EXPIRY", "30d"),
 
-    cookieName: required("COOKIE_NAME", "hire_a_helper_token"),
+    cookieName: required("COOKIE_NAME", "helperhub_token"),
     // Cross-site needs None+Secure
     cookieSecure: toBool(process.env.COOKIE_SECURE, isProduction),
     cookieSameSite: required("COOKIE_SAMESITE", isProduction ? "none" : "lax"),
@@ -90,13 +90,11 @@ const env = {
     security: {
         passwordReverifyWindowMs: toInt(process.env.PASSWORD_REVERIFY_WINDOW_MS, 10 * 60 * 1000),
         requestCooldownMs: toInt(process.env.REQUEST_COOLDOWN_MS, 24 * 60 * 60 * 1000),
-        // Per-account login throttling. The IP-based authLimiter above is the
-        // first line, but it is trivially sidestepped from a second address —
-        // this counter follows the account itself.
+        // Per-account login throttling
         loginMaxAttempts: toInt(process.env.LOGIN_MAX_ATTEMPTS, 5),
         loginBlockMs: toInt(process.env.LOGIN_BLOCK_MS, 15 * 60 * 1000),
         loginAttemptWindowMs: toInt(process.env.LOGIN_ATTEMPT_WINDOW_MS, 15 * 60 * 1000),
-        // How long a password-verified login may wait for its second factor.
+        // Second-factor wait window
         twoFactorWindowMs: toInt(process.env.TWO_FACTOR_WINDOW_MS, 10 * 60 * 1000),
     },
 

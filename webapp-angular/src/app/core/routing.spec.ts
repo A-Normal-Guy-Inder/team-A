@@ -7,14 +7,7 @@ import { ApiService } from './api.service';
 import { NotFound } from '../shared/not-found/not-found';
 import { NAV_PAGES, PAGES, Page, UiStore, pageToSlug, slugToPage } from '../state/ui.store';
 
-/*
- * Two guarantees about where the app puts the user.
- *
- * The dashboard section used to live only in component state, so a reload threw
- * the user back to the feed no matter which section they were on; and every
- * unknown URL redirected to /login, which reads as "you have been signed out"
- * to someone who merely mistyped an address. Both now go through the URL.
- */
+/* Section and 404 routing */
 describe('routing', () => {
   describe('dashboard section slugs', () => {
     it('round-trips every page through its slug', () => {
@@ -40,11 +33,7 @@ describe('routing', () => {
     });
   });
 
-  /*
-   * Add Task is reached from the My Tasks button rather than the menu, so the
-   * nav list is narrower than the set of sections that exist. Both still have to
-   * agree about what a section is.
-   */
+  /* NAV_PAGES is narrower */
   describe('navigable sections', () => {
     it('leaves Add Task out of the menus', () => {
       expect(NAV_PAGES).not.toContain('Add Task');
@@ -97,11 +86,7 @@ describe('routing', () => {
       expect(navigations[0].extras?.replaceUrl).toBe(false);
     });
 
-    /*
-     * How leaving the Add Task form avoids leaving the form itself behind: a
-     * Back out of My Tasks should reach whatever came before the form, not the
-     * form that has just been submitted or abandoned.
-     */
+    /* Back skips the form */
     it('replaces the current entry when asked', () => {
       const { store, navigations } = setup();
 

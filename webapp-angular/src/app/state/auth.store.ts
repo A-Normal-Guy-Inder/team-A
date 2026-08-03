@@ -27,7 +27,7 @@ interface LoginCredentials {
   rememberMe: boolean;
 }
 
-/** /auth/login answers with either a session or a demand for a second factor. */
+/** Session or 2FA demand */
 interface LoginResponse {
   user?: User;
   twoFactorRequired?: boolean;
@@ -53,9 +53,7 @@ export class AuthStore {
   readonly error = computed(() => this.state().error);
 
   constructor() {
-    // The interceptor cannot reach into a store that itself makes HTTP calls,
-    // so it publishes through SessionExpiryService and the wiring lands here —
-    // the counterpart to `setUnauthorizedHandler` in the React app's store.js.
+    // Wiring avoids circular injection
     inject(SessionExpiryService).onExpired(() => this.sessionExpired());
   }
 
@@ -87,11 +85,7 @@ export class AuthStore {
     try {
       const body = await this.api.post<ApiEnvelope<LoginResponse>>('/auth/login', credentials);
 
-      /*
-       * A 2FA account gets no session here — the backend deliberately withholds
-       * the cookie until the emailed code comes back. Leaving `user` null keeps
-       * the guards treating this as signed-out, which is what it is.
-       */
+      /* No session yet */
       if (body.data?.twoFactorRequired) {
         this.state.update((s) => ({ ...s, status: 'idle', user: null }));
         return ok({
@@ -112,7 +106,7 @@ export class AuthStore {
     }
   }
 
-  /** Redeems the emailed second factor; on success the session cookie is set. */
+  /** Redeems second factor */
   async verifyTwoFactor(payload: {
     email_id: string;
     otp: string;
@@ -149,7 +143,7 @@ export class AuthStore {
 
   sessionExpired(): void {
     this.state.update((s) => ({ ...s, user: null, status: 'idle', checked: true }));
-    // An expired session leaves the same residue a logout does.
+    // Same residue as logout
     this.reset.clear();
   }
 
