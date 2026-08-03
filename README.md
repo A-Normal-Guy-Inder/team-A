@@ -26,9 +26,6 @@
 | **Email** | Nodemailer (Gmail SMTP for OTPs) |
 | **Testing** | Vitest via the Angular CLI test target |
 
-> The frontend was ported from React 19 + Redux Toolkit to Angular. `webapp-angular/README.md`
-> documents the port: how each React concept maps across, the three deliberate behavioural
-> differences, and the re-entrancy defect the port surfaced.
 
 ## 🏗️ Architecture Overview
 
