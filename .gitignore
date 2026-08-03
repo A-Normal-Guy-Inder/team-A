@@ -5,6 +5,7 @@ memory/
 
 node_modules/
 webapp/build/
+webapp-angular/build/
 .vercel/
 
 # backend/.env holds live DB/JWT/Cloudinary/SMTP credentials. webapp/.env is
