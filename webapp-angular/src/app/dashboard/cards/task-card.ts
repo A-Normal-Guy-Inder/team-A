@@ -77,7 +77,10 @@ const UNAVAILABLE_STATUSES = ['completed', 'cancelled', 'assigned', 'closed'];
             </div>
 
             @if (editable()) {
-              <button class="edit-btn" (click)="edit.emit(t)">✏️ Edit Task</button>
+              <div class="owner-actions">
+                <button class="edit-btn" (click)="edit.emit(t)">✏️ Edit</button>
+                <button class="delete-btn" (click)="remove.emit(t)">🗑️ Delete</button>
+              </div>
             } @else {
               <button
                 [class]="button().className"
@@ -99,6 +102,7 @@ export class TaskCard {
   readonly editable = input(false);
 
   readonly edit = output<Task>();
+  readonly remove = output<Task>();
   readonly requestTask = output<Task>();
 
   /** The feed populates user_id; My Tasks returns it as a bare id. */

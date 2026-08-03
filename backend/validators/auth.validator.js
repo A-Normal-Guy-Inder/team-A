@@ -37,4 +37,18 @@ const resetPasswordSchema = {
     },
 };
 
-module.exports = { registerSchema, verifyOtpSchema, emailOnlySchema, loginSchema, resetPasswordSchema };
+const verifyTwoFactorSchema = {
+    body: {
+        email_id: [rules.required("Email"), rules.email()],
+        otp: [rules.required("Verification code"), rules.otp("Verification code")],
+    },
+};
+
+module.exports = {
+    registerSchema,
+    verifyOtpSchema,
+    emailOnlySchema,
+    loginSchema,
+    verifyTwoFactorSchema,
+    resetPasswordSchema,
+};

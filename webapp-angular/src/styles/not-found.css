@@ -1,0 +1,36 @@
+/*
+ * The 404 screen. Global rather than route-scoped: it is reachable from any
+ * address, including ones no lazy chunk is loaded for.
+ */
+
+.notfound-container {
+  @apply flex min-h-screen items-center justify-center bg-slate-100 p-5;
+}
+
+.notfound-card {
+  @apply w-full max-w-md rounded-xl border border-slate-200/70 bg-white
+         p-10 text-center shadow-card
+         max-[600px]:p-7;
+}
+
+.notfound-code {
+  @apply bg-gradient-to-br from-brand-500 to-brand-600 bg-clip-text
+         text-6xl font-bold leading-none tracking-tight text-transparent;
+}
+
+.notfound-title {
+  @apply mt-4 text-2xl font-semibold tracking-tight text-slate-900;
+}
+
+.notfound-text {
+  @apply mt-2 text-sm leading-relaxed text-slate-500;
+}
+
+.notfound-btn {
+  @apply mt-7 w-full rounded-lg bg-gradient-to-br from-brand-500 to-brand-600
+         p-3 text-sm font-semibold text-white shadow-sm transition duration-200
+         hover:-translate-y-px hover:shadow-lg hover:shadow-brand-500/30
+         active:translate-y-0
+         focus-visible:outline-none focus-visible:ring-2
+         focus-visible:ring-brand-500 focus-visible:ring-offset-2;
+}

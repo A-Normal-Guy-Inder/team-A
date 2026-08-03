@@ -129,6 +129,38 @@ export class TasksStore {
     }
   }
 
+  /**
+   * Deletes a task and drops it from the local list.
+   *
+   * The row is removed here rather than left to the next refetch: the card the
+   * user just deleted lingering on screen reads as a failure. The total is
+   * decremented with it so the pagination footer does not claim a page that is
+   * now short.
+   */
+  async deleteTask(taskId: string): Promise<Result<void>> {
+    this.state.update((s) => ({ ...s, saving: true, error: null }));
+
+    try {
+      await this.api.delete(`/task/${taskId}`);
+
+      this.state.update((s) => ({
+        ...s,
+        saving: false,
+        myTasks: {
+          ...s.myTasks,
+          items: s.myTasks.items.filter((task) => task._id !== taskId),
+          meta: { ...s.myTasks.meta, total: Math.max(0, (s.myTasks.meta.total ?? 1) - 1) },
+        },
+        feed: { ...s.feed, items: s.feed.items.filter((task) => task._id !== taskId) },
+      }));
+      return ok(undefined);
+    } catch (error) {
+      const message = getErrorMessage(error, 'Failed to delete task');
+      this.state.update((s) => ({ ...s, saving: false, error: message }));
+      return fail(message);
+    }
+  }
+
   setFeedQuery(patch: Partial<ListQuery>): void {
     this.state.update((s) => ({
       ...s,

@@ -11,9 +11,7 @@ import { ToastService } from '../../core/toast/toast.service';
   imports: [ReceivedRequestCard, Pagination],
   template: `
     <div class="requests-page">
-      <h2>Incoming Requests</h2>
-      <p class="page-subtitle">People who want to help with your tasks</p>
-
+      <!-- Heading and subtitle live in the topbar, which every section shares. -->
       @if (isLoading() && received().items.length === 0) {
         <p style="padding: 20px">Loading requests...</p>
       } @else if (received().items.length === 0) {

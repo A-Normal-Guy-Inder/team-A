@@ -10,6 +10,14 @@ router.get("/received", controller.listReceived);
 router.get("/sent", controller.listSent);
 
 router.post("/:taskId/send", writeLimiter, validate(schemas.createRequestSchema), controller.createRequest);
+// Declared before the generic PUT so "withdraw" is never read as a request id.
+router.patch(
+    "/:requestId/withdraw",
+    writeLimiter,
+    validate(schemas.requestIdSchema),
+    controller.withdrawRequest
+);
+
 router.put("/:requestId", writeLimiter, validate(schemas.updateRequestSchema), controller.updateStatus);
 
 module.exports = router;

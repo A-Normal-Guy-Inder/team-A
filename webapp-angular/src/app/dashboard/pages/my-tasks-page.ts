@@ -25,7 +25,12 @@ import { Task } from '../../core/api.types';
         </div>
       } @else {
         @for (task of myTasks().items; track task._id) {
-          <app-task-card [task]="task" [editable]="true" (edit)="editTask.emit($event)" />
+          <app-task-card
+            [task]="task"
+            [editable]="true"
+            (edit)="editTask.emit($event)"
+            (remove)="deleteTask.emit($event)"
+          />
         }
       }
     </div>
@@ -42,6 +47,7 @@ export class MyTasksPage {
 
   readonly addTask = output<void>();
   readonly editTask = output<Task>();
+  readonly deleteTask = output<Task>();
 
   readonly myTasks = this.tasks.myTasks;
   readonly isEmpty = computed(() => this.myTasks().items.length === 0);

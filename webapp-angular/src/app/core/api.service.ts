@@ -35,6 +35,14 @@ export class ApiService {
     return this.send(this.http.put<T>(this.url(path), body ?? {}, { withCredentials: true }));
   }
 
+  patch<T>(path: string, body?: unknown): Promise<T> {
+    return this.send(this.http.patch<T>(this.url(path), body ?? {}, { withCredentials: true }));
+  }
+
+  delete<T>(path: string): Promise<T> {
+    return this.send(this.http.delete<T>(this.url(path), { withCredentials: true }));
+  }
+
   private url(path: string): string {
     return `${config.apiUrl}${path}`;
   }

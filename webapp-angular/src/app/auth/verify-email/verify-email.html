@@ -5,8 +5,11 @@
 
   <div class="auth-container">
     <div class="auth-card">
-      <h2>Verify Your OTP</h2>
-      <p>OTP sent to: {{ email() }}</p>
+      <h2>{{ isTwoFactor() ? 'Two-Factor Verification' : 'Verify Your OTP' }}</h2>
+      <p>
+        {{ isTwoFactor() ? 'Verification code sent to:' : 'OTP sent to:' }}
+        {{ email() }}
+      </p>
 
       <label for="verify-otp" class="auth-label">
         Verification Code <span class="required">*</span>
@@ -26,7 +29,7 @@
       />
 
       <button class="primary-btn" (click)="handleVerify()" [disabled]="loading()">
-        {{ loading() ? 'Verifying...' : 'Verify Code' }}
+        {{ loading() ? 'Verifying...' : isTwoFactor() ? 'Verify & Sign In' : 'Verify Code' }}
       </button>
 
       <button
@@ -34,7 +37,7 @@
         (click)="handleResend()"
         [disabled]="loading() || cooldown() > 0"
       >
-        {{ cooldown() > 0 ? 'Resend OTP in ' + cooldown() + 's' : 'Resend OTP' }}
+        {{ cooldown() > 0 ? 'Resend code in ' + cooldown() + 's' : 'Resend code' }}
       </button>
     </div>
   </div>

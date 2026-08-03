@@ -7,7 +7,8 @@ import {
   signal,
   untracked,
 } from '@angular/core';
-import { Router } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ActivatedRoute, Router } from '@angular/router';
 
 import { Sidebar } from './sidebar/sidebar';
 import { Topbar } from './topbar/topbar';
@@ -27,10 +28,9 @@ import { AuthStore } from '../state/auth.store';
 import { TasksStore } from '../state/tasks.store';
 import { RequestsStore } from '../state/requests.store';
 import { NotificationsStore } from '../state/notifications.store';
-import { Page, UiStore } from '../state/ui.store';
+import { Page, UiStore, slugToPage } from '../state/ui.store';
 import { RealtimeService } from '../core/realtime.service';
 import { ToastService } from '../core/toast/toast.service';
-import { readNavigationState } from '../core/navigation-state';
 import { debouncedSignal } from '../shared/debounced';
 import { Task } from '../core/api.types';
 
@@ -90,6 +90,7 @@ export class Dashboard {
   );
 
   readonly editingTask = signal<Task | null>(null);
+  readonly deletingTask = signal<Task | null>(null);
   readonly requestTarget = signal<Task | null>(null);
 
   private readonly debouncedSearch = debouncedSignal(this.searchTerm, 400);
@@ -102,12 +103,20 @@ export class Dashboard {
   private seeded = false;
 
   constructor() {
-    const state = readNavigationState<{ openPage?: string }>(this.router);
-    if (state.openPage) {
-      this.ui.setActivePage(state.openPage);
-      // Consume it, or a reload would keep forcing the same page open.
-      history.replaceState({ ...history.state, openPage: undefined }, '');
-    }
+    /*
+     * The URL owns the open section, so it is read here rather than kept in
+     * component state — a reload lands back on the same page instead of
+     * resetting to the feed. An unrecognised slug is a URL that does not exist,
+     * and is treated like any other: 404.
+     */
+    inject(ActivatedRoute)
+      .paramMap.pipe(takeUntilDestroyed())
+      .subscribe((params) => {
+        const page = slugToPage(params.get('section'));
+
+        if (page) this.ui.syncActivePage(page);
+        else this.router.navigate(['/404'], { replaceUrl: true });
+      });
 
     inject(RealtimeService).connect(() => this.user()?._id, {
       onRequestUpdated: (payload) => this.handleRequestUpdated(payload),
@@ -207,6 +216,26 @@ export class Dashboard {
   onNotificationNavigate(page: Page): void {
     this.ui.setActivePage(page);
     this.ui.toggleNotifications(false);
+  }
+
+  /** Spells out the consequence, since deleting also cancels other people's applications. */
+  deleteMessage(task: Task): string {
+    return `Delete "${task.title}"? Anyone who applied will be told it has been closed.`;
+  }
+
+  async handleDeleteTask(task: Task): Promise<void> {
+    const result = await this.tasks.deleteTask(task._id);
+
+    this.deletingTask.set(null);
+
+    if (!result.ok) {
+      this.toasts.error(result.error);
+      return;
+    }
+
+    this.toasts.success('Task deleted');
+    // The badge counts applications against tasks that no longer exist.
+    this.requests.fetchReceived();
   }
 
   async handleLogout(): Promise<void> {

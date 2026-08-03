@@ -17,5 +17,6 @@ router.post("/create", writeLimiter, ...single("picture"), validate(schemas.crea
 
 router.get("/:taskId", validate(schemas.taskIdSchema), controller.getTask);
 router.put("/:taskId", writeLimiter, ...single("picture"), validate(schemas.updateTaskSchema), controller.updateTask);
+router.delete("/:taskId", writeLimiter, validate(schemas.taskIdSchema), controller.deleteTask);
 
 module.exports = router;

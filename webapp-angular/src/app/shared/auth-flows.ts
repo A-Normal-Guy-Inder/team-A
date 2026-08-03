@@ -5,6 +5,7 @@ export const OTP_FLOW = {
   SIGNUP: 'signup',
   LOGIN_UNVERIFIED: 'login_unverified',
   PASSWORD_RESET: 'password_reset',
+  TWO_FACTOR: 'two_factor',
 } as const;
 
 export type OtpFlow = (typeof OTP_FLOW)[keyof typeof OTP_FLOW];
@@ -13,4 +14,10 @@ export type OtpFlow = (typeof OTP_FLOW)[keyof typeof OTP_FLOW];
 export interface OtpNavigationState {
   email?: string;
   flow?: OtpFlow;
+  /*
+   * Only the two-factor flow carries this: the session length was chosen on the
+   * login form, but the cookie is not minted until the code is redeemed a
+   * screen later, so the choice has to travel with the user.
+   */
+  rememberMe?: boolean;
 }

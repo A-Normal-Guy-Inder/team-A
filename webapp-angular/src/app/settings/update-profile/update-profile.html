@@ -8,7 +8,26 @@
         <div class="profile-placeholder">{{ firstName().charAt(0) || 'U' }}</div>
       }
     </div>
-    <input type="file" accept="image/*" (change)="onImageChange($event)" />
+    <div class="profile-picture-controls">
+      <input
+        type="file"
+        accept="image/*"
+        [disabled]="pictureBusy()"
+        (change)="onImageChange($event)"
+      />
+      @if (uploading()) {
+        <span class="settings-hint">Uploading…</span>
+      }
+      @if (canRemovePicture()) {
+        <button
+          class="settings-cancel-btn"
+          (click)="handleRemovePicture()"
+          [disabled]="pictureBusy()"
+        >
+          {{ removing() ? 'Removing…' : 'Remove photo' }}
+        </button>
+      }
+    </div>
   </div>
 </div>
 
@@ -38,6 +57,21 @@
     [ngModel]="phoneNumber()"
     (ngModelChange)="phoneNumber.set($event)"
   />
+
+  <label class="settings-hint" for="profile-bio">
+    Bio <span class="bio-counter">{{ bio().length }}/{{ BIO_MAX }}</span>
+  </label>
+  <textarea
+    id="profile-bio"
+    name="bio"
+    class="settings-textarea"
+    rows="4"
+    placeholder="Tell others a little about yourself"
+    [maxlength]="BIO_MAX"
+    [ngModel]="bio()"
+    (ngModelChange)="bio.set($event)"
+  ></textarea>
+
   <button class="settings-save-btn" (click)="handleSave()" [disabled]="saving()">
     {{ saving() ? 'Saving...' : 'Save Changes' }}
   </button>

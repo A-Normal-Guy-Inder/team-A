@@ -141,6 +141,14 @@ async function listReceivedRequests(userId, query = {}) {
             .map((value) => value.trim().toLowerCase())
             .filter((value) => Object.values(REQUEST_STATUS).includes(value));
         if (statuses.length) requestFilter.status = statuses.length === 1 ? statuses[0] : { $in: statuses };
+    } else {
+        /*
+         * A withdrawn application is no longer the owner's to act on, so it
+         * drops out of their inbox — they were told about it by notification.
+         * Asking for it explicitly by status still returns it, which is what
+         * keeps it reachable as history.
+         */
+        requestFilter.status = { $ne: REQUEST_STATUS.WITHDRAWN };
     }
 
     const [requests, total, pendingCount] = await Promise.all([
@@ -176,20 +184,25 @@ async function listReceivedRequests(userId, query = {}) {
     };
 }
 
+function buildStatusMatch(status) {
+    if (!status || status === "all") return null;
+
+    const statuses = String(status)
+        .split(",")
+        .map((value) => value.trim().toLowerCase())
+        .filter((value) => Object.values(REQUEST_STATUS).includes(value));
+
+    if (!statuses.length) return null;
+
+    return { status: statuses.length === 1 ? statuses[0] : { $in: statuses } };
+}
+
 async function listSentRequests(userId, query = {}) {
     const { page, limit, skip } = parsePagination(query);
     const sort = parseSort(query, SORTABLE_FIELDS, "createdAt");
 
-    const match = { requester_id: userId };
-    if (query.status && query.status !== "all") {
-        const statuses = String(query.status)
-            .split(",")
-            .map((value) => value.trim().toLowerCase())
-            .filter((value) => Object.values(REQUEST_STATUS).includes(value));
-        if (statuses.length) match.status = statuses.length === 1 ? statuses[0] : { $in: statuses };
-    }
-
     const search = typeof query.search === "string" ? query.search.trim() : "";
+    const statusMatch = buildStatusMatch(query.status);
 
     const taskLookup = {
         $lookup: {
@@ -202,18 +215,26 @@ async function listSentRequests(userId, query = {}) {
     };
     const unwindTask = { $unwind: { path: "$task", preserveNullAndEmptyArrays: true } };
 
-    const pipeline = search
-        ? [
-            { $match: match },
-            taskLookup,
-            unwindTask,
-            { $match: buildSearchFilter(search, ["task.title", "task.location"]) },
-        ]
-        : [{ $match: match }, { $sort: sort }, { $skip: skip }, { $limit: limit }, taskLookup, unwindTask];
-
+    /*
+     * Everything this user has sent, narrowed by the search box but deliberately
+     * NOT by the status filter: the filter tabs each show how many requests they
+     * would reveal, and a status-filtered pipeline could only ever report on the
+     * tab already selected.
+     */
+    const basePipeline = [{ $match: { requester_id: userId } }];
     if (search) {
-        pipeline.push({ $sort: sort }, { $skip: skip }, { $limit: limit });
+        basePipeline.push(taskLookup, unwindTask, {
+            $match: buildSearchFilter(search, ["task.title", "task.location"]),
+        });
     }
+
+    const pipeline = [...basePipeline];
+    if (statusMatch) pipeline.push({ $match: statusMatch });
+
+    // Without a search there has been no lookup yet, so paginate first and join
+    // only the page's worth of rows — the order the original built it in.
+    pipeline.push({ $sort: sort }, { $skip: skip }, { $limit: limit });
+    if (!search) pipeline.push(taskLookup, unwindTask);
 
     pipeline.push(
         {
@@ -242,22 +263,27 @@ async function listSentRequests(userId, query = {}) {
         }
     );
 
-    const countPipeline = search
-        ? [
-            { $match: match },
-            taskLookup,
-            unwindTask,
-            { $match: buildSearchFilter(search, ["task.title", "task.location"]) },
-            { $count: "total" },
-        ]
-        : null;
+    const countPipeline = [...basePipeline];
+    if (statusMatch) countPipeline.push({ $match: statusMatch });
+    countPipeline.push({ $count: "total" });
 
-    const [items, total] = await Promise.all([
+    const countsPipeline = [...basePipeline, { $group: { _id: "$status", count: { $sum: 1 } } }];
+
+    const [items, total, countRows] = await Promise.all([
         Requests.aggregate(pipeline),
-        countPipeline
-            ? Requests.aggregate(countPipeline).then((rows) => rows[0]?.total || 0)
-            : Requests.countDocuments(match),
+        Requests.aggregate(countPipeline).then((rows) => rows[0]?.total || 0),
+        Requests.aggregate(countsPipeline),
     ]);
+
+    const statusCounts = Object.values(REQUEST_STATUS).reduce(
+        (counts, status) => ({ ...counts, [status]: 0 }),
+        {}
+    );
+    for (const row of countRows) {
+        if (row._id in statusCounts) statusCounts[row._id] = row.count;
+    }
+    // Summed before `all` is added, so it does not count itself.
+    statusCounts.all = Object.values(statusCounts).reduce((sum, count) => sum + count, 0);
 
     const mapped = items.map((item) => {
         const ownerName = item.owner
@@ -278,7 +304,60 @@ async function listSentRequests(userId, query = {}) {
         };
     });
 
-    return { items: mapped, meta: buildMeta({ page, limit, total }) };
+    return { items: mapped, meta: { ...buildMeta({ page, limit, total }), statusCounts } };
+}
+
+/*
+ * The requester retracting their own application.
+ *
+ * The row is kept, not deleted: the requester should still be able to see that
+ * they applied and changed their mind, and the owner's notification refers to
+ * it. Only a still-pending request can be withdrawn — once it has been accepted
+ * the other side has made plans around it, and once rejected there is nothing
+ * left to retract.
+ */
+async function withdrawRequest(requestId, requester) {
+    const request = await Requests.findById(requestId);
+    if (!request) throw ApiError.notFound("Request not found");
+
+    if (String(request.requester_id) !== String(requester._id)) {
+        throw ApiError.forbidden("You are not allowed to withdraw this request");
+    }
+
+    if (request.status === REQUEST_STATUS.WITHDRAWN) {
+        throw ApiError.conflict("This request has already been withdrawn");
+    }
+
+    if (request.status !== REQUEST_STATUS.PENDING) {
+        throw ApiError.badRequest(`A request that was already ${request.status} cannot be withdrawn`);
+    }
+
+    const task = await Task.findById(request.task_id).select("user_id title").lean();
+
+    const now = new Date();
+    request.status = REQUEST_STATUS.WITHDRAWN;
+    request.withdrawnAt = now;
+    request.resolvedAt = now;
+    await request.save();
+
+    if (task) {
+        const requesterName = `${requester.first_name} ${requester.last_name}`.trim();
+
+        await notificationService.notify({
+            user_id: task.user_id,
+            message: `${requesterName} withdrew their application for your task "${task.title}".`,
+            type: "request_withdrawn",
+            reference_id: String(request._id),
+        });
+
+        // Refreshes the owner's list and the pending badge, which no longer
+        // counts this one.
+        emitToUser(task.user_id, SOCKET_EVENTS.REQUEST_UPDATED, { scope: "received" });
+    }
+
+    emitToUser(requester._id, SOCKET_EVENTS.REQUEST_UPDATED, { scope: "sent" });
+
+    return { message: "Request withdrawn successfully" };
 }
 
 async function updateRequestStatus(requestId, action, ownerId) {
@@ -415,5 +494,6 @@ module.exports = {
     createRequest,
     listReceivedRequests,
     listSentRequests,
+    withdrawRequest,
     updateRequestStatus,
 };

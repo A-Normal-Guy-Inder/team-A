@@ -5,6 +5,8 @@ const updateProfileSchema = {
         first_name: [rules.required("First name"), rules.string("First name", { min: 1, max: 50 })],
         last_name: [rules.required("Last name"), rules.string("Last name", { min: 1, max: 50 })],
         phone_number: [rules.required("Phone number"), rules.phone()],
+        // Optional, and blank is allowed — that is how you clear it.
+        bio: [rules.string("Bio", { max: 500 })],
     },
 };
 
@@ -43,6 +45,13 @@ const changePasswordSchema = {
     },
 };
 
+const twoFactorSchema = {
+    body: {
+        enabled: [rules.required("Enabled"), rules.boolean("Enabled")],
+        password: [rules.required("Password"), rules.string("Password", { min: 1, max: 100 })],
+    },
+};
+
 const notificationIdSchema = {
     params: {
         notificationId: [rules.required("Notification ID"), rules.objectId("Notification ID")],
@@ -55,5 +64,6 @@ module.exports = {
     changeEmailSchema,
     otpOnlySchema,
     changePasswordSchema,
+    twoFactorSchema,
     notificationIdSchema,
 };

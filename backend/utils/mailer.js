@@ -39,4 +39,85 @@ async function sendWelcomeEmail(email, name) {
     }
 }
 
-module.exports = { sendOtpEmail, sendWelcomeEmail };
+/*
+ * Security notices to the address being moved away from.
+ *
+ * The OTP for an email change goes to the *new* address, which means the person
+ * who owns the old one — the account's actual owner, if this was not them —
+ * would otherwise see nothing at all until they were locked out. These are the
+ * only warning they get, so a failure to send is logged rather than thrown: it
+ * must not roll back a change the user legitimately asked for.
+ */
+function maskEmail(email) {
+    const [name = "", domain = ""] = String(email).split("@");
+    const visible = name.slice(0, 2);
+    return `${visible}${"*".repeat(Math.max(1, name.length - 2))}@${domain}`;
+}
+
+function noticeHtml(heading, body) {
+    return `
+        <div style="font-family:'Segoe UI',sans-serif;max-width:520px;margin:0 auto;padding:24px;
+                    border:1px solid #e2e8f0;border-radius:12px;color:#0f172a">
+            <h2 style="margin:0 0 12px;font-size:20px">${heading}</h2>
+            <p style="margin:0 0 12px;line-height:1.6;color:#334155">${body}</p>
+            <p style="margin:16px 0 0;line-height:1.6;color:#b91c1c;font-weight:600">
+                If this was not you, reset your password immediately — someone else may have
+                access to your account.
+            </p>
+        </div>
+    `;
+}
+
+async function sendEmailChangeWarning(oldEmail, newEmail) {
+    const masked = maskEmail(newEmail);
+
+    try {
+        await transporter.sendMail({
+            from: from("Account Security"),
+            to: oldEmail,
+            subject: "Security alert: a change of email address was requested",
+            text:
+                `Someone requested to change the email address on your account to ${masked}. ` +
+                `A confirmation code was sent to that address. If this was not you, reset your ` +
+                `password immediately.`,
+            html: noticeHtml(
+                "A change of email address was requested",
+                `Someone asked to move your account to <strong>${masked}</strong>, and a
+                 confirmation code was sent there. The change has not happened yet.`
+            ),
+        });
+    } catch (err) {
+        console.error("[mail] Email-change warning failed:", err.message);
+    }
+}
+
+async function sendEmailChangedNotice(oldEmail, newEmail) {
+    const masked = maskEmail(newEmail);
+
+    try {
+        await transporter.sendMail({
+            from: from("Account Security"),
+            to: oldEmail,
+            subject: "Your account email address was changed",
+            text:
+                `The email address on your account was changed to ${masked}. This address will ` +
+                `no longer receive account notifications. If this was not you, reset your ` +
+                `password immediately.`,
+            html: noticeHtml(
+                "Your account email address was changed",
+                `Your account now uses <strong>${masked}</strong>. This address will no longer
+                 receive account notifications.`
+            ),
+        });
+    } catch (err) {
+        console.error("[mail] Email-changed notice failed:", err.message);
+    }
+}
+
+module.exports = {
+    sendOtpEmail,
+    sendWelcomeEmail,
+    sendEmailChangeWarning,
+    sendEmailChangedNotice,
+    maskEmail,
+};

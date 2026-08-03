@@ -90,9 +90,8 @@ export class ChangeEmail {
       if (body?.data?.user) this.auth.patchUser(body.data.user);
       this.toasts.success('Email updated successfully');
 
-      // Hands the dashboard the page to open, so the user lands back where they
-      // started rather than on the feed.
-      this.router.navigate(['/Dashboard'], { state: { openPage: 'Settings' } });
+      // Back to the section this was launched from, rather than the feed.
+      this.router.navigate(['/Dashboard', 'settings']);
     } catch (error) {
       this.toasts.error(getErrorMessage(error, 'Failed to verify OTP'));
     } finally {

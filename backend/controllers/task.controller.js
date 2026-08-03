@@ -20,6 +20,11 @@ const updateTask = asyncHandler(async (req, res) => {
     });
 });
 
+const deleteTask = asyncHandler(async (req, res) => {
+    const result = await taskService.deleteTask(req.params.taskId, req.user._id);
+    return sendSuccess(res, { message: result.message, data: { notified: result.notified } });
+});
+
 const listMyTasks = asyncHandler(async (req, res) => {
     const { items, meta } = await taskService.listMyTasks(req.user._id, req.query);
     return sendSuccess(res, { message: "User tasks fetched successfully", data: items, meta });
@@ -39,4 +44,4 @@ const listCategories = asyncHandler(async (req, res) => {
     return sendSuccess(res, { message: "Categories fetched successfully", data: TASK_CATEGORIES });
 });
 
-module.exports = { createTask, updateTask, listMyTasks, listFeed, getTask, listCategories };
+module.exports = { createTask, updateTask, deleteTask, listMyTasks, listFeed, getTask, listCategories };

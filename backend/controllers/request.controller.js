@@ -21,6 +21,11 @@ const listSent = asyncHandler(async (req, res) => {
     return sendSuccess(res, { message: "Sent requests fetched successfully", data: items, meta });
 });
 
+const withdrawRequest = asyncHandler(async (req, res) => {
+    const result = await requestService.withdrawRequest(req.params.requestId, req.user);
+    return sendSuccess(res, { message: result.message });
+});
+
 const updateStatus = asyncHandler(async (req, res) => {
     const result = await requestService.updateRequestStatus(
         req.params.requestId,
@@ -30,4 +35,4 @@ const updateStatus = asyncHandler(async (req, res) => {
     return sendSuccess(res, { message: result.message });
 });
 
-module.exports = { createRequest, listReceived, listSent, updateStatus };
+module.exports = { createRequest, listReceived, listSent, withdrawRequest, updateStatus };

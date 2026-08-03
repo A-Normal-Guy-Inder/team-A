@@ -38,6 +38,7 @@
           <app-my-tasks-page
             (addTask)="onNavigate('Add Task')"
             (editTask)="editingTask.set($event)"
+            (deleteTask)="deletingTask.set($event)"
           />
         }
         @case ('Requests') {
@@ -68,6 +69,17 @@
         (close)="ui.setShowMenu(false)"
         (navigate)="onMenuNavigate($event)"
         (logoutClick)="onMenuLogout()"
+      />
+    }
+
+    @if (deletingTask(); as task) {
+      <app-confirm-modal
+        [message]="deleteMessage(task)"
+        confirmLabel="DELETE"
+        cancelLabel="CANCEL"
+        [busy]="busy()"
+        (confirmed)="handleDeleteTask(task)"
+        (cancelled)="deletingTask.set(null)"
       />
     }
 

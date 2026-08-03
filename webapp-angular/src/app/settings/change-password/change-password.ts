@@ -24,6 +24,24 @@ export class ChangePassword {
   readonly newPassword = signal('');
   readonly confirmPassword = signal('');
 
+  /**
+   * Leaves without changing anything — no request is sent from here at all.
+   *
+   * The typed passwords are cleared first. They are only in component state,
+   * which this navigation tears down, but wiping them explicitly means a
+   * cancel never depends on that happening.
+   */
+  handleCancel(): void {
+    if (this.loading()) return;
+
+    this.currentPassword.set('');
+    this.newPassword.set('');
+    this.confirmPassword.set('');
+    this.step.set(1);
+
+    this.router.navigate(['/Dashboard', 'settings']);
+  }
+
   async handleVerifyPassword(): Promise<void> {
     if (!this.currentPassword()) {
       this.toasts.error('Please enter your current password');
@@ -66,7 +84,7 @@ export class ChangePassword {
       });
 
       this.toasts.success('Password changed successfully');
-      this.router.navigate(['/Dashboard'], { state: { openPage: 'Settings' } });
+      this.router.navigate(['/Dashboard', 'settings']);
     } catch (error) {
       this.toasts.error(getErrorMessage(error, 'Password change failed'));
     } finally {

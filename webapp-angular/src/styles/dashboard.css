@@ -25,6 +25,24 @@
   @apply text-xl font-semibold tracking-tight text-slate-900;
 }
 
+/*
+ * Heading and subtitle stack inside the topbar's fixed 72px. `leading-tight`
+ * on the pair is what keeps them inside it — at the default line height the two
+ * lines together overflow the bar.
+ */
+.topbar-heading {
+  @apply flex min-w-0 flex-col justify-center leading-tight;
+}
+
+/*
+ * Truncated rather than wrapped: a second line would push the heading off
+ * centre and grow the bar. The subtitle is orientation, not content, so losing
+ * its tail on a narrow window costs nothing.
+ */
+.topbar-subtitle {
+  @apply mt-0.5 truncate text-xs font-normal text-slate-500;
+}
+
 .topbar-left {
   @apply flex-1;
 }
@@ -58,7 +76,7 @@
  * the burger's own menu already names the current page, so nothing is lost.
  */
 @media (max-width: 768px) {
-  .topbar-left h2 {
+  .topbar-left .topbar-heading {
     display: none;
   }
 }
@@ -467,6 +485,7 @@
 }
 
 .task-card .edit-btn,
+.task-card .delete-btn,
 .task-card .request-btn {
   @apply w-auto cursor-pointer rounded-lg border-0 px-4 py-2 text-[13px]
          font-semibold transition-all duration-200
@@ -476,6 +495,29 @@
 
 .task-card .edit-btn {
   @apply bg-slate-100 text-slate-700 hover:bg-slate-200 hover:text-slate-900;
+}
+
+/*
+ * The owner's two actions share the footer slot. `.task-footer button` adds a
+ * left margin to every button, which would double up between the pair — the
+ * gap here is the only spacing they need, so the margin is reset.
+ */
+.owner-actions {
+  @apply flex shrink-0 items-center gap-2;
+}
+
+.owner-actions button {
+  margin-left: 0;
+}
+
+/*
+ * Destructive, so it reads as such — but muted until hover rather than a
+ * permanent red block competing with Edit for attention.
+ */
+.task-card .delete-btn {
+  @apply bg-rose-50 text-rose-600
+         hover:bg-rose-600 hover:text-white hover:shadow-md hover:shadow-rose-500/25
+         focus-visible:ring-rose-500;
 }
 
 .task-card .request-btn {
@@ -1569,8 +1611,15 @@
 }
 
 .btn-cancel {
-  @apply bg-slate-100 text-slate-700
-         hover:bg-slate-200 hover:text-slate-900;
+  @apply bg-slate-100 text-slate-700;
+}
+
+.btn-cancel:hover:not(:disabled) {
+  @apply bg-slate-200 text-slate-900;
+}
+
+.btn-cancel:disabled {
+  @apply cursor-not-allowed text-slate-400 opacity-60;
 }
 
 .request-card {
@@ -2050,6 +2099,39 @@
   margin-top: 4px;
 }
 
+/* My Requests status filters ---------------------------------------------- */
+
+.request-filters {
+  @apply mb-5 flex flex-wrap gap-2;
+}
+
+.request-filter {
+  @apply flex cursor-pointer items-center gap-2 rounded-full border
+         border-slate-200 bg-white px-4 py-2 text-[13px] font-semibold
+         text-slate-600 transition-all duration-200
+         hover:border-brand-300 hover:text-brand-700
+         focus-visible:outline-none focus-visible:ring-2
+         focus-visible:ring-brand-500 focus-visible:ring-offset-2
+         disabled:cursor-not-allowed disabled:opacity-60;
+}
+
+.request-filter.is-active {
+  @apply border-brand-600 bg-brand-600 text-white shadow-sm;
+}
+
+/*
+ * The count pill inherits its colours from the tab, so the active tab does not
+ * need a second rule to keep the pill legible against its filled background.
+ */
+.request-filter-count {
+  @apply rounded-full bg-slate-100 px-2 py-0.5 text-xs tabular-nums
+         text-slate-600;
+}
+
+.request-filter.is-active .request-filter-count {
+  @apply bg-white/25 text-white;
+}
+
 .request-status-section {
   padding: 12px 18px;
   border-top: 1px solid #f1f5f9;
@@ -2057,6 +2139,9 @@
   justify-content: space-between;
   align-items: center;
   margin-top: auto;
+  /* The Withdraw button is a third item here; let it drop rather than squeeze. */
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .status-badge {
@@ -2064,6 +2149,24 @@
   border-radius: 999px;
   font-size: 13px;
   font-weight: 600;
+}
+
+/*
+ * A quiet outline button. Retracting an application is deliberate but not
+ * destructive — nothing is deleted — so it does not carry the red of a delete.
+ */
+.withdraw-btn {
+  @apply cursor-pointer rounded-lg border border-slate-300 bg-white px-3 py-1.5
+         text-[13px] font-semibold text-slate-600 transition-all duration-200
+         hover:border-rose-300 hover:bg-rose-50 hover:text-rose-600
+         focus-visible:outline-none focus-visible:ring-2
+         focus-visible:ring-rose-500 focus-visible:ring-offset-2
+         disabled:cursor-not-allowed disabled:opacity-60;
+}
+
+.status-withdrawn {
+  background: #f1f5f9;
+  color: #64748b;
 }
 
 .status-pending {

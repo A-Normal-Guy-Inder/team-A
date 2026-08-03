@@ -17,6 +17,8 @@ export interface ListMeta {
   hasPrevPage: boolean;
   pendingCount?: number;
   unreadCount?: number;
+  /** How many sent requests sit in each status — drives the My Requests tabs. */
+  statusCounts?: Record<string, number>;
 }
 
 export interface ListQuery {

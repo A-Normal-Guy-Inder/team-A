@@ -13,6 +13,16 @@ const updateProfile = asyncHandler(async (req, res) => {
     return sendSuccess(res, { message: result.message, data: { user: result.user } });
 });
 
+const uploadProfilePicture = asyncHandler(async (req, res) => {
+    const result = await userService.uploadProfilePicture(req.user._id, req.file);
+    return sendSuccess(res, { message: result.message, data: { user: result.user } });
+});
+
+const removeProfilePicture = asyncHandler(async (req, res) => {
+    const result = await userService.removeProfilePicture(req.user._id);
+    return sendSuccess(res, { message: result.message, data: { user: result.user } });
+});
+
 const reverifyPassword = asyncHandler(async (req, res) => {
     const result = await userService.reverifyPassword(req.body.password, req.user._id);
     return sendSuccess(res, { message: result.message });
@@ -33,6 +43,11 @@ const resendChangeEmailOtp = asyncHandler(async (req, res) => {
     return sendSuccess(res, { message: result.message });
 });
 
+const setTwoFactor = asyncHandler(async (req, res) => {
+    const result = await userService.setTwoFactor(req.user._id, req.body);
+    return sendSuccess(res, { message: result.message, data: { user: result.user } });
+});
+
 const changePassword = asyncHandler(async (req, res) => {
     const result = await userService.changePassword(req.user._id, req.body);
     setAuthCookie(res, result.token, result.maxAge);
@@ -42,9 +57,12 @@ const changePassword = asyncHandler(async (req, res) => {
 module.exports = {
     getProfile,
     updateProfile,
+    uploadProfilePicture,
+    removeProfilePicture,
     reverifyPassword,
     sendChangeEmailOtp,
     verifyChangeEmailOtp,
     resendChangeEmailOtp,
+    setTwoFactor,
     changePassword,
 };

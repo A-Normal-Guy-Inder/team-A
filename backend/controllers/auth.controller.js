@@ -2,6 +2,7 @@ const asyncHandler = require("../utils/asyncHandler");
 const { sendSuccess } = require("../utils/apiResponse");
 const { setAuthCookie, clearAuthCookie } = require("../utils/cookies");
 const authService = require("../services/auth.service");
+const env = require("../config/env");
 
 const register = asyncHandler(async (req, res) => {
     const result = await authService.register(req.body);
@@ -22,6 +23,24 @@ const login = asyncHandler(async (req, res) => {
     const rememberMe = Boolean(req.body.rememberMe ?? req.body.remember);
     const result = await authService.login({ ...req.body, rememberMe });
 
+    // 2FA accounts get a step, not a session: no cookie is set until the code
+    // comes back through /verify-2fa.
+    if (result.twoFactorRequired) {
+        return sendSuccess(res, {
+            message: "Verification code sent to your email",
+            data: { twoFactorRequired: true, email: result.email },
+        });
+    }
+
+    setAuthCookie(res, result.token, result.maxAge);
+
+    return sendSuccess(res, { message: "Login successful", data: { user: result.user } });
+});
+
+const verifyTwoFactor = asyncHandler(async (req, res) => {
+    const rememberMe = Boolean(req.body.rememberMe ?? req.body.remember);
+    const result = await authService.verifyTwoFactor({ ...req.body, rememberMe });
+
     setAuthCookie(res, result.token, result.maxAge);
 
     return sendSuccess(res, { message: "Login successful", data: { user: result.user } });
@@ -39,6 +58,10 @@ const resetPassword = asyncHandler(async (req, res) => {
 });
 
 const logout = asyncHandler(async (req, res) => {
+    // Retire the token as well as the cookie, so a copy taken before logout
+    // cannot go on being used afterwards.
+    await authService.invalidateSessions(req.cookies?.[env.cookieName]);
+
     clearAuthCookie(res);
     return sendSuccess(res, { message: "Logged out successfully" });
 });
@@ -56,9 +79,20 @@ const me = asyncHandler(async (req, res) => {
                 phone_number: req.user.phone_number,
                 profile_picture: req.user.profile_picture,
                 is_verified: req.user.is_verified,
+                two_factor_enabled: Boolean(req.user.two_factor_enabled),
             },
         },
     });
 });
 
-module.exports = { register, verifyOtp, resendOtp, login, forgotPassword, resetPassword, logout, me };
+module.exports = {
+    register,
+    verifyOtp,
+    resendOtp,
+    login,
+    verifyTwoFactor,
+    forgotPassword,
+    resetPassword,
+    logout,
+    me,
+};

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
-import { PAGES } from '../../state/ui.store';
+import { NAV_PAGES } from '../../state/ui.store';
 import { User } from '../../core/api.types';
 
 @Component({
@@ -49,7 +49,7 @@ export class Sidebar {
   readonly navigate = output<string>();
   readonly logoutClick = output<void>();
 
-  readonly pages = PAGES;
+  readonly pages = NAV_PAGES;
 
   /*
    * Dashboard used to reshape the user before handing it down

@@ -64,6 +64,20 @@ export class Login {
       return;
     }
 
+    // 2FA account: the password was right but there is no session yet, so the
+    // OTP screen takes over rather than the dashboard.
+    if (result.value.twoFactorRequired) {
+      this.toasts.success('Verification code sent to your email');
+      this.router.navigate(['/verify'], {
+        state: {
+          email: result.value.email ?? email,
+          flow: OTP_FLOW.TWO_FACTOR,
+          rememberMe: this.remember(),
+        },
+      });
+      return;
+    }
+
     this.toasts.success('Login successful');
     this.router.navigate(['/Dashboard'], { replaceUrl: true });
   }

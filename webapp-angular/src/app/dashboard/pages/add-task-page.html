@@ -100,6 +100,9 @@
       <button class="btn-submit" (click)="handleSubmit()" [disabled]="saving()">
         {{ saving() ? 'Adding...' : 'Add Task' }}
       </button>
+      <button class="btn-cancel" type="button" (click)="handleCancel()" [disabled]="saving()">
+        Cancel
+      </button>
     </div>
   </div>
 </div>

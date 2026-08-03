@@ -8,7 +8,13 @@ const REQUEST_STATUS = Object.freeze({
     PENDING: "pending",
     ACCEPTED: "accepted",
     REJECTED: "rejected",
+    // Retracted by the requester. Kept rather than deleted so the requester
+    // still has a record of having applied.
+    WITHDRAWN: "withdrawn",
 });
+
+/* Statuses the task owner is expected to act on. */
+const ACTIONABLE_REQUEST_STATUSES = [REQUEST_STATUS.PENDING];
 
 const ACCEPTED_TASK_STATUS = Object.freeze({
     PENDING: "pending",
@@ -56,6 +62,7 @@ module.exports = {
     ASSIGNABLE_TASK_STATUSES,
     REQUEST_STATUS,
     REQUEST_STATUSES,
+    ACTIONABLE_REQUEST_STATUSES,
     ACCEPTED_TASK_STATUS,
     ACCEPTED_TASK_STATUSES,
     TASK_CATEGORIES,

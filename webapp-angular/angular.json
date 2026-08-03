@@ -33,7 +33,8 @@
               "src/styles/auth.css",
               "src/styles/dashboard.css",
               "src/styles/loader.css",
-              "src/styles/settings.css"
+              "src/styles/settings.css",
+              "src/styles/not-found.css"
             ]
           },
           "configurations": {

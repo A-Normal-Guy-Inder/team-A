@@ -13,7 +13,7 @@ import {
 import { IconBell } from '../../shared/icons';
 import { NotificationDropdown } from '../notification-dropdown/notification-dropdown';
 import { AppNotification } from '../../core/api.types';
-import { Page } from '../../state/ui.store';
+import { PAGE_SUBTITLES, Page } from '../../state/ui.store';
 
 const NO_SEARCH_PAGES = ['Settings', 'Add Task'];
 
@@ -25,7 +25,12 @@ const NO_SEARCH_PAGES = ['Settings', 'Add Task'];
     <div class="topbar">
       <div class="topbar-left">
         <span class="hamburger-icon" (click)="openMenu.emit()">☰</span>
-        <h2>{{ activePage() }}</h2>
+        <div class="topbar-heading">
+          <h2>{{ activePage() }}</h2>
+          @if (subtitle()) {
+            <p class="topbar-subtitle">{{ subtitle() }}</p>
+          }
+        </div>
       </div>
 
       <div class="topbar-center">
@@ -83,6 +88,8 @@ export class Topbar {
 
   private readonly bell = viewChild<ElementRef<HTMLElement>>('bell');
   private readonly dropdown = viewChild('dropdown', { read: ElementRef<HTMLElement> });
+
+  readonly subtitle = computed(() => PAGE_SUBTITLES[this.activePage() as Page] ?? '');
 
   readonly showSearch = computed(() => !NO_SEARCH_PAGES.includes(this.activePage()));
   readonly searchPlaceholder = computed(() => `Search in ${this.activePage().toLowerCase()}...`);

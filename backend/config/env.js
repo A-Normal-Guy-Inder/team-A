@@ -90,6 +90,14 @@ const env = {
     security: {
         passwordReverifyWindowMs: toInt(process.env.PASSWORD_REVERIFY_WINDOW_MS, 10 * 60 * 1000),
         requestCooldownMs: toInt(process.env.REQUEST_COOLDOWN_MS, 24 * 60 * 60 * 1000),
+        // Per-account login throttling. The IP-based authLimiter above is the
+        // first line, but it is trivially sidestepped from a second address —
+        // this counter follows the account itself.
+        loginMaxAttempts: toInt(process.env.LOGIN_MAX_ATTEMPTS, 5),
+        loginBlockMs: toInt(process.env.LOGIN_BLOCK_MS, 15 * 60 * 1000),
+        loginAttemptWindowMs: toInt(process.env.LOGIN_ATTEMPT_WINDOW_MS, 15 * 60 * 1000),
+        // How long a password-verified login may wait for its second factor.
+        twoFactorWindowMs: toInt(process.env.TWO_FACTOR_WINDOW_MS, 10 * 60 * 1000),
     },
 
     rateLimit: {

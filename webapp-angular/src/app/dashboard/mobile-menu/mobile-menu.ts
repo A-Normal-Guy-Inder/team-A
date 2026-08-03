@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, output } from '@angular/core';
-import { PAGES } from '../../state/ui.store';
+import { NAV_PAGES } from '../../state/ui.store';
 
 @Component({
   selector: 'app-mobile-menu',
@@ -26,5 +26,5 @@ export class MobileMenu {
   readonly navigate = output<string>();
   readonly logoutClick = output<void>();
 
-  readonly pages = PAGES;
+  readonly pages = NAV_PAGES;
 }

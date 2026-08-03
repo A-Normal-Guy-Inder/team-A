@@ -22,4 +22,10 @@ const updateRequestSchema = {
     },
 };
 
-module.exports = { createRequestSchema, updateRequestSchema };
+const requestIdSchema = {
+    params: {
+        requestId: [rules.required("Request ID"), rules.objectId("Request ID")],
+    },
+};
+
+module.exports = { createRequestSchema, updateRequestSchema, requestIdSchema };

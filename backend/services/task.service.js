@@ -1,10 +1,13 @@
 const Task = require("../models/task.model");
 const Requests = require("../models/request.model");
 const User = require("../models/user.model");
+const AcceptedTasks = require("../models/acceptedTask.model");
 const ApiError = require("../utils/ApiError");
 const env = require("../config/env");
-const { TASK_STATUS, REQUEST_STATUS } = require("../config/constants");
+const { TASK_STATUS, REQUEST_STATUS, SOCKET_EVENTS } = require("../config/constants");
 const { uploadToCloudinary, deleteFromCloudinary } = require("../utils/cloudinary");
+const notificationService = require("./notification.service");
+const { emitToUser, emitToUsers } = require("../realtime/socket");
 const { parsePagination, parseSort, buildMeta, buildSearchFilter } = require("../utils/pagination");
 
 const SORTABLE_FIELDS = ["createdAt", "start_time", "end_time", "title", "status"];
@@ -135,6 +138,60 @@ async function updateTask(taskId, payload, file, userId) {
     return { task: task.toObject(), message: "Task updated successfully" };
 }
 
+/*
+ * Removes a task and everything hanging off it.
+ *
+ * The applicants are read out first: once the requests are gone there is no
+ * record of who had applied, and telling them is the whole point — from their
+ * side a task that simply vanished from the feed is indistinguishable from a
+ * bug. Their requests go with it rather than being left pointing at a task that
+ * no longer exists, which would show up in their list as "Task Unavailable".
+ */
+async function deleteTask(taskId, userId) {
+    const task = await Task.findById(taskId);
+    if (!task) throw ApiError.notFound("Task not found");
+
+    if (String(task.user_id) !== String(userId)) {
+        throw ApiError.forbidden("You are not allowed to delete this task");
+    }
+
+    const openRequests = await Requests.find({
+        task_id: task._id,
+        status: { $in: [REQUEST_STATUS.PENDING, REQUEST_STATUS.ACCEPTED] },
+    })
+        .select("requester_id")
+        .lean();
+
+    const applicantIds = [...new Set(openRequests.map((request) => String(request.requester_id)))];
+    const title = task.title;
+    const pictureId = task.picture_public_id;
+
+    await Requests.deleteMany({ task_id: task._id });
+    await AcceptedTasks.deleteMany({ task_id: task._id });
+    await task.deleteOne();
+
+    // After the row is gone — a failed image cleanup must not keep the task alive.
+    await deleteFromCloudinary(pictureId);
+
+    if (applicantIds.length) {
+        await notificationService.notify(
+            applicantIds.map((applicantId) => ({
+                user_id: applicantId,
+                message: `The task "${title}" you applied for has been closed by its owner.`,
+                type: "task_closed",
+                reference_id: String(task._id),
+            }))
+        );
+
+        emitToUsers(applicantIds, SOCKET_EVENTS.REQUEST_UPDATED, { scope: "sent" });
+        emitToUsers(applicantIds, SOCKET_EVENTS.TASK_UPDATED, { taskId: String(task._id) });
+    }
+
+    emitToUser(userId, SOCKET_EVENTS.REQUEST_UPDATED, { scope: "received" });
+
+    return { message: "Task deleted successfully", notified: applicantIds.length };
+}
+
 async function listMyTasks(userId, query = {}) {
     const { page, limit, skip } = parsePagination(query);
     const sort = parseSort(query, SORTABLE_FIELDS, "createdAt");
@@ -252,6 +309,7 @@ async function getTaskById(taskId, userId) {
 module.exports = {
     createTask,
     updateTask,
+    deleteTask,
     listMyTasks,
     listFeed,
     getTaskById,

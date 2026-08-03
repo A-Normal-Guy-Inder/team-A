@@ -130,6 +130,39 @@ export class RequestsStore {
     }
   }
 
+  /**
+   * Retracts one of the user's own applications.
+   *
+   * The row stays in the list with its new status rather than disappearing —
+   * the application is withdrawn, not deleted, and the user should be able to
+   * see that is what happened.
+   */
+  async withdraw(requestId: string): Promise<Result<void>> {
+    this.state.update((s) => ({
+      ...s,
+      actionInFlight: { ...s.actionInFlight, [requestId]: 'withdrawn' },
+    }));
+
+    try {
+      await this.api.patch(`/requests/${requestId}/withdraw`);
+
+      this.state.update((s) => ({
+        ...s,
+        actionInFlight: omit(s.actionInFlight, requestId),
+        sent: {
+          ...s.sent,
+          items: s.sent.items.map((item) =>
+            item.requestId === requestId ? { ...item, status: 'withdrawn' } : item,
+          ),
+        },
+      }));
+      return ok(undefined);
+    } catch (error) {
+      this.state.update((s) => ({ ...s, actionInFlight: omit(s.actionInFlight, requestId) }));
+      return fail(getErrorMessage(error, 'Failed to withdraw request'));
+    }
+  }
+
   setReceivedQuery(patch: Partial<ListQuery>): void {
     this.state.update((s) => ({
       ...s,
