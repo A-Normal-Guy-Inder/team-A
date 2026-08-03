@@ -8,8 +8,6 @@ webapp/build/
 webapp-angular/build/
 .vercel/
 
-# backend/.env holds live DB/JWT/Cloudinary/SMTP credentials. webapp/.env is
-# tracked on purpose: it only documents the REACT_APP_* knobs and holds no secrets.
 backend/.env
 .env.local
 .env.*.local
