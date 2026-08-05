@@ -1,0 +1,176 @@
+==============================================================================
+HelperHub — Developer Requirements
+==============================================================================
+
+This is a human-readable checklist of everything needed to run HelperHub
+locally. It is NOT a pip manifest — HelperHub is a Node.js + Angular project,
+so packages are installed with `npm install`, which resolves them from
+`backend/package.json` and `webapp-angular/package.json` and pins exact
+versions via the committed `package-lock.json` files.
+
+Install order:  backend deps -> backend .env -> frontend deps -> run both.
+
+
+------------------------------------------------------------------------------
+1. SYSTEM REQUIREMENTS
+------------------------------------------------------------------------------
+
+Node.js            >= 18.0.0        (backend `engines` field enforces this)
+npm                >= 8.0.0         (frontend was authored with npm 11.14.1)
+MongoDB            >= 4.4           local server or Atlas cluster
+Git                any recent version
+
+MongoDB notes:
+  - A replica set is required for multi-document transactions. On a standalone
+    server the request-acceptance flow detects this and falls back to
+    sequential writes, so a plain `mongod` is fine for development.
+  - MongoDB Atlas free tier is already a replica set and needs no extra setup.
+
+
+------------------------------------------------------------------------------
+2. EXTERNAL SERVICE ACCOUNTS
+------------------------------------------------------------------------------
+
+Cloudinary         Image upload/hosting. Needs Cloud Name, API Key, API Secret.
+                   https://cloudinary.com — free tier is sufficient.
+
+Gmail account      Sends the 6-digit OTP emails over SMTP.
+                   Requires 2-Step Verification enabled and an App Password
+                   (a normal account password will not authenticate).
+                   https://myaccount.google.com/apppasswords
+
+Without Cloudinary the app runs but avatar/image uploads fail.
+Without SMTP credentials the app runs but signup verification, password reset
+and two-factor login cannot complete, since those flows await the email send.
+
+
+------------------------------------------------------------------------------
+3. BACKEND PACKAGES  (backend/package.json — installed by `npm install`)
+------------------------------------------------------------------------------
+
+runtime dependencies:
+
+  bcryptjs                ^3.0.3      password hashing
+  cloudinary              ^2.9.0      image upload / transformation SDK
+  cookie-parser           ^1.4.7      reads the HTTP-only session cookie
+  cors                    ^2.8.5      origin allowlist for the REST API
+  dotenv                  ^17.2.3     loads backend/.env
+  express                 ^5.2.1      HTTP framework
+  express-rate-limit      ^8.6.1      tiered rate-limit buckets
+  helmet                  ^8.3.0      security headers
+  jsonwebtoken            ^9.0.3      session token signing/verification
+  mongoose                ^9.1.2      MongoDB ODM, schemas and indexes
+  multer                  ^2.0.2      multipart upload handling
+  node-cron               ^4.2.1      scheduler for the auto-close job
+  nodemailer              ^7.0.12     Gmail SMTP transport for OTPs
+  socket.io               ^4.8.3      realtime notification server
+  uuid                    ^13.0.0     UUID primary keys
+  validator               ^13.15.26   string validation helpers
+
+dev dependencies:
+
+  nodemon                 ^3.1.11     auto-restart for `npm run dev`
+
+
+------------------------------------------------------------------------------
+4. FRONTEND PACKAGES  (webapp-angular/package.json — installed by `npm install`)
+------------------------------------------------------------------------------
+
+runtime dependencies:
+
+  @angular/common         ^21.0.0
+  @angular/compiler       ^21.0.0
+  @angular/core           ^21.0.0     zoneless change detection + signals
+  @angular/forms          ^21.0.0
+  @angular/platform-browser ^21.0.0
+  @angular/router         ^21.0.0
+  rxjs                    ~7.8.0
+  socket.io-client        ^4.8.3      realtime notification client
+  tslib                   ^2.3.0
+
+dev dependencies:
+
+  @angular/build          ^21.0.4     application builder
+  @angular/cli            ^21.0.4     `ng` command
+  @angular/compiler-cli   ^21.0.0
+  autoprefixer            ^10.5.4
+  jsdom                   ^27.1.0     DOM environment for tests
+  postcss                 ^8.5.25
+  tailwindcss             ^3.4.19
+  typescript              ~5.9.2
+  vitest                  ^4.0.8      test runner behind `npm test`
+
+The Angular CLI is a local dev dependency — no global install is needed. Use
+`npm start` / `npm run build`, or `npx ng <command>` for other CLI commands.
+
+
+------------------------------------------------------------------------------
+5. BACKEND ENVIRONMENT  (backend/.env — git-ignored, create it yourself)
+------------------------------------------------------------------------------
+
+Only MONGO_URI and JWT_SECRET are mandatory; the server refuses to boot
+without them. Everything else has a working default — see the full table in
+README.md ("Backend environment variables").
+
+Minimum working development file:
+
+  MONGO_URI=mongodb://127.0.0.1:27017/helperhub
+  JWT_SECRET=replace-with-a-long-random-string
+
+Recommended for a fully functional development setup:
+
+  NODE_ENV=development
+  PORT=5000
+  FRONTEND_URL=http://localhost:3000
+
+  CLOUDINARY_CLOUD_NAME=your-cloud-name
+  CLOUDINARY_API_KEY=your-api-key
+  CLOUDINARY_API_SECRET=your-api-secret
+
+  GMAIL_USER=your-address@gmail.com
+  GMAIL_PASS=your-16-char-app-password
+
+Rules that bite:
+  - JWT_SECRET must be >= 32 characters when NODE_ENV=production.
+  - Do not set COOKIE_SECURE / COOKIE_SAMESITE in production. They are derived
+    from NODE_ENV; an explicit value overrides that and breaks authentication
+    across domains.
+  - FRONTEND_URL is the CORS allowlist for both Express and Socket.IO. Any dev
+    port other than 3000 must be added here (comma-separated) or every request
+    is blocked before it reaches the app.
+
+
+------------------------------------------------------------------------------
+6. FRONTEND CONFIGURATION  (not environment variables)
+------------------------------------------------------------------------------
+
+Angular has no REACT_APP_* equivalent. Values are build-time and committed:
+
+  webapp-angular/src/environments/environment.ts             development
+  webapp-angular/src/environments/environment.production.ts  production
+
+Leave `apiUrl` empty for local development so the API origin is derived from
+window.location — pointing localhost at 127.0.0.1 (or the reverse) makes the
+browser discard the session cookie and every request answers 401.
+
+
+------------------------------------------------------------------------------
+7. INSTALL AND RUN
+------------------------------------------------------------------------------
+
+  git clone <repository-url>
+  cd team-A
+
+  cd backend
+  npm install
+  # create backend/.env as described in section 5
+  npm run dev                  # nodemon on port 5000 (npm start for plain node)
+
+  cd ../webapp-angular
+  npm install
+  npm start                    # dev server on port 3000 — not Angular's 4200
+  npm run build                # production bundle into ./build
+  npm test                     # vitest, single run
+
+Use `npm ci` instead of `npm install` for a clean, lockfile-exact install.
+The backend has no test script; `npm test` there exits with an error by design.

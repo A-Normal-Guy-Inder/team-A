@@ -102,6 +102,12 @@ would break every one of them.
 
 ## 🚥 Getting Started
 
+> **New to the project?** [`requirements.txt`](./requirements.txt) is the single-page
+> setup sheet: system requirements, the external accounts you need, every backend and
+> frontend package with its version, the minimum `.env`, and the commands to run both
+> halves. It is a human-readable checklist, **not** a pip manifest — this is a Node.js
+> project, so packages install with `npm install` from each `package.json`.
+
 ### Prerequisites
 *   Node.js (≥18.0.0)
 *   npm (≥8.0.0)
