@@ -98,7 +98,7 @@ webapp-angular/src/
 
 The stylesheets are registered as **global** styles in `angular.json`, not as component
 styles. They are written as global class selectors and Angular's default style scoping
-would break every one of them.
+would break every one of them.   
 
 ## 🚥 Getting Started
 
