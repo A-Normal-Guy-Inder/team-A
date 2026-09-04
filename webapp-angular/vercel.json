@@ -14,7 +14,7 @@
   ],
   "headers": [
     {
-      "source": "/(.*-[0-9A-Z]{8}\\.(?:js|css))",
+      "source": "/(.*-[0-9A-Za-z]+\\.(?:js|css))",
       "headers": [
         {
           "key": "Cache-Control",
@@ -41,11 +41,11 @@
       ]
     },
     {
-      "source": "/index.html",
+      "source": "/((?!.*\\.).*)",
       "headers": [
         {
           "key": "Cache-Control",
-          "value": "no-cache, no-store, must-revalidate"
+          "value": "no-cache"
         }
       ]
     },
@@ -67,6 +67,14 @@
         {
           "key": "Permissions-Policy",
           "value": "camera=(), microphone=(), geolocation=()"
+        },
+        {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=63072000; includeSubDomains; preload"
+        },
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://res.cloudinary.com; connect-src 'self' https://helper-backend-t7tv.onrender.com wss://helper-backend-t7tv.onrender.com; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
         }
       ]
     }
