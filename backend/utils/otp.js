@@ -9,9 +9,8 @@ function generateOtp(length = env.otp.length) {
     return String(crypto.randomInt(min, max));
 }
 
-async function hashOtp(otp) {
-    const salt = await bcrypt.genSalt(10);
-    return bcrypt.hash(String(otp), salt);
+function hashOtp(otp) {
+    return bcrypt.hash(String(otp), env.security.bcryptRounds);
 }
 
 function verifyOtp(otp, hash) {

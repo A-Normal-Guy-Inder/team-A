@@ -88,6 +88,7 @@ const env = {
     },
 
     security: {
+        bcryptRounds: toInt(process.env.BCRYPT_ROUNDS, 10),
         passwordReverifyWindowMs: toInt(process.env.PASSWORD_REVERIFY_WINDOW_MS, 10 * 60 * 1000),
         requestCooldownMs: toInt(process.env.REQUEST_COOLDOWN_MS, 24 * 60 * 60 * 1000),
         // Per-account login throttling

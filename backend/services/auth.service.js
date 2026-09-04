@@ -14,21 +14,18 @@ const OTP_PURPOSE = {
     TWO_FACTOR: "two_factor",
 };
 
-const BCRYPT_ROUNDS = 10;
-
 /* Avoids account-existence oracle */
 const GENERIC_LOGIN_ERROR = "Invalid email or password.";
 
 // Burns equivalent bcrypt time
-const DUMMY_PASSWORD_HASH = bcrypt.hashSync(crypto.randomBytes(32).toString("hex"), BCRYPT_ROUNDS);
+const DUMMY_PASSWORD_HASH = bcrypt.hashSync(crypto.randomBytes(32).toString("hex"), env.security.bcryptRounds);
 
 function normaliseEmail(email) {
     return String(email || "").trim().toLowerCase();
 }
 
-async function hashPassword(password) {
-    const salt = await bcrypt.genSalt(BCRYPT_ROUNDS);
-    return bcrypt.hash(password, salt);
+function hashPassword(password) {
+    return bcrypt.hash(password, env.security.bcryptRounds);
 }
 
 function findByEmailWithSecrets(email) {
@@ -124,14 +121,13 @@ async function verifyEmailOtp({ email_id, otp }) {
     const wasUnverified = !user.is_verified;
 
     if (purpose === OTP_PURPOSE.PASSWORD_RESET) {
-        user.password_reset_expires_at = new Date(Date.now() + env.security.passwordReverifyWindowMs);
-        user.password_is_verified = true;
-        user.password_verified_at = new Date();
+        user.password_reset_expires_at = new Date(Date.now() + env.security.passwordReverifyWindowMs);   
     } else {
         user.is_verified = true;
-        user.password_is_verified = true;
-        user.password_verified_at = new Date();
     }
+
+    user.password_is_verified = true;
+        user.password_verified_at = new Date();
 
     await user.save();
 

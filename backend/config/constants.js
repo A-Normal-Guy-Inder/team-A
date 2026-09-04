@@ -8,7 +8,6 @@ const REQUEST_STATUS = Object.freeze({
     PENDING: "pending",
     ACCEPTED: "accepted",
     REJECTED: "rejected",
-    // Retracted; kept, not deleted
     WITHDRAWN: "withdrawn",
 });
 

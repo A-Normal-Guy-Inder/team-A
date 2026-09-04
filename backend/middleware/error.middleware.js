@@ -24,7 +24,7 @@ function errorHandler(err, req, res, next) {
         status = err.statusCode;
         message = err.message;
         details = err.details;
-    } else if (err instanceof multer.MulterError) {
+    } else if (err instanceof multer.MulterError) { //nmcf
         status = err.code === "LIMIT_FILE_SIZE" ? 413 : 400;
         message = {
             LIMIT_FILE_SIZE: `File is too large. Maximum size is ${Math.round(env.upload.maxFileSizeBytes / (1024 * 1024))}MB.`,
@@ -35,7 +35,7 @@ function errorHandler(err, req, res, next) {
         status = 400;
         message = "Validation failed";
         details = Object.fromEntries(
-            Object.entries(err.errors).map(([field, error]) => [field, error.message])
+            Object.entries(err.errors).map(([field, error]) => [field, error.message])//mkp
         );
     } else if (err instanceof mongoose.Error.CastError) {
         status = 400;
