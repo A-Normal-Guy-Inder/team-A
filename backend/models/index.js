@@ -4,5 +4,4 @@ module.exports = {
     Requests: require("./request.model"),
     AcceptedTasks: require("./acceptedTask.model"),
     Notification: require("./notification.model"),
-    JobLock: require("./jobLock.model"),
 };

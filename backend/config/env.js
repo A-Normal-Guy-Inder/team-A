@@ -120,7 +120,8 @@ const env = {
         enabled: toBool(process.env.CRON_ENABLED, true),
         timezone: required("CRON_TIMEZONE", "Asia/Kolkata"),
         autoCloseSchedule: required("CRON_AUTO_CLOSE_SCHEDULE", "* * * * *"),
-        lockTtlMs: toInt(process.env.CRON_LOCK_TTL_MS, 55 * 1000),
+        // "true" on exactly one instance; "false" on the others
+        run: toBool(process.env.NODE_CRON_RUN, true),
     },
 };
 

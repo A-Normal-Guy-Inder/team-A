@@ -167,7 +167,7 @@ Only `MONGO_URI` and `JWT_SECRET` are mandatory — everything else has a workin
 | `RATE_LIMIT_*`, `OTP_*` | Tunables for limits and OTP policy |
 | `LOGIN_MAX_ATTEMPTS`, `LOGIN_BLOCK_MS` | Per-account login lockout |
 | `TWO_FACTOR_WINDOW_MS` | How long a password-verified login may wait for its second factor |
-| `CRON_ENABLED`, `CRON_LOCK_TTL_MS` | Background job toggle and lease duration |
+| `CRON_ENABLED`, `NODE_CRON_RUN` | Background job toggle, and whether this instance runs the scheduled jobs |
 | `ENSURE_INDEXES` | Build schema indexes on boot (default `true`) |
 
 ### Frontend configuration
@@ -200,11 +200,20 @@ via `fileReplacements` in `angular.json`:
 
 ### Running Multiple Backend Instances
 
-Scaling out horizontally needs no extra configuration. The scheduler takes a lease
-in the `joblocks` collection before each run, so only one instance performs the
-auto-close for a given tick; the others log a skip and move on. Keep
-`CRON_LOCK_TTL_MS` **below** the schedule interval so the lease expires between
-ticks.
+Scaling out horizontally needs one decision: which instance runs the cron jobs.
+Duplicate runs are prevented by node-cron's own coordination — the auto-close job is
+scheduled with `distributed: true`, and the default coordinator reads `NODE_CRON_RUN`.
+Set it to `true` on **exactly one** instance and `false` on the rest; an instance with
+`false` still schedules the job but skips every fire (`execution:skipped`, reason
+`not-elected`). `noOverlap: true` separately stops a slow run from overlapping the next
+tick within an instance.
+
+Because a host's environment variables normally apply to every replica of a service,
+`NODE_CRON_RUN=true` cannot single out one replica of a scaled service — give the
+scheduler its own service (a background worker) with the flag on, and set it to `false`
+on the scaled web service. For a coordinator that elects a winner at runtime instead,
+pass `runCoordinator` to `cron.schedule`: a two-method interface
+(`shouldRun`/`onComplete`) that any shared store can back.
 
 ## ☁️ Deployment
 

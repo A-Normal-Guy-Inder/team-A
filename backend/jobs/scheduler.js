@@ -1,31 +1,17 @@
 const cron = require("node-cron");
 const env = require("../config/env");
-const { withLock, INSTANCE_ID } = require("./jobLock");
 const { JOB_NAME, autoCloseExpiredTasks } = require("./autoCloseTasks.job");
 
 const scheduledTasks = [];
 
-let autoCloseRunning = false;
-
 async function runAutoClose() {
-    if (autoCloseRunning) return;
-    autoCloseRunning = true;
-
     try {
-        const ran = await withLock(JOB_NAME, async () => {
-            const closed = await autoCloseExpiredTasks();
-            if (closed > 0) {
-                console.log(`[cron] Closed ${closed} expired task(s)`);
-            }
-        });
-
-        if (!ran && !env.isProduction) {
-            console.log("[cron] auto-close skipped — lock held by another instance");
+        const closed = await autoCloseExpiredTasks();
+        if (closed > 0) {
+            console.log(`[cron] Closed ${closed} expired task(s)`);
         }
     } catch (err) {
         console.error("[cron] Auto close task error:", err);
-    } finally {
-        autoCloseRunning = false;
     }
 }
 
@@ -40,12 +26,30 @@ function startScheduler() {
         return;
     }
 
+    /* node-cron reads this itself; only "true"/"false" are accepted */
+    process.env.NODE_CRON_RUN = String(env.jobs.run);
+
     const task = cron.schedule(env.jobs.autoCloseSchedule, runAutoClose, {
+        // Name forms the coordination key
+        name: JOB_NAME,
         timezone: env.jobs.timezone,
+        distributed: true,
+        noOverlap: true,
     });
 
+    if (!env.isProduction) {
+        task.on("execution:overlap", () =>
+            console.log("[cron] auto-close skipped — previous run still going")
+        );
+        task.on("execution:skipped", (context) =>
+            console.log(`[cron] auto-close skipped — ${context.reason}`)
+        );
+    }
+
     scheduledTasks.push(task);
-    console.log(`[cron] Scheduler started (instance ${INSTANCE_ID}, "${env.jobs.autoCloseSchedule}")`);
+    console.log(
+        `[cron] Scheduler started (NODE_CRON_RUN=${env.jobs.run}, "${env.jobs.autoCloseSchedule}")`
+    );
 }
 
 async function stopScheduler() {
@@ -58,4 +62,4 @@ async function stopScheduler() {
     scheduledTasks.length = 0;
 }
 
-module.exports = { startScheduler, stopScheduler, runAutoClose };
+module.exports = { startScheduler, stopScheduler };
