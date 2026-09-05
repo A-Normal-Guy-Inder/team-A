@@ -14,24 +14,7 @@ export interface ImageSelection {
   selector: 'app-image-upload-field',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [IconUpload],
-  template: `
-    @if (preview()) {
-      <div class="image-preview-container">
-        <img [src]="preview()" alt="Preview" class="image-preview" />
-        <button type="button" class="btn-remove-image" (click)="remove.emit()">
-          ✕ Remove Image
-        </button>
-      </div>
-    } @else {
-      <div class="file-upload" (dragover)="onDragOver($event)" (drop)="onDrop($event)">
-        <input type="file" [id]="inputId()" accept="image/*" (change)="onFileInput($event)" />
-        <label [attr.for]="inputId()" class="file-upload-label">
-          <span><app-icon-upload /></span>Upload a file or drag and drop
-          <span>PNG, JPG, GIF up to 5MB</span>
-        </label>
-      </div>
-    }
-  `,
+  templateUrl: './image-upload-field.html',
 })
 export class ImageUploadField {
   private readonly toasts = inject(ToastService);

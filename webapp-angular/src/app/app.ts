@@ -17,13 +17,7 @@ import { isProtectedUrl } from './app.routes';
 @Component({
   selector: 'app-root',
   imports: [RouterOutlet, Loader, ToastContainer],
-  template: `
-    <app-toast-container />
-    @if (navigating()) {
-      <app-loader />
-    }
-    <router-outlet />
-  `,
+  templateUrl: './app.html',
 })
 export class App {
   private readonly router = inject(Router);

@@ -8,63 +8,7 @@ import { IconX } from '../../shared/icons';
   selector: 'app-notification-dropdown',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [IconX],
-  template: `
-    <div class="notification-dropdown">
-      <div class="notification-header">
-        <span>Notifications</span>
-        @if (hasUnread()) {
-          <p class="mark-all-btn" (click)="markAllRead.emit()">Mark all as read</p>
-        }
-      </div>
-
-      <div class="notification-list">
-        @if (notifications().length === 0) {
-          <div class="notification-empty"><p>No notifications yet</p></div>
-        } @else {
-          @for (note of notifications(); track note._id) {
-            <div
-              class="notification-item"
-              [class.read]="note.read"
-              [class.unread]="!note.read"
-              [class.notification-linked]="targetPage(note) !== null"
-              [attr.role]="targetPage(note) ? 'button' : null"
-              [attr.tabindex]="targetPage(note) ? 0 : null"
-              [title]="itemTitle(note)"
-              (click)="onItemClick(note)"
-              (keydown.enter)="onItemClick(note)"
-            >
-              <div class="notification-dot"></div>
-              <div class="notification-content">
-                <p class="notification-message">{{ note.message }}</p>
-                <p class="notification-time">{{ formatTimestamp(note.createdAt) }}</p>
-              </div>
-
-              <!-- Unread rows only -->
-              @if (!note.read) {
-                <button
-                  type="button"
-                  class="notification-dismiss"
-                  title="Mark as read without leaving this page"
-                  aria-label="Mark as read without leaving this page"
-                  (click)="onDismissClick($event, note)"
-                >
-                  <app-icon-x [size]="14" />
-                </button>
-              }
-            </div>
-          }
-
-          @if (canLoadMore()) {
-            <div class="notification-item notification-load-more" (click)="loadMore.emit()">
-              <div class="notification-content">
-                <p class="notification-message">Load older notifications</p>
-              </div>
-            </div>
-          }
-        }
-      </div>
-    </div>
-  `,
+  templateUrl: './notification-dropdown.html',
 })
 export class NotificationDropdown {
   readonly notifications = input<AppNotification[]>([]);

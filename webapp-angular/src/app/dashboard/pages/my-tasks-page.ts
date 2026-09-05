@@ -8,39 +8,7 @@ import { Task } from '../../core/api.types';
   selector: 'app-my-tasks-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [TaskCard, Pagination],
-  template: `
-    <div class="my-tasks-header">
-      <button class="add-task-btn" (click)="addTask.emit()">+ Add New Task</button>
-    </div>
-
-    <div class="feed my-tasks-section">
-      @if (isEmpty()) {
-        <div class="empty-state">
-          @if (isLoading()) {
-            <h3>Loading your tasks…</h3>
-          } @else {
-            <h3>You haven’t created any tasks yet</h3>
-            <p>Start by adding a new task and get help from others.</p>
-          }
-        </div>
-      } @else {
-        @for (task of myTasks().items; track task._id) {
-          <app-task-card
-            [task]="task"
-            [editable]="true"
-            (edit)="editTask.emit($event)"
-            (remove)="deleteTask.emit($event)"
-          />
-        }
-      }
-    </div>
-
-    <app-pagination
-      [meta]="myTasks().meta"
-      [disabled]="isLoading()"
-      (pageChange)="onPageChange($event)"
-    />
-  `,
+  templateUrl: './my-tasks-page.html',
 })
 export class MyTasksPage {
   private readonly tasks = inject(TasksStore);

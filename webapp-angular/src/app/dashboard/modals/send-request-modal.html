@@ -1,0 +1,31 @@
+<div class="modal-overlay">
+  <div class="modal request-modal">
+    <h2>Send Request</h2>
+
+    <div class="modal-task-info">
+      <h3>{{ task().title }}</h3>
+      @if (task().picture) {
+        <img [src]="task().picture" [alt]="task().title" class="modal-task-image" />
+      }
+    </div>
+
+    <label for="send-request-message">Your Message to the Task Owner</label>
+    <textarea
+      id="send-request-message"
+      name="description"
+      placeholder="Tell the task owner about your experience, availability, and why you'd be great for this task..."
+      maxlength="1000"
+      rows="6"
+      style="width: 100%; padding: 10px; margin-bottom: 15px"
+      [ngModel]="message()"
+      (ngModelChange)="message.set($event)"
+    ></textarea>
+
+    <div class="modal-actions">
+      <button class="btn-submit" (click)="handleSubmit()" [disabled]="submitDisabled()">
+        {{ sending() ? 'Sending...' : 'Send Request' }}
+      </button>
+      <button class="btn-cancel" (click)="closed.emit()">Cancel</button>
+    </div>
+  </div>
+</div>

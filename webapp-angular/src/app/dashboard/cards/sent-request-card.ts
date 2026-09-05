@@ -11,50 +11,7 @@ const STATUS_LABELS: Record<string, string> = {
 @Component({
   selector: 'app-sent-request-card',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
-    @if (request(); as r) {
-      <div class="request-card my-request-card">
-        <div class="request-task-image-wrapper">
-          @if (r.taskPicture) {
-            <img
-              [src]="r.taskPicture"
-              [alt]="r.taskTitle || 'Task'"
-              class="request-task-image"
-              loading="lazy"
-            />
-          } @else {
-            <div class="request-task-image-placeholder">📷 No image provided</div>
-          }
-        </div>
-
-        <div class="request-card-body">
-          <h3 class="request-title">{{ r.taskTitle || 'Untitled task' }}</h3>
-          <p class="request-owner">
-            <strong>Owner:</strong> {{ r.taskOwnerName || 'Not available' }}
-          </p>
-          @if (r.taskLocation) {
-            <p class="task-location">📍 {{ r.taskLocation }}</p>
-          }
-          <div class="request-message">
-            <strong>Your message:</strong>
-            <p>{{ r.description || 'No message' }}</p>
-          </div>
-        </div>
-
-        <div class="request-status-section">
-          <span class="status-badge status-{{ r.status }}">{{ statusLabel() }}</span>
-          <p class="request-date">{{ sentDate() }}</p>
-
-          <!-- Only pending can retract -->
-          @if (canWithdraw()) {
-            <button class="withdraw-btn" (click)="withdraw.emit(r)" [disabled]="busy()">
-              {{ busy() ? 'Withdrawing…' : 'Withdraw' }}
-            </button>
-          }
-        </div>
-      </div>
-    }
-  `,
+  templateUrl: './sent-request-card.html',
 })
 export class SentRequestCard {
   readonly request = input<HelpRequest | null>(null);

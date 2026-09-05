@@ -1,0 +1,44 @@
+<div class="topbar">
+  <div class="topbar-left">
+    <span class="hamburger-icon" (click)="openMenu.emit()">☰</span>
+    <div class="topbar-heading">
+      <h2>{{ activePage() }}</h2>
+      @if (subtitle()) {
+        <p class="topbar-subtitle">{{ subtitle() }}</p>
+      }
+    </div>
+  </div>
+
+  <div class="topbar-center">
+    @if (showSearch()) {
+      <input
+        type="text"
+        [placeholder]="searchPlaceholder()"
+        [value]="searchTerm()"
+        (input)="searchChange.emit($any($event.target).value)"
+      />
+    }
+  </div>
+
+  <div class="topbar-right">
+    <div #bell class="notification-bell" (click)="toggleNotifications.emit()">
+      <app-icon-bell [size]="25" />
+      @if (unreadCount() > 0) {
+        <span class="notification-badge">{{ unreadCount() }}</span>
+      }
+    </div>
+
+    @if (showNotifications()) {
+      <app-notification-dropdown
+        #dropdown
+        [notifications]="notifications()"
+        [hasUnread]="unreadCount() > 0"
+        [canLoadMore]="canLoadMoreNotifications()"
+        (markAllRead)="markAllRead.emit()"
+        (markRead)="markRead.emit($event)"
+        (loadMore)="loadMoreNotifications.emit()"
+        (navigate)="notificationNavigate.emit($event)"
+      />
+    }
+  </div>
+</div>

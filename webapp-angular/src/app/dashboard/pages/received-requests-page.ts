@@ -9,33 +9,7 @@ import { ToastService } from '../../core/toast/toast.service';
   selector: 'app-received-requests-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [ReceivedRequestCard, Pagination],
-  template: `
-    <div class="requests-page">
-      <!-- Heading lives in topbar -->
-      @if (isLoading() && received().items.length === 0) {
-        <p style="padding: 20px">Loading requests...</p>
-      } @else if (received().items.length === 0) {
-        <p style="padding: 20px">No requests yet. Create a task to get started!</p>
-      } @else {
-        <div class="feed">
-          @for (request of received().items; track request.requestId) {
-            <app-received-request-card
-              [request]="request"
-              [pendingAction]="actionInFlight()[request.requestId]"
-              (accept)="respond($event, 'accepted')"
-              (reject)="respond($event, 'rejected')"
-            />
-          }
-        </div>
-
-        <app-pagination
-          [meta]="received().meta"
-          [disabled]="isLoading()"
-          (pageChange)="onPageChange($event)"
-        />
-      }
-    </div>
-  `,
+  templateUrl: './received-requests-page.html',
 })
 export class ReceivedRequestsPage {
   private readonly requests = inject(RequestsStore);

@@ -19,65 +19,7 @@ const STATUS_FILTERS = [
   selector: 'app-sent-requests-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [SentRequestCard, Pagination, ConfirmModal],
-  template: `
-    <div class="my-requests-page">
-      <!-- Heading lives in topbar -->
-      <div class="request-filters" role="tablist" aria-label="Filter requests by status">
-        @for (filter of FILTERS; track filter.value) {
-          <button
-            class="request-filter"
-            role="tab"
-            [class.is-active]="activeFilter() === filter.value"
-            [attr.aria-selected]="activeFilter() === filter.value"
-            [disabled]="isLoading()"
-            (click)="setFilter(filter.value)"
-          >
-            {{ filter.label }}
-            <span class="request-filter-count">{{ countFor(filter.value) }}</span>
-          </button>
-        }
-      </div>
-
-      @if (isLoading() && sent().items.length === 0) {
-        <p style="padding: 20px">Loading requests...</p>
-      } @else if (sent().items.length === 0) {
-        <p style="padding: 20px">
-          @if (activeFilter() === 'all') {
-            You haven't requested any tasks yet. Go to Feed to request!
-          } @else {
-            No {{ activeFilter() }} requests.
-          }
-        </p>
-      } @else {
-        <div class="my-requests-grid">
-          @for (request of sent().items; track request.requestId) {
-            <app-sent-request-card
-              [request]="request"
-              [busy]="isWithdrawing(request.requestId)"
-              (withdraw)="confirming.set($event)"
-            />
-          }
-        </div>
-
-        <app-pagination
-          [meta]="sent().meta"
-          [disabled]="isLoading()"
-          (pageChange)="onPageChange($event)"
-        />
-      }
-
-      @if (confirming(); as target) {
-        <app-confirm-modal
-          [message]="withdrawMessage(target)"
-          confirmLabel="WITHDRAW"
-          cancelLabel="KEEP"
-          [busy]="isWithdrawing(target.requestId)"
-          (confirmed)="handleWithdraw(target)"
-          (cancelled)="confirming.set(null)"
-        />
-      }
-    </div>
-  `,
+  templateUrl: './sent-requests-page.html',
 })
 export class SentRequestsPage {
   private readonly requests = inject(RequestsStore);

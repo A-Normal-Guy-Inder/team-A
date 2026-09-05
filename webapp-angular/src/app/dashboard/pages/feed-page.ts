@@ -9,34 +9,7 @@ import { Task } from '../../core/api.types';
   selector: 'app-feed-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [TaskCard, Pagination],
-  template: `
-    <div class="feed">
-      @if (isEmpty()) {
-        <div class="empty-state-feed">
-          @if (isLoading()) {
-            <h3>Loading tasks…</h3>
-          } @else {
-            <h3>No tasks available right now</h3>
-            <p>Be the first to add a task or check back later.</p>
-          }
-        </div>
-      } @else {
-        @for (task of feed().items; track task._id) {
-          <app-task-card
-            [task]="task"
-            [currentUserId]="currentUserId()"
-            (requestTask)="requestTask.emit($event)"
-          />
-        }
-      }
-    </div>
-
-    <app-pagination
-      [meta]="feed().meta"
-      [disabled]="isLoading()"
-      (pageChange)="onPageChange($event)"
-    />
-  `,
+  templateUrl: './feed-page.html',
 })
 export class FeedPage {
   private readonly tasks = inject(TasksStore);

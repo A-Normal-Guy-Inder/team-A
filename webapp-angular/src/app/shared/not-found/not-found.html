@@ -1,0 +1,12 @@
+<div class="notfound-container">
+  <div class="notfound-card">
+    <p class="notfound-code">404</p>
+    <h1 class="notfound-title">Page not found</h1>
+    <p class="notfound-text">
+      The page you are looking for does not exist, or it may have been moved.
+    </p>
+    <button class="notfound-btn" (click)="goHome()">
+      {{ signedIn() ? 'Back to dashboard' : 'Back to login' }}
+    </button>
+  </div>
+</div>

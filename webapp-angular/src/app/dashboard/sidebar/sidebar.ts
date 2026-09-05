@@ -5,41 +5,7 @@ import { User } from '../../core/api.types';
 @Component({
   selector: 'app-sidebar',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
-    <aside class="sidebar">
-      <div class="sidebar-header">
-        <h3 class="logo">HelperHub</h3>
-      </div>
-
-      <ul class="sidebar-menu">
-        @for (page of pages; track page) {
-          <li [class.active]="activePage() === page" (click)="navigate.emit(page)">
-            {{ page }}
-            @if (page === 'Requests' && pendingCount() > 0) {
-              <span class="pending-badge">{{ pendingCount() }}</span>
-            }
-          </li>
-        }
-      </ul>
-
-      <div class="sidebar-footer">
-        <div class="sidebar-footer-info">
-          <div class="sidebar-footer-user">
-            @if (picture()) {
-              <img [src]="picture()" alt="profile" class="sidebar-footer-avatar" />
-            } @else {
-              {{ initial() }}
-            }
-          </div>
-          <div class="sidebar-footer-text">
-            <strong>{{ fullName() }}</strong>
-            <span>{{ email() }}</span>
-          </div>
-        </div>
-        <button class="logout-btn" (click)="logoutClick.emit()">Logout</button>
-      </div>
-    </aside>
-  `,
+  templateUrl: './sidebar.html',
 })
 export class Sidebar {
   readonly activePage = input<string>('Feed');

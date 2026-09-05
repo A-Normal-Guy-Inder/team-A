@@ -1,0 +1,77 @@
+@if (task(); as t) {
+  <div class="task-card">
+    <div class="task-image-wrapper">
+      @if (t.picture) {
+        <img [src]="t.picture" alt="task" class="task-image" loading="lazy" />
+      } @else {
+        <div class="task-image-placeholder"><span>📷 No image provided</span></div>
+      }
+    </div>
+
+    <div class="badges-container">
+      <div class="tag">{{ t.category || 'General' }}</div>
+      @if (editable() && t.status) {
+        <div class="status-badge status-{{ t.status.toLowerCase() }}">{{ t.status }}</div>
+      }
+    </div>
+
+    <div class="card-content">
+      <h3>{{ t.title }}</h3>
+      <p class="task-description">{{ t.description?.trim() || 'No description provided' }}</p>
+
+      @if (t.location) {
+        <p class="task-location"><span class="icon">📍</span> {{ t.location }}</p>
+      }
+
+      @if (t.start_time) {
+        <p class="task-date">
+          <span class="icon">🟢</span> Start: {{ formatDate(t.start_time) }} •
+          {{ formatTime(t.start_time) }}
+        </p>
+      }
+
+      @if (t.end_time) {
+        <p class="task-date end-date">
+          <span class="icon">🔴</span> End: {{ formatDate(t.end_time) }} •
+          {{ formatTime(t.end_time) }}
+        </p>
+      }
+
+      <div class="task-footer">
+        <div class="task-author">
+          <div class="author-avatar">
+            @if (authorPicture()) {
+              <img
+                [src]="authorPicture()"
+                [alt]="author()?.first_name || 'User'"
+                class="author-avatar-image"
+                loading="lazy"
+              />
+            } @else {
+              {{ authorInitial() }}
+            }
+          </div>
+          <!-- One span, not two -->
+          <div class="author-name" [title]="authorName()">
+            <span>{{ authorName() }}</span>
+          </div>
+        </div>
+
+        @if (editable()) {
+          <div class="owner-actions">
+            <button class="edit-btn" (click)="edit.emit(t)">✏️ Edit</button>
+            <button class="delete-btn" (click)="remove.emit(t)">🗑️ Delete</button>
+          </div>
+        } @else {
+          <button
+            [class]="button().className"
+            (click)="onRequestClick(t)"
+            [disabled]="button().disabled"
+          >
+            {{ button().text }}
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+}
